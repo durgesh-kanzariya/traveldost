@@ -1,12 +1,12 @@
-import { UserPlus, MapPin, Compass } from 'lucide-react' // Changed Download to UserPlus
+import { UserPlus, MapPin, Compass } from 'lucide-react'
 
 const steps = [
   {
-    icon: UserPlus, // Changed icon to represent 'Sign Up'
+    icon: UserPlus,
     step: '01',
-    title: 'Create Your Account', // Fixed title
+    title: 'Create Your Account',
     description:
-      'Sign up for free on our website to access your personalized travel dashboard.', // Fixed description
+      'Sign up for free on our website to access your personalized travel dashboard.',
   },
   {
     icon: MapPin,

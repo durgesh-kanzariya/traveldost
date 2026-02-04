@@ -18,15 +18,18 @@ export function HeroSection() {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link
-                to="/login"
+                to="/signup"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-sky-700"
               >
                 Start Your Journey
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <button className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-base font-medium text-slate-700 transition-colors hover:bg-slate-50">
+              <a
+                href="#features"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-base font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
                 Learn More
-              </button>
+              </a>
             </div>
           </div>
 

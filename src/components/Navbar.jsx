@@ -40,7 +40,7 @@ export function Navbar() {
             Login
           </Link>
           <Link
-            to="/login"
+            to="/signup"
             className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-700"
           >
             Sign Up Free
@@ -81,7 +81,7 @@ export function Navbar() {
                 Login
               </Link>
               <Link
-                to="/login"
+                to="/signup"
                 className="rounded-lg bg-sky-600 px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-sky-700"
                 onClick={() => setIsMenuOpen(false)}
               >
