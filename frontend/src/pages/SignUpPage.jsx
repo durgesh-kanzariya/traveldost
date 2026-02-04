@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Globe, Mail, Lock, ArrowRight, User } from 'lucide-react'
+import { Globe, Mail, Lock, ArrowRight, User, Languages } from 'lucide-react'
 
 export function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [nativeLanguage, setNativeLanguage] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
@@ -41,6 +42,21 @@ export function SignUpPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
+                  required
+                  className="w-full rounded-lg border border-slate-300 py-3 pl-10 pr-4 text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700">Native Language</label>
+              <div className="relative">
+                <Languages className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={nativeLanguage}
+                  onChange={(e) => setNativeLanguage(e.target.value)}
+                  placeholder="Native Language"
                   required
                   className="w-full rounded-lg border border-slate-300 py-3 pl-10 pr-4 text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
                 />
