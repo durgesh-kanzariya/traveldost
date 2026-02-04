@@ -5,10 +5,11 @@ import { MapWidget } from './MapWidget'
 
 const menuItems = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', active: true },
-  { name: 'Emergency', icon: ShieldAlert, href: '/dashboard#emergency' },
-  { name: 'Translator', icon: Languages, href: '/dashboard#translator' },
-  { name: 'Checklist', icon: ClipboardList, href: '/dashboard#checklist' },
-  { name: 'Settings', icon: Settings, href: '/dashboard#settings' },
+  { name: 'Emergency', icon: ShieldAlert, href: '/emergency' },
+  { name: 'Translator', icon: Languages, href: '/translator' },
+  { name: 'Checklist', icon: ClipboardList, href: '/checklist' },
+  { name: 'Currency Converter', icon: ArrowRightLeft, href: '/currency-converter' },
+  { name: 'Settings', icon: Settings, href: '/settings' },
 ]
 
 export function Dashboard() {
@@ -185,24 +186,24 @@ export function Dashboard() {
                   </h2>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => alert('Currency Converter - Coming Soon!')}
+                  <Link
+                    to="/currency-converter"
                     className="flex flex-col items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100 hover:border-purple-300"
                   >
                     <ArrowRightLeft className="h-6 w-6 text-purple-600" />
                     <span className="text-sm font-medium text-slate-700">
                       Currency
                     </span>
-                  </button>
-                  <button
-                    onClick={() => alert('Language Translator - Coming Soon!')}
+                  </Link>
+                  <Link
+                    to="/translator"
                     className="flex flex-col items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100 hover:border-teal-300"
                   >
                     <Languages className="h-6 w-6 text-teal-600" />
                     <span className="text-sm font-medium text-slate-700">
                       Translator
                     </span>
-                  </button>
+                  </Link>
                 </div>
               </div>
 

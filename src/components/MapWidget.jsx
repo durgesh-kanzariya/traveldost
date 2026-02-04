@@ -26,23 +26,29 @@ export function MapWidget() {
   // Coordinates for Rajkot, Gujarat (Default)
   const position = [22.3039, 70.8022]
 
+  const handleMapWheel = (e) => {
+    e.preventDefault()
+  }
+
   return (
-    <MapContainer 
-      center={position} 
-      zoom={13} 
-      scrollWheelZoom={false} 
-      style={{ height: '100%', width: '100%', minHeight: '400px', zIndex: 0 }}
-      className="rounded-xl overflow-hidden"
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <Marker position={position}>
-        <Popup>
-          You are here! <br /> Rajkot, Gujarat.
-        </Popup>
-      </Marker>
-    </MapContainer>
+    <div onWheel={handleMapWheel} style={{ height: '100%', width: '100%' }}>
+      <MapContainer 
+        center={position} 
+        zoom={13} 
+        scrollWheelZoom={true} 
+        style={{ height: '100%', width: '100%', minHeight: '400px', zIndex: 0 }}
+        className="rounded-xl overflow-hidden"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={position}>
+          <Popup>
+            You are here! <br /> Rajkot, Gujarat.
+          </Popup>
+        </Marker>
+      </MapContainer>
+    </div>
   )
 }
