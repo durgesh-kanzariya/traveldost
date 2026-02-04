@@ -1,5 +1,17 @@
 import { Mail, Phone, MapPin } from 'lucide-react'
 
+function ContactCard({ icon: Icon, title, info, colorClass, iconColorClass }) {
+  return (
+    <div className="flex flex-col items-center rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
+      <div className={`rounded-lg p-3 ${colorClass} ${iconColorClass}`}>
+        <Icon className="h-6 w-6" />
+      </div>
+      <h3 className="mt-4 text-base font-semibold text-slate-900">{title}</h3>
+      <p className="mt-2 text-sm text-slate-600">{info}</p>
+    </div>
+  )
+}
+
 export function AboutContactSection() {
   return (
     <>
@@ -33,27 +45,27 @@ export function AboutContactSection() {
           </div>
 
           <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
-            <div className="flex flex-col items-center rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-              <div className="rounded-lg bg-sky-100 p-3 text-sky-600">
-                <Mail className="h-6 w-6" />
-              </div>
-              <h3 className="mt-4 text-base font-semibold text-slate-900">Email Us</h3>
-              <p className="mt-2 text-sm text-slate-600">support@traveldost.com</p>
-            </div>
-            <div className="flex flex-col items-center rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-              <div className="rounded-lg bg-teal-100 p-3 text-teal-600">
-                <Phone className="h-6 w-6" />
-              </div>
-              <h3 className="mt-4 text-base font-semibold text-slate-900">Call Us</h3>
-              <p className="mt-2 text-sm text-slate-600">+91 98765 43210</p>
-            </div>
-            <div className="flex flex-col items-center rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-              <div className="rounded-lg bg-amber-100 p-3 text-amber-600">
-                <MapPin className="h-6 w-6" />
-              </div>
-              <h3 className="mt-4 text-base font-semibold text-slate-900">Visit Us</h3>
-              <p className="mt-2 text-sm text-slate-600">Rajkot, Gujarat, India</p>
-            </div>
+            <ContactCard
+              icon={Mail}
+              title="Email Us"
+              info="support@traveldost.com"
+              colorClass="bg-sky-100"
+              iconColorClass="text-sky-600"
+            />
+            <ContactCard
+              icon={Phone}
+              title="Call Us"
+              info="+91 98765 43210"
+              colorClass="bg-teal-100"
+              iconColorClass="text-teal-600"
+            />
+            <ContactCard
+              icon={MapPin}
+              title="Visit Us"
+              info="Rajkot, Gujarat, India"
+              colorClass="bg-amber-100"
+              iconColorClass="text-amber-600"
+            />
           </div>
         </div>
       </section>
