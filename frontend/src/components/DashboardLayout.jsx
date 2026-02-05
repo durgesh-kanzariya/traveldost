@@ -1,103 +1,119 @@
-import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Globe, LayoutDashboard, ShieldAlert, Languages, ClipboardList, Settings, ArrowRightLeft, Menu, X, LogOut } from 'lucide-react'
-
-const menuItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { name: 'Emergency', icon: ShieldAlert, href: '/emergency' },
-  { name: 'Translator', icon: Languages, href: '/translator' },
-  { name: 'Checklist', icon: ClipboardList, href: '/checklist' },
-  { name: 'Currency Converter', icon: ArrowRightLeft, href: '/currency-converter' },
-  { name: 'Settings', icon: Settings, href: '/settings' },
-]
+import { useState } from 'react' // Removed useEffect
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { 
+  LayoutDashboard, 
+  CheckSquare, 
+  Globe, 
+  Phone, 
+  Settings, 
+  LogOut, 
+  Menu, 
+  X,
+  User,
+  Banknote
+} from 'lucide-react'
 
 export function DashboardLayout({ children }) {
-  const navigate = useNavigate()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate()
 
+  // 1. FIXED: Lazy Initialization (Reads storage once on load)
+  const [userData] = useState(() => {
+    const storedUser = localStorage.getItem('user')
+    return storedUser ? JSON.parse(storedUser) : { name: 'Traveler', email: 'user@example.com' }
+  })
+
+  // 2. LOGOUT FUNCTION
   const handleLogout = () => {
-    localStorage.removeItem('userToken')
-    localStorage.removeItem('userData')
-    navigate('/')
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/login')
   }
 
+  const menuItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: CheckSquare, label: 'Trip Checklist', path: '/checklist' },
+    { icon: Globe, label: 'Translator', path: '/translator' },
+    { icon: Banknote, label: 'Currency', path: '/currency-converter' }, // <--- NEW LINK
+    { icon: Phone, label: 'Emergency', path: '/emergency' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+  ]
+
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="min-h-screen bg-slate-50">
+      {/* Mobile Header */}
+      <div className="lg:hidden flex items-center justify-between bg-white p-4 shadow-sm">
+        <span className="text-xl font-bold text-sky-600">TravelDost</span>
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          {isSidebarOpen ? <X /> : <Menu />}
+        </button>
+      </div>
 
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white shadow-lg transition-transform lg:static lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <Globe className="h-8 w-8 text-sky-600" />
-            <span className="text-xl font-bold text-slate-900">TravelDost</span>
-          </Link>
-          <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="h-6 w-6 text-slate-500" />
-          </button>
-        </div>
-
-        <nav className="flex-1 space-y-1 p-4">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.href
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-sky-50 text-sky-700'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
-
-        <div className="border-t border-slate-200 p-4">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-600 text-sm font-semibold text-white">
-              JD
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="flex h-full flex-col">
+            {/* Logo */}
+            <div className="flex h-16 items-center px-6">
+              <span className="text-2xl font-bold text-sky-600">TravelDost</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-900">John Doe</p>
-              <p className="text-xs text-slate-500">john@example.com</p>
+
+            {/* Navigation Links */}
+            <nav className="flex-1 space-y-1 px-3 py-4">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                const isActive = location.pathname === item.path
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-sky-50 text-sky-600'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    <Icon className={`h-5 w-5 ${isActive ? 'text-sky-600' : 'text-slate-400'}`} />
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* User Profile Section */}
+            <div className="border-t border-slate-200 p-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
+                  <User className="h-6 w-6 text-sky-600" />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="truncate text-sm font-medium text-slate-900">
+                    {userData.name}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">
+                    {userData.email}
+                  </p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+                Sign Out
+              </button>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </button>
-        </div>
-      </aside>
+        </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="flex h-16 items-center gap-4 border-b border-slate-200 bg-white px-4 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)}>
-            <Menu className="h-6 w-6 text-slate-700" />
-          </button>
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <Globe className="h-6 w-6 text-sky-600" />
-            <span className="font-bold text-slate-900">TravelDost</span>
-          </Link>
-        </header>
-
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 lg:p-8">
           {children}
         </main>
       </div>

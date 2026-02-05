@@ -1,41 +1,105 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 
 export function ChecklistPage() {
-  const [checklist, setChecklist] = useState([
-    { id: 1, label: 'Passport', checked: true },
-    { id: 2, label: 'Tickets', checked: false },
-    { id: 3, label: 'Travel Insurance', checked: false },
-    { id: 4, label: 'Hotel Booking', checked: true },
-    { id: 5, label: 'Emergency Contacts', checked: false },
-  ])
+  const [checklist, setChecklist] = useState([])
   const [newItem, setNewItem] = useState('')
+  const token = localStorage.getItem('token')
 
-  const toggleChecklistItem = (id) => {
+  // 1. FETCH ITEMS (Defined INSIDE useEffect to prevent errors)
+  useEffect(() => {
+    const fetchChecklist = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/checklist', {
+          headers: { 'x-auth-token': token }
+        })
+        const data = await res.json()
+        // Sort: Unchecked items first, Checked items last
+        const sortedData = data.sort((a, b) => a.id - b.id)
+        setChecklist(sortedData)
+      } catch (err) {
+        console.error("Error fetching checklist:", err)
+      }
+    }
+
+    fetchChecklist()
+  }, [token]) // Re-run if token changes (e.g. user re-login)
+
+
+  // 2. ADD ITEM
+  const addItem = async () => {
+    if (newItem.trim()) {
+      try {
+        const res = await fetch('http://localhost:5000/api/checklist', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-auth-token': token 
+          },
+          body: JSON.stringify({ label: newItem })
+        })
+        const savedItem = await res.json()
+        setChecklist((prev) => [...prev, savedItem])
+        setNewItem('')
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  }
+
+  // 3. TOGGLE ITEM (With Manual Revert on Error)
+  const toggleChecklistItem = async (id, currentStatus) => {
+    // A. Optimistic Update (Update UI instantly)
     setChecklist((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, checked: !item.checked } : item
       )
     )
-  }
 
-  const addItem = () => {
-    if (newItem.trim()) {
-      setChecklist((prev) => [
-        ...prev,
-        { id: Date.now(), label: newItem, checked: false }
-      ])
-      setNewItem('')
+    // B. Send update to DB
+    try {
+      await fetch(`http://localhost:5000/api/checklist/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': token 
+        },
+        body: JSON.stringify({ checked: !currentStatus })
+      })
+    } catch (err) {
+      console.error(err)
+      // C. ERROR HANDLER: Revert the UI back if server fails
+      setChecklist((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, checked: currentStatus } : item
+        )
+      )
+      alert("Failed to save change. Check your connection.")
     }
   }
 
-  const deleteItem = (id) => {
+  // 4. DELETE ITEM
+  const deleteItem = async (id) => {
+    // Optimistic Remove
+    const previousList = [...checklist]
     setChecklist((prev) => prev.filter((item) => item.id !== id))
+
+    try {
+      await fetch(`http://localhost:5000/api/checklist/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-auth-token': token }
+      })
+    } catch (err) {
+      console.error(err)
+      // Revert if delete fails
+      setChecklist(previousList)
+      alert("Could not delete item.")
+    }
   }
 
   const completedCount = checklist.filter(item => item.checked).length
-  const progressPercent = Math.round((completedCount / checklist.length) * 100) || 0
+  const progressPercent = checklist.length > 0 ? Math.round((completedCount / checklist.length) * 100) : 0
 
   return (
     <DashboardLayout>
@@ -84,12 +148,15 @@ export function ChecklistPage() {
       </div>
 
       <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        {checklist.length === 0 && (
+            <p className="text-center text-slate-500 py-4">Your list is empty. Add items to start!</p>
+        )}
         {checklist.map((item) => (
           <div key={item.id} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-slate-50">
             <input
               type="checkbox"
               checked={item.checked}
-              onChange={() => toggleChecklistItem(item.id)}
+              onChange={() => toggleChecklistItem(item.id, item.checked)}
               className="h-5 w-5 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
             />
             <span

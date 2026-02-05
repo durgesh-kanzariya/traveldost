@@ -8,6 +8,7 @@ import { FeaturesSection } from './components/FeaturesSection'
 import { HowItWorksSection } from './components/HowItWorksSection'
 import { AboutContactSection } from './components/AboutContactSection'
 import { Footer } from './components/Footer'
+import { ProtectedRoute } from './components/ProtectedRoute' // Ensure this file exists!
 
 // Lazy load Page Components (from ./pages/)
 const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })))
@@ -44,15 +45,67 @@ function App() {
         </div>
       }>
         <Routes>
+          {/* --- PUBLIC ROUTES (Anyone can access) --- */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/emergency" element={<EmergencyPage />} />
-          <Route path="/translator" element={<TranslatorPage />} />
-          <Route path="/checklist" element={<ChecklistPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/currency-converter" element={<CurrencyConverterPage />} />
+
+          {/* --- PROTECTED ROUTES (Must be logged in) --- */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/emergency" 
+            element={
+              <ProtectedRoute>
+                <EmergencyPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/translator" 
+            element={
+              <ProtectedRoute>
+                <TranslatorPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/checklist" 
+            element={
+              <ProtectedRoute>
+                <ChecklistPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/currency-converter" 
+            element={
+              <ProtectedRoute>
+                <CurrencyConverterPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* --- CATCH-ALL (404) --- */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

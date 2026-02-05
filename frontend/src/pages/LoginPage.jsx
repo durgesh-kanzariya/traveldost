@@ -1,33 +1,52 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Globe, Mail, Lock, ArrowRight } from 'lucide-react'
+import { Globe, Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // In the future, this is where we send data to MySQL
-    console.log('Logging in:', { email, password })
-    navigate('/dashboard')
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        navigate('/dashboard')
+      } else {
+        alert(data.message || 'Login failed')
+      }
+    } catch (error) {
+      console.error("Login Error:", error) // <--- Now 'error' is used!
+      alert('Cannot connect to server.')
+    }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-50 via-white to-teal-50 px-4">
       <div className="w-full max-w-md">
+        
+        {/* NEW: Back Button */}
+        <Link to="/" className="mb-6 flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-sky-600 transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+        </Link>
+
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
           <div className="flex flex-col items-center gap-2">
-            <Link to="/" className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Globe className="h-10 w-10 text-sky-600" />
-            </Link>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Welcome Back
-            </h1>
-            <p className="text-slate-600">
-              Sign in to continue your journey
-            </p>
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900">Welcome Back</h1>
+            <p className="text-slate-600">Sign in to continue your journey</p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
@@ -70,14 +89,10 @@ export function LoginPage() {
             </button>
           </form>
 
-          {/* Toggle Link */}
           <p className="mt-6 text-center text-sm text-slate-600">
             Don't have an account?{' '}
-            <Link
-              to="/signup"
-              className="font-medium text-sky-600 transition-colors hover:text-sky-700"
-            >
-              Sign up
+            <Link to="/signup" className="font-medium text-sky-600 hover:text-sky-700">
+              Create Account
             </Link>
           </p>
         </div>

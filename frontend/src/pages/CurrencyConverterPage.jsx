@@ -1,50 +1,59 @@
-import { useState } from 'react'
-import { ArrowRightLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ArrowRightLeft, RefreshCw, TrendingUp } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 
-const currencies = [
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-  { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
-  { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF' },
-  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
-  { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
-  { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$' },
-  { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
-]
-
-const exchangeRates = {
-  USD: { EUR: 0.92, GBP: 0.79, INR: 83.12, JPY: 149.50, AUD: 1.53, CAD: 1.36, CHF: 0.88, CNY: 7.24, SEK: 10.15, NZD: 1.63, MXN: 17.05 },
-  EUR: { USD: 1.09, GBP: 0.86, INR: 90.35, JPY: 162.50, AUD: 1.66, CAD: 1.48, CHF: 0.96, CNY: 7.87, SEK: 11.03, NZD: 1.77, MXN: 18.53 },
-  GBP: { USD: 1.27, EUR: 1.16, INR: 105.13, JPY: 189.00, AUD: 1.93, CAD: 1.72, CHF: 1.12, CNY: 9.16, SEK: 12.83, NZD: 2.06, MXN: 21.54 },
-  INR: { USD: 0.012, EUR: 0.011, GBP: 0.0095, JPY: 1.80, AUD: 0.018, CAD: 0.016, CHF: 0.011, CNY: 0.087, SEK: 0.122, NZD: 0.020, MXN: 0.205 },
-  JPY: { USD: 0.0067, EUR: 0.0062, GBP: 0.0053, INR: 0.556, AUD: 0.010, CAD: 0.009, CHF: 0.0059, CNY: 0.049, SEK: 0.068, NZD: 0.011, MXN: 0.114 },
-}
-
 export function CurrencyConverterPage() {
+  // 1. STATE MANAGEMENT
+  const [amount, setAmount] = useState(1)
   const [fromCurrency, setFromCurrency] = useState('USD')
   const [toCurrency, setToCurrency] = useState('INR')
-  const [amount, setAmount] = useState('1')
-  const [convertedAmount, setConvertedAmount] = useState('83.12')
+  const [exchangeRate, setExchangeRate] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(null)
 
-  const handleSwapCurrencies = () => {
+  // 2. LIST OF POPULAR CURRENCIES
+  const currencies = [
+    { code: 'USD', name: 'US Dollar', flag: '🇺🇸' },
+    { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳' },
+    { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
+    { code: 'GBP', name: 'British Pound', flag: '🇬🇧' },
+    { code: 'JPY', name: 'Japanese Yen', flag: '🇯🇵' },
+    { code: 'AUD', name: 'Australian Dollar', flag: '🇦🇺' },
+    { code: 'CAD', name: 'Canadian Dollar', flag: '🇨🇦' },
+    { code: 'AED', name: 'UAE Dirham', flag: '🇦🇪' },
+  ]
+
+  // 3. FETCH LIVE RATES
+  const fetchRates = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
+      const data = await res.json()
+      
+      const rate = data.rates[toCurrency]
+      setExchangeRate(rate)
+      setLastUpdated(new Date().toLocaleTimeString())
+    } catch (error) {
+      console.error("Failed to fetch rates:", error)
+      alert("Could not fetch live rates. Check internet connection.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch when currencies change
+  useEffect(() => {
+    fetchRates()
+  }, [fromCurrency, toCurrency])
+
+  // 4. HANDLERS
+  const handleSwap = () => {
     setFromCurrency(toCurrency)
     setToCurrency(fromCurrency)
   }
 
-  const handleAmountChange = (e) => {
-    const value = e.target.value
-    setAmount(value)
-    if (value && !isNaN(value)) {
-      const rate = exchangeRates[fromCurrency]?.[toCurrency] || 1
-      const result = (parseFloat(value) * rate).toFixed(2)
-      setConvertedAmount(result)
-    }
-  }
+  // Calculate Result
+  const convertedAmount = exchangeRate ? (amount * exchangeRate).toFixed(2) : '...'
 
   return (
     <DashboardLayout>
@@ -53,73 +62,63 @@ export function CurrencyConverterPage() {
           Currency Converter
         </h1>
         <p className="mt-2 text-slate-600">
-          Convert currencies at real-time rates
+          Real-time exchange rates for international travel.
         </p>
       </div>
 
-      {/* Main Converter Card */}
-      <div className="mb-6 rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-6 shadow-sm sm:p-8">
-        <div className="grid gap-6 sm:grid-cols-3 sm:items-end">
-          {/* From Currency */}
+      <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
+        
+        {/* INPUT SECTION */}
+        <div className="space-y-6">
+          
+          {/* Amount Input */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">From</label>
-            <div className="space-y-2">
-              <input
-                type="number"
-                value={amount}
-                onChange={handleAmountChange}
-                placeholder="Enter amount"
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-              />
+            <label className="mb-2 block text-sm font-medium text-slate-700">Amount</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 p-4 text-2xl font-bold text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+            />
+          </div>
+
+          <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
+            
+            {/* FROM Select */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">From</label>
               <select
                 value={fromCurrency}
-                onChange={(e) => {
-                  setFromCurrency(e.target.value)
-                  handleAmountChange({ target: { value: amount } })
-                }}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                onChange={(e) => setFromCurrency(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 p-3 font-medium text-slate-900 focus:border-sky-500 focus:outline-none"
               >
-                {currencies.map((curr) => (
-                  <option key={curr.code} value={curr.code}>
-                    {curr.code} - {curr.name}
+                {currencies.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.flag} {c.code}
                   </option>
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* Swap Button */}
-          <div className="flex justify-center">
-            <button
-              onClick={handleSwapCurrencies}
-              className="rounded-full border-2 border-sky-300 bg-white p-3 text-sky-600 transition-all hover:bg-sky-50 hover:border-sky-500"
-              title="Swap currencies"
+            {/* SWAP Button */}
+            <button 
+              onClick={handleSwap}
+              className="mt-6 rounded-full bg-slate-100 p-3 text-slate-600 transition-colors hover:bg-sky-100 hover:text-sky-600"
             >
-              <ArrowRightLeft className="h-6 w-6" />
+              <ArrowRightLeft className="h-5 w-5" />
             </button>
-          </div>
 
-          {/* To Currency */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">To</label>
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={convertedAmount}
-                readOnly
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-lg font-semibold text-slate-900"
-              />
+            {/* TO Select */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">To</label>
               <select
                 value={toCurrency}
-                onChange={(e) => {
-                  setToCurrency(e.target.value)
-                  handleAmountChange({ target: { value: amount } })
-                }}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                onChange={(e) => setToCurrency(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 p-3 font-medium text-slate-900 focus:border-sky-500 focus:outline-none"
               >
-                {currencies.map((curr) => (
-                  <option key={curr.code} value={curr.code}>
-                    {curr.code} - {curr.name}
+                {currencies.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.flag} {c.code}
                   </option>
                 ))}
               </select>
@@ -127,53 +126,36 @@ export function CurrencyConverterPage() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-lg bg-sky-100 p-4">
-          <p className="text-center text-sm text-sky-900">
-            1 <span className="font-semibold">{fromCurrency}</span> = {(exchangeRates[fromCurrency]?.[toCurrency] || 1).toFixed(4)} <span className="font-semibold">{toCurrency}</span>
-          </p>
+        {/* RESULT SECTION */}
+        <div className="mt-8 rounded-xl bg-slate-50 p-6 text-center">
+          {loading ? (
+             <div className="flex justify-center py-2">
+               <RefreshCw className="h-6 w-6 animate-spin text-sky-600" />
+             </div>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-slate-500">
+                {amount} {fromCurrency} =
+              </p>
+              <p className="mt-1 text-4xl font-bold text-sky-600">
+                {convertedAmount} <span className="text-2xl text-sky-500">{toCurrency}</span>
+              </p>
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+                <TrendingUp className="h-3 w-3" />
+                <span>1 {fromCurrency} = {exchangeRate} {toCurrency}</span>
+                <span>• Updated: {lastUpdated}</span>
+              </div>
+            </>
+          )}
         </div>
-      </div>
+        
+        <button 
+          onClick={fetchRates}
+          className="mt-6 w-full rounded-xl bg-sky-600 py-3.5 font-bold text-white transition-transform hover:scale-[1.02] hover:bg-sky-700 active:scale-[0.98]"
+        >
+          Refresh Rates
+        </button>
 
-      {/* Exchange Rates Table */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
-          Exchange Rates
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-200">
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Currency</th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Code</th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-700">Rate (to {toCurrency})</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currencies.map((curr) => (
-                <tr key={curr.code} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-900">
-                    <span className="font-medium">{curr.symbol}</span> {curr.name}
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">{curr.code}</td>
-                  <td className="px-4 py-3 font-semibold text-sky-600">
-                    {curr.code === toCurrency ? '1.0000' : (exchangeRates[curr.code]?.[toCurrency] || exchangeRates[toCurrency]?.[curr.code] ? (1 / (exchangeRates[toCurrency]?.[curr.code] || 1)).toFixed(4) : 'N/A')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Tips Section */}
-      <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-6">
-        <h3 className="mb-3 font-semibold text-amber-900">💡 Tips</h3>
-        <ul className="space-y-2 text-sm text-amber-800">
-          <li>• Exchange rates are updated regularly for accuracy</li>
-          <li>• Use this converter before withdrawing cash or making payments abroad</li>
-          <li>• Always check with your bank for their current exchange rates</li>
-          <li>• Consider any transaction fees that may apply</li>
-        </ul>
       </div>
     </DashboardLayout>
   )
