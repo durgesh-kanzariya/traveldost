@@ -24,7 +24,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 export function MapWidget() {
   // Coordinates for Rajkot, Gujarat (Default)
-  const position = [22.3039, 70.8022]
+  const position = [22.261230, 70.789475]
 
   const handleMapWheel = (e) => {
     e.preventDefault()

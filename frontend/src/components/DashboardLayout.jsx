@@ -37,7 +37,7 @@ export function DashboardLayout({ children }) {
         }`}
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <Globe className="h-8 w-8 text-sky-600" />
             <span className="text-xl font-bold text-slate-900">TravelDost</span>
           </Link>
@@ -91,7 +91,7 @@ export function DashboardLayout({ children }) {
           <button onClick={() => setSidebarOpen(true)}>
             <Menu className="h-6 w-6 text-slate-700" />
           </button>
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <Globe className="h-6 w-6 text-sky-600" />
             <span className="font-bold text-slate-900">TravelDost</span>
           </Link>
