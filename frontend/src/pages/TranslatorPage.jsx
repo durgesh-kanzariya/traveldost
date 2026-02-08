@@ -158,7 +158,7 @@ export function TranslatorPage() {
           <select
             value={targetLang}
             onChange={(e) => setTargetLang(e.target.value)}
-            className="p-2 rounded-lg border border-sky-200 dark:border-sky-900/50 font-medium focus:ring-2 focus:ring-sky-500/20 outline-none bg-sky-50/50 dark:bg-sky-900/20 text-sky-900 dark:text-sky-300"
+            className="p-2 rounded-lg border border-slate-300 dark:border-slate-700 font-medium focus:ring-2 focus:ring-sky-500/20 outline-none bg-white/50 dark:bg-slate-800 dark:text-white"
           >
             {supportedLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
           </select>
