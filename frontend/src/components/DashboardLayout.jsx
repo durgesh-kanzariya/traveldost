@@ -1,21 +1,25 @@
 import { useState } from 'react' // Removed useEffect
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  CheckSquare, 
-  Globe, 
-  Phone, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Globe,
+  Phone,
+  Settings,
+  LogOut,
+  Menu,
   X,
   User,
-  Banknote
+  Banknote,
+  Sun,
+  Moon
 } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
 
 export function DashboardLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   // 1. FIXED: Lazy Initialization (Reads storage once on load)
@@ -41,7 +45,7 @@ export function DashboardLayout({ children }) {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between bg-white p-4 shadow-sm">
         <span className="text-xl font-bold text-sky-600">TravelDost</span>
@@ -53,9 +57,8 @@ export function DashboardLayout({ children }) {
       <div className="flex min-h-screen">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white dark:bg-slate-900 shadow-lg dark:shadow-slate-900/50 transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
         >
           <div className="flex h-full flex-col">
             {/* Logo */}
@@ -72,13 +75,12 @@ export function DashboardLayout({ children }) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-sky-50 text-sky-600'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
+                      ? 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
                   >
-                    <Icon className={`h-5 w-5 ${isActive ? 'text-sky-600' : 'text-slate-400'}`} />
+                    <Icon className={`h-5 w-5 ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-slate-500'}`} />
                     {item.label}
                   </Link>
                 )
@@ -92,16 +94,24 @@ export function DashboardLayout({ children }) {
                   <User className="h-6 w-6 text-sky-600" />
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <p className="truncate text-sm font-medium text-slate-900">
+                  <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
                     {userData.name}
                   </p>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                     {userData.email}
                   </p>
                 </div>
               </div>
-              
-              <button 
+
+              <button
+                onClick={toggleTheme}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-2"
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </button>
+
+              <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
               >

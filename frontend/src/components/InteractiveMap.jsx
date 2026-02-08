@@ -5,7 +5,6 @@ import L from 'leaflet'
 import { Shield, Hospital, MapPin, Navigation } from 'lucide-react'
 
 // --- CUSTOM ICONS ---
-// We use DivIcon to render Lucide React icons inside Leaflet markers
 const createIcon = (color, type) => {
     return L.divIcon({
         className: 'custom-icon',
@@ -47,41 +46,18 @@ export function InteractiveMap({ lat, lng }) {
     const [safeZones, setSafeZones] = useState([])
     const [loading, setLoading] = useState(false)
 
-    // Fetch Safe Zones (Police/Hospitals) from Overpass API
     useEffect(() => {
         if (!lat || !lng) return
 
         const fetchSafeZones = async () => {
             setLoading(true)
             try {
-                // Query: Get nodes, ways, relations (nwr) to find ALL police/hospitals
-                // 'out center;' ensures we get coordinates even for buildings (ways)
-                const query = `
-          [out:json][timeout:25];
-          (
-            nwr["amenity"="police"](around:5000, ${lat}, ${lng});
-            nwr["amenity"="hospital"](around:2000, ${lat}, ${lng});
-          );
-          out center;
-        `
+                const query = constructOverpassQuery(lat, lng)
                 const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
 
                 const res = await fetch(url)
                 const data = await res.json()
-
-                const zones = data.elements.map(el => {
-                    // Handle Nodes (lat/lon) vs Ways/Relations (center.lat/center.lon)
-                    const latitude = el.lat || (el.center && el.center.lat);
-                    const longitude = el.lon || (el.center && el.center.lon);
-
-                    return {
-                        id: el.id,
-                        lat: latitude,
-                        lng: longitude,
-                        type: el.tags.amenity,
-                        name: el.tags.name || (el.tags.amenity === 'police' ? 'Unnamed Police Station' : 'Unnamed Hospital')
-                    }
-                }).filter(z => z.lat && z.lng) // Filter out items without coordinates
+                const zones = parseOverpassResponse(data)
 
                 setSafeZones(zones)
             } catch (err) {
@@ -95,12 +71,12 @@ export function InteractiveMap({ lat, lng }) {
     }, [lat, lng])
 
     return (
-        <div className="relative h-96 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner">
+        <div className="relative h-96 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner [&_.leaflet-tile-pane]:dark:invert-[.9] [&_.leaflet-tile-pane]:dark:hue-rotate-180 [&_.leaflet-tile-pane]:dark:contrast-75">
             <MapContainer
                 center={[lat, lng]}
                 zoom={14}
-                style={{ height: '100%', width: '100%' }}
-                scrollWheelZoom={true} // Enabled per user request
+                style={{ height: '100%', width: '100%', background: '#0f172a' }} // Start with dark bg to avoid white flash
+                scrollWheelZoom={true}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -138,24 +114,53 @@ export function InteractiveMap({ lat, lng }) {
 
             {/* OVERLAY LOADING INDICATOR */}
             {loading && (
-                <div className="absolute top-4 right-4 z-[400] bg-white/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 shadow-sm flex items-center gap-2">
-                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-sky-600 border-t-transparent"></div>
+                <div className="absolute top-4 right-4 z-[400] bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm flex items-center gap-2">
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-sky-600 dark:border-sky-400 border-t-transparent"></div>
                     Scanning Safe Zones...
                 </div>
             )}
 
             {/* LEGEND */}
-            <div className="absolute bottom-4 left-4 z-[400] bg-white/90 backdrop-blur p-2 rounded-lg text-xs font-medium text-slate-600 shadow-sm border border-slate-200">
+            <div className="absolute bottom-4 left-4 z-[400] bg-white/90 dark:bg-slate-900/90 backdrop-blur p-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 mb-1">
-                    <div className="w-3 h-3 rounded-full bg-red-600 border border-white shadow-sm"></div>
+                    <div className="w-3 h-3 rounded-full bg-red-600 border border-white dark:border-slate-800 shadow-sm"></div>
                     Police
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-600 border border-white shadow-sm"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-600 border border-white dark:border-slate-800 shadow-sm"></div>
                     Hospital
                 </div>
             </div>
 
         </div>
     )
+}
+
+// --- OVERPASS API LOGIC EXTRACTED FOR SIMPLICITY ---
+
+function constructOverpassQuery(lat, lng) {
+    return `
+      [out:json][timeout:25];
+      (
+        nwr["amenity"="police"](around:5000, ${lat}, ${lng});
+        nwr["amenity"="hospital"](around:2000, ${lat}, ${lng});
+      );
+      out center;
+    `
+}
+
+function parseOverpassResponse(data) {
+    return data.elements.map(el => {
+        // Handle Nodes (lat/lon) vs Ways/Relations (center.lat/center.lon)
+        const latitude = el.lat || (el.center && el.center.lat);
+        const longitude = el.lon || (el.center && el.center.lon);
+
+        return {
+            id: el.id,
+            lat: latitude,
+            lng: longitude,
+            type: el.tags.amenity,
+            name: el.tags.name || (el.tags.amenity === 'police' ? 'Unnamed Police Station' : 'Unnamed Hospital')
+        }
+    }).filter(z => z.lat && z.lng)
 }

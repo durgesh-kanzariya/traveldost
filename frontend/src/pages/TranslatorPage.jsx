@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Languages, Volume2, ArrowRightLeft, RefreshCw, Star } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { countryToLanguage, supportedLanguages } from '../utils/countryLanguages'
 
 // Common Phrases (User requested to keep these)
@@ -67,19 +68,23 @@ export function TranslatorPage() {
   }, []) // Run once on mount
 
   // --- 2. TRANSLATE FUNCTION ---
+  // Steps:
+  // 1. Check if we already have this translation in Cache (LocalStorage)
+  // 2. If not, call our Backend API (/api/translate)
+  // 3. Save result to Cache for next time
   const handleTranslate = async (textOverride = null) => {
     const textToTranslate = textOverride || inputText
     if (!textToTranslate.trim()) return
 
-    // A. Check Cache First
+    // A. Check Cache First (Instant Result)
     const cacheKey = `${sourceLang}-${targetLang}-${textToTranslate.toLowerCase().trim()}`
     if (cache[cacheKey]) {
       console.log("⚡ Serving from Cache")
       setTranslatedText(cache[cacheKey])
-      return // Skip API
+      return // Skip API call
     }
 
-    // B. Call API
+    // B. Call API (Server handles the translation via MyMemory)
     setLoading(true)
     try {
       const res = await fetch(`http://localhost:5000/api/translate?text=${encodeURIComponent(textToTranslate)}&from=${sourceLang}&to=${targetLang}`)
@@ -119,32 +124,32 @@ export function TranslatorPage() {
 
   return (
     <DashboardLayout>
+      <div className="mb-8">
+        <Breadcrumbs />
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl flex items-center gap-3 mt-2">
+          <Languages className="h-8 w-8 text-sky-600 dark:text-sky-400" />
+          AI Translator
+        </h1>
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
+          {userLocation ? `Detected location: ${userLocation}. Translating to local language.` : 'Translate text instantly.'}
+        </p>
+      </div>
+
       <div className="max-w-4xl mx-auto space-y-6">
 
-        {/* HEADER */}
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl flex items-center gap-3">
-            <Languages className="h-8 w-8 text-sky-600" />
-            AI Translator
-          </h1>
-          <p className="mt-2 text-slate-600">
-            {userLocation ? `Detected location: ${userLocation}. Translating to local language.` : 'Translate text instantly.'}
-          </p>
-        </div>
-
         {/* CONTROLS */}
-        <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-xl border border-white/50 dark:border-slate-800/50 shadow-sm">
           {/* FROM */}
           <select
             value={sourceLang}
             onChange={(e) => setSourceLang(e.target.value)}
-            className="p-2 rounded-lg border border-slate-300 font-medium focus:ring-2 focus:ring-sky-500/20 outline-none"
+            className="p-2 rounded-lg border border-slate-300 dark:border-slate-700 font-medium focus:ring-2 focus:ring-sky-500/20 outline-none bg-white/50 dark:bg-slate-800 dark:text-white"
           >
             {supportedLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
           </select>
 
           {/* SWAP */}
-          <button onClick={handleSwap} className="p-2 rounded-full hover:bg-slate-100 text-slate-500">
+          <button onClick={handleSwap} className="p-2 rounded-full hover:bg-white/50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
             <ArrowRightLeft className="h-5 w-5" />
           </button>
 
@@ -152,7 +157,7 @@ export function TranslatorPage() {
           <select
             value={targetLang}
             onChange={(e) => setTargetLang(e.target.value)}
-            className="p-2 rounded-lg border border-slate-300 font-medium focus:ring-2 focus:ring-sky-500/20 outline-none bg-sky-50 text-sky-900 border-sky-200"
+            className="p-2 rounded-lg border border-sky-200 dark:border-sky-900/50 font-medium focus:ring-2 focus:ring-sky-500/20 outline-none bg-sky-50/50 dark:bg-sky-900/20 text-sky-900 dark:text-sky-300"
           >
             {supportedLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
           </select>
@@ -167,12 +172,12 @@ export function TranslatorPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Type here..."
-              className="w-full h-48 p-4 text-lg rounded-2xl border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none resize-none shadow-sm transition-all"
+              className="w-full h-48 p-4 text-lg rounded-2xl border border-white/50 dark:border-slate-700/50 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none resize-none shadow-sm transition-all dark:text-white dark:placeholder-slate-500"
             />
             {inputText && (
               <button
                 onClick={() => setInputText('')}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 ✕
               </button>
@@ -180,23 +185,23 @@ export function TranslatorPage() {
           </div>
 
           {/* OUTPUT */}
-          <div className="relative bg-slate-50 rounded-2xl border border-slate-200 h-48 p-4 flex flex-col justify-between group">
+          <div className="relative bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/50 dark:border-slate-700/50 h-48 p-4 flex flex-col justify-between group shadow-inner">
             {loading ? (
-              <div className="flex items-center justify-center h-full text-sky-600 gap-2">
+              <div className="flex items-center justify-center h-full text-sky-600 dark:text-sky-400 gap-2">
                 <RefreshCw className="h-6 w-6 animate-spin" />
                 Translating...
               </div>
             ) : (
               <>
-                <p className="text-xl font-medium text-slate-800 break-words overflow-y-auto">
-                  {translatedText || <span className="text-slate-400 italic">Translation will appear here...</span>}
+                <p className="text-xl font-medium text-slate-800 dark:text-slate-100 break-words overflow-y-auto">
+                  {translatedText || <span className="text-slate-400 dark:text-slate-500 italic">Translation will appear here...</span>}
                 </p>
 
                 {translatedText && (
-                  <div className="flex justify-end pt-2 border-t border-slate-200/50 mt-2">
+                  <div className="flex justify-end pt-2 border-t border-slate-200/50 dark:border-slate-700/50 mt-2">
                     <button
                       onClick={() => handleSpeak(translatedText)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm font-medium text-slate-700 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-all shadow-sm"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/80 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-600 hover:text-sky-700 dark:hover:text-sky-300 hover:border-sky-200 dark:hover:border-sky-500/50 transition-all shadow-sm"
                     >
                       <Volume2 className="h-4 w-4" />
                       Pronounce
@@ -212,14 +217,14 @@ export function TranslatorPage() {
         <button
           onClick={() => handleTranslate()}
           disabled={!inputText || loading}
-          className="w-full py-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-lg font-bold rounded-xl shadow-md shadow-sky-600/20 transition-all active:scale-[0.99]"
+          className="w-full py-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-lg font-bold rounded-xl shadow-lg shadow-sky-600/20 transition-all active:scale-[0.99]"
         >
           Translate Text
         </button>
 
         {/* QUICK PHRASES (As requested) */}
-        <div className="mt-8 pt-8 border-t border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <div className="mt-8 pt-8 border-t border-slate-200/50 dark:border-slate-700/50">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
             Quick Phrases
           </h3>
@@ -231,12 +236,12 @@ export function TranslatorPage() {
                   setInputText(phrase.text)
                   handleTranslate(phrase.text) // Translate immediately
                 }}
-                className="text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-sky-300 hover:bg-sky-50 transition-all group"
+                className="text-left px-4 py-3 rounded-xl border border-white/60 dark:border-slate-700/50 bg-white/40 dark:bg-slate-800/40 hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:border-sky-200 dark:hover:border-sky-900 backdrop-blur-sm transition-all group shadow-sm"
               >
-                <span className="block text-xs font-semibold text-slate-400 group-hover:text-sky-600 mb-1">
+                <span className="block text-xs font-semibold text-slate-400 dark:text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 mb-1">
                   {phrase.category}
                 </span>
-                <span className="font-medium text-slate-700 group-hover:text-slate-900">
+                <span className="font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">
                   {phrase.text}
                 </span>
               </button>

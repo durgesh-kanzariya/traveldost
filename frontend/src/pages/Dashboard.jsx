@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { InteractiveMap } from '../components/InteractiveMap'
+import { Skeleton } from '../components/Skeleton'
 
 export function Dashboard() {
   const [location, setLocation] = useState({
@@ -118,23 +119,25 @@ export function Dashboard() {
 
   useEffect(() => { detectLocation() }, [])
 
+  // ... (inside component)
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/20 dark:border-slate-800/50 shadow-sm animate-fade-in">
           <div>
-            <h1 className="text-3xl font-light tracking-tight text-foreground mb-1">
+            <h1 className="text-3xl font-light tracking-tight text-slate-800 dark:text-slate-100 mb-1">
               Travel Guide
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Local customs and emergency information for your destination
             </p>
           </div>
           <button
             onClick={detectLocation}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-all disabled:opacity-50 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600/90 hover:bg-sky-700 text-white rounded-xl shadow-lg shadow-sky-600/20 backdrop-blur-sm transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Locating...' : 'Refresh Location'}
@@ -142,31 +145,31 @@ export function Dashboard() {
         </div>
 
         {/* Map Section */}
-        {/* We pass the lat/lng only when we have a valid location */}
         {loading ? (
-          <div className="rounded-2xl overflow-hidden bg-slate-100 h-96 border border-slate-200 shadow-inner flex items-center justify-center">
-            <div className="flex flex-col items-center gap-2">
-              <RefreshCw className="h-8 w-8 text-sky-600 animate-spin" />
-              <p className="text-sm font-medium text-slate-600">Acquiring Satellite Signal...</p>
-            </div>
-          </div>
+          <Skeleton className="h-96 w-full rounded-2xl" />
         ) : (
-          <InteractiveMap lat={location.lat} lng={location.lng} />
+          <div className="animate-fade-in">
+            <InteractiveMap lat={location.lat} lng={location.lng} />
+          </div>
         )}
 
         {/* Location Info Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/50 dark:border-slate-800/50 shadow-sm animate-fade-in">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center">
-              <MapPin className="h-5 w-5 text-sky-600" />
+            <div className="h-10 w-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+              <MapPin className="h-5 w-5 text-sky-600 dark:text-sky-400" />
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">
                 Current Location
               </p>
-              <p className="text-base font-bold text-slate-900">
-                {loading ? 'Detecting location...' : `${location.city || 'Unknown'}, ${location.country}`}
-              </p>
+              {loading ? (
+                <Skeleton className="h-6 w-32 mt-1" />
+              ) : (
+                <p className="text-base font-bold text-slate-900 dark:text-white">
+                  {`${location.city || 'Unknown'}, ${location.country}`}
+                </p>
+              )}
             </div>
           </div>
           {error && (
@@ -182,30 +185,30 @@ export function Dashboard() {
           {/* Emergency Contacts Card */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                <Shield className="h-4 w-4 text-red-600" />
+              <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">Emergency Contacts</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Emergency Contacts</h2>
             </div>
             <div className="space-y-3">
-              <div className="p-4 border border-slate-200 rounded-xl hover:border-red-200 hover:bg-red-50/30 transition-all bg-white shadow-sm">
+              <div className="p-4 border border-white/50 dark:border-slate-800/50 rounded-xl hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-slate-400" />
-                    <span className="text-sm font-medium text-slate-700">Police</span>
+                    <Phone className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Police</span>
                   </div>
-                  <span className="text-xl font-bold text-red-600 tabular-nums">
+                  <span className="text-xl font-bold text-red-600 dark:text-red-400 tabular-nums">
                     {countryData?.emergency.police || '--'}
                   </span>
                 </div>
               </div>
-              <div className="p-4 border border-slate-200 rounded-xl hover:border-red-200 hover:bg-red-50/30 transition-all bg-white shadow-sm">
+              <div className="p-4 border border-white/50 dark:border-slate-800/50 rounded-xl hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-slate-400" />
-                    <span className="text-sm font-medium text-slate-700">Ambulance</span>
+                    <Phone className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Ambulance</span>
                   </div>
-                  <span className="text-xl font-bold text-red-600 tabular-nums">
+                  <span className="text-xl font-bold text-red-600 dark:text-red-400 tabular-nums">
                     {countryData?.emergency.ambulance || '--'}
                   </span>
                 </div>
@@ -216,19 +219,19 @@ export function Dashboard() {
           {/* Local Customs Card */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">Local Customs</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Local Customs</h2>
             </div>
             <div className="space-y-2">
               {countryData?.rules.map((rule, idx) => (
                 <div
                   key={idx}
-                  className="flex gap-3 p-3 rounded-lg bg-slate-50 hover:bg-amber-50 transition-colors border border-transparent hover:border-amber-100"
+                  className="flex gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors border border-transparent hover:border-amber-100 dark:hover:border-amber-900/30"
                 >
-                  <CheckCircle2 className="h-4 w-4 text-teal-600 shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-700 leading-relaxed font-medium">{rule}</p>
+                  <CheckCircle2 className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">{rule}</p>
                 </div>
               ))}
               {!countryData && (

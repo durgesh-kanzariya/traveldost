@@ -21,9 +21,11 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage').then(module => ({
 const CurrencyConverterPage = lazy(() => import('./pages/CurrencyConverterPage').then(module => ({ default: module.CurrencyConverterPage })))
 const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default: module.NotFound })))
 
+import { BackToTop } from './components/BackToTop'
+
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
       <Navbar />
       <main>
         <HeroSection />
@@ -32,6 +34,7 @@ function LandingPage() {
         <AboutContactSection />
       </main>
       <Footer />
+      <BackToTop />
     </div>
   )
 }
@@ -51,58 +54,58 @@ function App() {
           <Route path="/signup" element={<SignUpPage />} />
 
           {/* --- PROTECTED ROUTES (Must be logged in) --- */}
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/emergency" 
+
+          <Route
+            path="/emergency"
             element={
               <ProtectedRoute>
                 <EmergencyPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/translator" 
+
+          <Route
+            path="/translator"
             element={
               <ProtectedRoute>
                 <TranslatorPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/checklist" 
+
+          <Route
+            path="/checklist"
             element={
               <ProtectedRoute>
                 <ChecklistPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/settings" 
+
+          <Route
+            path="/settings"
             element={
               <ProtectedRoute>
                 <SettingsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/currency-converter" 
+
+          <Route
+            path="/currency-converter"
             element={
               <ProtectedRoute>
                 <CurrencyConverterPage />
               </ProtectedRoute>
-            } 
+            }
           />
 
           {/* --- CATCH-ALL (404) --- */}
