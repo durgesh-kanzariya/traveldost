@@ -40,7 +40,8 @@ router.post('/register', async (req, res) => {
 
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    // DEBUG: Expose actual DB error
+    res.status(500).json({ message: `DB Registration Error: ${err.message}` });
   }
 });
 
