@@ -99,28 +99,7 @@ export function LoginPage() {
             </Link>
           </p>
 
-          {/* DEBUG SECTION - REMOVE AFTER FIXING */}
-          <div className="mt-8 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-mono text-slate-500 overflow-hidden">
-            <p className="font-bold mb-2">🚧 Debug Info:</p>
-            <p>API URL: {import.meta.env.VITE_API_URL || '(Not Set - using localhost)'}</p>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                  alert(`Pinging: ${url}...`);
-                  const res = await fetch(`${url}/`);
-                  const text = await res.text();
-                  alert(`Success! Backend says: ${text}`);
-                } catch (e) {
-                  alert(`Error: ${e.message}`);
-                }
-              }}
-              className="mt-2 text-blue-500 underline"
-            >
-              Test Backend Connection
-            </button>
-          </div>
+
 
         </div>
       </div>
