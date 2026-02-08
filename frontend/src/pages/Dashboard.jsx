@@ -9,6 +9,7 @@ import {
   Info
 } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
+import { InteractiveMap } from '../components/InteractiveMap'
 
 export function Dashboard() {
   const [location, setLocation] = useState({
@@ -81,7 +82,7 @@ export function Dashboard() {
             rawCountry = "Niger";
           } else if (rawCountry.includes("Central African Republic")) {
             rawCountry = "Central African Republic";
-          }else if (rawCountry.includes("Iran")) {
+          } else if (rawCountry.includes("Iran")) {
             rawCountry = "Iran";
           }
 
@@ -141,25 +142,17 @@ export function Dashboard() {
         </div>
 
         {/* Map Section */}
-        <div className="rounded-2xl overflow-hidden bg-slate-100 h-96 border border-slate-200 shadow-inner relative group">
-          <iframe
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            scrolling="no"
-            src={`https://maps.google.com/maps?q=${location.lat},${location.lng}&z=${zoom}&output=embed`}
-            title="Location Map"
-            className="w-full h-full grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000"
-          />
-          {loading && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2">
-                <RefreshCw className="h-8 w-8 text-sky-600 animate-spin" />
-                <p className="text-sm font-medium text-slate-600">Acquiring Satellite Signal...</p>
-              </div>
+        {/* We pass the lat/lng only when we have a valid location */}
+        {loading ? (
+          <div className="rounded-2xl overflow-hidden bg-slate-100 h-96 border border-slate-200 shadow-inner flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <RefreshCw className="h-8 w-8 text-sky-600 animate-spin" />
+              <p className="text-sm font-medium text-slate-600">Acquiring Satellite Signal...</p>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <InteractiveMap lat={location.lat} lng={location.lng} />
+        )}
 
         {/* Location Info Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
