@@ -27,8 +27,8 @@ export function LoginPage() {
         alert(data.message || 'Login failed')
       }
     } catch (error) {
-      console.error("Login Error:", error) // <--- Now 'error' is used!
-      alert('Cannot connect to server.')
+      console.error("Login Error:", error)
+      alert(`Connection Failed: ${error.message}. Check console for CORS errors.`)
     }
   }
 
