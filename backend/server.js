@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.options('*', cors()); // Enable pre-flight for all routes
+// app.options('*', cors()); // Removed: Causes crash in Express 5 with path-to-regexp
 app.use(express.json());
 
 // --- REMOVED DUPLICATE POOL CONFIGURATION HERE --- 
