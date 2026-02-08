@@ -2,17 +2,8 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { Pool } = require('pg');
+const pool = require('../config/db'); // Use shared pool
 require('dotenv').config();
-
-// Connect to Database
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
 
 // REGISTRATION ROUTE
 router.post('/register', async (req, res) => {
@@ -37,14 +28,14 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ id: newUser.rows[0].id }, 'secretKey123', { expiresIn: '1h' });
 
     // 3. Send back the language so the frontend can save it to localStorage
-    res.json({ 
-        token, 
-        user: { 
-            id: newUser.rows[0].id, 
-            name, 
-            email, 
-            nativeLanguage: newUser.rows[0].native_language 
-        } 
+    res.json({
+      token,
+      user: {
+        id: newUser.rows[0].id,
+        name,
+        email,
+        nativeLanguage: newUser.rows[0].native_language
+      }
     });
 
   } catch (err) {
@@ -60,14 +51,14 @@ router.post('/login', async (req, res) => {
   try {
     // 1. Check if user exists
     const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    
+
     if (user.rows.length === 0) {
       return res.status(400).json({ message: 'Invalid Credentials (User not found)' });
     }
 
     // 2. Check if password matches (Compare encrypted passwords)
     const validPassword = await bcrypt.compare(password, user.rows[0].password);
-    
+
     if (!validPassword) {
       return res.status(401).json({ message: 'Invalid Credentials (Wrong Password)' });
     }

@@ -12,7 +12,8 @@ export function ChecklistPage() {
   useEffect(() => {
     const fetchChecklist = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/checklist', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${API_URL}/api/checklist`, {
           headers: { 'x-auth-token': token }
         })
         const data = await res.json()
@@ -32,7 +33,8 @@ export function ChecklistPage() {
   const addItem = async () => {
     if (newItem.trim()) {
       try {
-        const res = await fetch('http://localhost:5000/api/checklist', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${API_URL}/api/checklist`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -60,7 +62,8 @@ export function ChecklistPage() {
 
     // B. Send update to DB
     try {
-      await fetch(`http://localhost:5000/api/checklist/${id}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await fetch(`${API_URL}/api/checklist/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +90,8 @@ export function ChecklistPage() {
     setChecklist((prev) => prev.filter((item) => item.id !== id))
 
     try {
-      await fetch(`http://localhost:5000/api/checklist/${id}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await fetch(`${API_URL}/api/checklist/${id}`, {
         method: 'DELETE',
         headers: { 'x-auth-token': token }
       })

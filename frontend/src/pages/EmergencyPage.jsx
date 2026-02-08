@@ -21,7 +21,8 @@ export function EmergencyPage() {
 
   // 1. Fetch the List of Countries (for Autocomplete)
   useEffect(() => {
-    fetch('http://localhost:5000/api/guides/list')
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    fetch(`${API_URL}/api/guides/list`)
       .then(res => res.json())
       .then(data => setAllCountries(data))
       .catch(err => console.error("Failed to load country list", err))
@@ -34,7 +35,8 @@ export function EmergencyPage() {
       setIsDropdownOpen(false) // Close dropdown on selection
       setSearchQuery(countryName) // Update input text
 
-      const res = await fetch(`http://localhost:5000/api/guides/${countryName}`)
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${API_URL}/api/guides/${countryName}`)
       const data = await res.json()
 
       setActiveData({

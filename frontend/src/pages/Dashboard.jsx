@@ -29,7 +29,8 @@ export function Dashboard() {
   const fetchGuideData = async (countryName) => {
     try {
       // Call your new API endpoint
-      const res = await fetch(`http://localhost:5000/api/guides/${countryName}`)
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${API_URL}/api/guides/${countryName}`)
       const data = await res.json()
 
       // Format the DB data to match what the UI expects
