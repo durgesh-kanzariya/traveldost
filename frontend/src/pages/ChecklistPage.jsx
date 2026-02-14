@@ -143,7 +143,7 @@ export function ChecklistPage() {
               className="h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-sky-600 focus:ring-sky-500 cursor-pointer bg-white dark:bg-slate-700"
             />
             <span
-              className={`flex-1 text-sm ${item.checked
+              className={`flex-1 text-sm break-all ${item.checked
                 ? 'text-slate-400 dark:text-slate-600 line-through'
                 : 'text-slate-700 dark:text-slate-200'
                 }`}

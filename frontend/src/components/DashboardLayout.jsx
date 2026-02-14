@@ -57,7 +57,7 @@ export function DashboardLayout({ children }) {
       <div className="flex min-h-screen">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white dark:bg-slate-900 shadow-lg dark:shadow-slate-900/50 transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          className={`fixed inset-y-0 left-0 z-[9999] w-64 transform bg-white dark:bg-slate-900 shadow-lg dark:shadow-slate-900/50 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
         >
           <div className="flex h-full flex-col">
@@ -67,7 +67,7 @@ export function DashboardLayout({ children }) {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex-1 space-y-1 px-3 py-4">
+            <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
               {menuItems.map((item) => {
                 const Icon = item.icon
                 const isActive = location.pathname === item.path
@@ -123,7 +123,7 @@ export function DashboardLayout({ children }) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 lg:p-8">
+        <main className="flex-1 w-full min-w-0 overflow-x-hidden p-4 lg:p-8">
           {children}
         </main>
       </div>
