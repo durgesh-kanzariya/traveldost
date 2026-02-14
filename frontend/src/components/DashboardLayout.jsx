@@ -12,7 +12,8 @@ import {
   User,
   Banknote,
   Sun,
-  Moon
+  Moon,
+  ArrowLeftRight
 } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 
@@ -110,6 +111,16 @@ export function DashboardLayout({ children }) {
                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
               </button>
+
+              {userData.role === 'admin' && (
+                <button
+                  onClick={() => navigate('/admin/dashboard')}
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors mb-2"
+                >
+                  <ArrowLeftRight className="h-5 w-5" />
+                  Switch to Admin View
+                </button>
+              )}
 
               <button
                 onClick={handleLogout}

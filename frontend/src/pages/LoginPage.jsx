@@ -26,7 +26,11 @@ export function LoginPage() {
         localStorage.setItem('nativeLanguage', data.user.nativeLanguage);
       }
 
-      navigate('/dashboard');
+      if (data.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error("Login Error:", error)
       alert(error.message || 'Login failed. Please check your credentials.')

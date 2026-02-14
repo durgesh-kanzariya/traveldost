@@ -20,8 +20,12 @@ const ChecklistPage = lazy(() => import('./pages/ChecklistPage').then(module => 
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(module => ({ default: module.SettingsPage })))
 const CurrencyConverterPage = lazy(() => import('./pages/CurrencyConverterPage').then(module => ({ default: module.CurrencyConverterPage })))
 const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default: module.NotFound })))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
+const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(module => ({ default: module.UserManagement })))
+const ContentModeration = lazy(() => import('./pages/admin/ContentModeration').then(module => ({ default: module.ContentModeration })))
 
 import { BackToTop } from './components/BackToTop'
+import { AdminRoute } from './components/AdminRoute'
 
 function LandingPage() {
   return (
@@ -105,6 +109,32 @@ function App() {
               <ProtectedRoute>
                 <CurrencyConverterPage />
               </ProtectedRoute>
+            }
+          />
+
+          {/* --- ADMIN ROUTES --- */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <UserManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/content"
+            element={
+              <AdminRoute>
+                <ContentModeration />
+              </AdminRoute>
             }
           />
 

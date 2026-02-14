@@ -38,7 +38,8 @@ app.get('/db-test', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/checklist', checklistRoutes);
 app.use('/api/guides', guideRoutes);
-app.use('/api/translate', require('./routes/translate')); // <--- New Translation Route
+app.use('/api/translate', require('./routes/translate'));
+app.use('/api/admin', require('./routes/adminRoutes')); // <--- Admin Routes
 
 app.listen(PORT, () => {
   console.log(`Server is running on port: ${PORT}`);

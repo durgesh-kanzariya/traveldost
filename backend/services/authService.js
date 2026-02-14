@@ -23,7 +23,7 @@ const registerUser = async ({ name, email, password, nativeLanguage }) => {
     });
 
     // 4. Generate Token (Business Logic)
-    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     return {
         token,
@@ -31,7 +31,8 @@ const registerUser = async ({ name, email, password, nativeLanguage }) => {
             id: newUser.id,
             name: newUser.name,
             email: newUser.email,
-            nativeLanguage: newUser.native_language
+            nativeLanguage: newUser.native_language,
+            role: newUser.role
         }
     };
 };
@@ -50,7 +51,7 @@ const loginUser = async ({ email, password }) => {
     }
 
     // 3. Generate Token
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     return {
         token,
@@ -58,7 +59,8 @@ const loginUser = async ({ email, password }) => {
             id: user.id,
             name: user.name,
             email: user.email,
-            nativeLanguage: user.native_language
+            nativeLanguage: user.native_language,
+            role: user.role
         }
     };
 };
