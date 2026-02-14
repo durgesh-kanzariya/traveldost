@@ -27,6 +27,13 @@ const User = {
         return result.rows;
     },
 
+    // Count all users
+    count: async () => {
+        const query = 'SELECT COUNT(*) FROM users';
+        const result = await pool.query(query);
+        return parseInt(result.rows[0].count, 10);
+    },
+
     // Delete user
     delete: async (id) => {
         const query = 'DELETE FROM users WHERE id = $1 RETURNING *';

@@ -26,15 +26,72 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const CountryGuide = require('../models/CountryGuide');
+
 const getStats = async (req, res) => {
     try {
-        const users = await User.findAll();
-        // Placeholder for guides count until Guide model is fully implemented
+        const userCount = await User.count();
+        const guideCount = await CountryGuide.count();
+
+        // Placeholder for reports count until Report model is fully implemented
         const stats = {
-            totalUsers: users.length,
-            totalGuides: 0 // To be updated
+            totalUsers: userCount,
+            totalGuides: guideCount,
+            reports: 0
         };
         res.json(stats);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+const getAllGuides = async (req, res) => {
+    try {
+        const guides = await CountryGuide.findAll();
+        res.json(guides);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+const createGuide = async (req, res) => {
+    try {
+        const newGuide = await CountryGuide.create(req.body);
+        res.json(newGuide);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+const updateGuide = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedGuide = await CountryGuide.update(id, req.body);
+
+        if (!updatedGuide) {
+            return res.status(404).json({ message: 'Guide not found' });
+        }
+
+        res.json(updatedGuide);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+const deleteGuide = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedGuide = await CountryGuide.delete(id);
+
+        if (!deletedGuide) {
+            return res.status(440).json({ message: 'Guide not found' });
+        }
+
+        res.json({ message: 'Guide deleted successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Server Error' });
@@ -44,5 +101,9 @@ const getStats = async (req, res) => {
 module.exports = {
     getAllUsers,
     deleteUser,
-    getStats
+    getStats,
+    getAllGuides,
+    createGuide,
+    updateGuide,
+    deleteGuide
 };

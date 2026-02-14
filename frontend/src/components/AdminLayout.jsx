@@ -21,8 +21,13 @@ export function AdminLayout({ children }) {
     const navigate = useNavigate()
 
     const [userData] = useState(() => {
-        const storedUser = localStorage.getItem('user')
-        return storedUser ? JSON.parse(storedUser) : { name: 'Admin', email: 'admin@example.com' }
+        try {
+            const storedUser = localStorage.getItem('user')
+            return storedUser ? JSON.parse(storedUser) : { name: 'Admin', email: 'admin@example.com' }
+        } catch (e) {
+            console.error("Failed to parse user data", e);
+            return { name: 'Admin', email: 'admin@example.com' };
+        }
     })
 
     // LOGOUT FUNCTION
@@ -35,7 +40,7 @@ export function AdminLayout({ children }) {
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
         { icon: Users, label: 'Manage Users', path: '/admin/users' },
-        { icon: ShieldAlert, label: 'Content Moderation', path: '/admin/content' }, // Placeholder
+        { icon: ShieldAlert, label: 'Manage Guides', path: '/admin/guides' },
     ]
 
     return (

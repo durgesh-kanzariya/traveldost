@@ -22,10 +22,11 @@ const CurrencyConverterPage = lazy(() => import('./pages/CurrencyConverterPage')
 const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default: module.NotFound })))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(module => ({ default: module.UserManagement })))
-const ContentModeration = lazy(() => import('./pages/admin/ContentModeration').then(module => ({ default: module.ContentModeration })))
+const ManageGuides = lazy(() => import('./pages/admin/ManageGuides').then(module => ({ default: module.ManageGuides })))
 
 import { BackToTop } from './components/BackToTop'
 import { AdminRoute } from './components/AdminRoute'
+import { AdminErrorBoundary } from './components/AdminErrorBoundary'
 
 function LandingPage() {
   return (
@@ -114,27 +115,36 @@ function App() {
 
           {/* --- ADMIN ROUTES --- */}
           <Route
-            path="/admin/dashboard"
+            path="/admin/*"
             element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <AdminRoute>
-                <UserManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/content"
-            element={
-              <AdminRoute>
-                <ContentModeration />
-              </AdminRoute>
+              <AdminErrorBoundary>
+                <Routes>
+                  <Route
+                    path="dashboard"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="users"
+                    element={
+                      <AdminRoute>
+                        <UserManagement />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="guides"
+                    element={
+                      <AdminRoute>
+                        <ManageGuides />
+                      </AdminRoute>
+                    }
+                  />
+                </Routes>
+              </AdminErrorBoundary>
             }
           />
 
