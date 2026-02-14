@@ -15,6 +15,7 @@ const initDb = async () => {
         email VARCHAR(150) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         native_language VARCHAR(50) DEFAULT 'English',
+        role VARCHAR(20) DEFAULT 'user',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
