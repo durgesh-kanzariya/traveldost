@@ -1,4 +1,7 @@
+
 import { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom';
+import { getGuideByCountry } from '../services/guideService';
 import {
   Shield,
   MapPin,
@@ -25,13 +28,16 @@ export function Dashboard() {
   const [countryData, setCountryData] = useState(null)
   const [error, setError] = useState(null)
 
+
   // 1. FETCH DATA FROM YOUR BACKEND
   const fetchGuideData = async (countryName) => {
     try {
       // Call your new API endpoint
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const res = await fetch(`${API_URL}/api/guides/${countryName}`)
-      const data = await res.json()
+      // const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // const res = await fetch(`${ API_URL } /api/guides / ${ countryName } `)
+      // const data = await res.json()
+
+      const data = await getGuideByCountry(countryName);
 
       // Format the DB data to match what the UI expects
       const formattedData = {

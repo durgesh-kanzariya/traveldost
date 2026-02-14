@@ -1,20 +1,74 @@
-import { useState } from 'react'
-import { Bell, Lock, User } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Bell, Lock, User, Save, AlertCircle } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { updateUserProfile, changePassword } from '../services/authService'
 
 export function SettingsPage() {
+  const [user, setUser] = useState({ name: '', email: '' })
+  const [passwords, setPasswords] = useState({ oldPassword: '', newPassword: '' })
   const [settings, setSettings] = useState({
     notifications: true,
     locationTracking: true,
     darkMode: false,
   })
 
+  const [message, setMessage] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    // Load initial user data from localStorage
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+  }, [])
+
   const toggleSetting = (key) => {
     setSettings(prev => ({
       ...prev,
       [key]: !prev[key]
     }))
+  }
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage(null)
+    setError(null)
+
+    try {
+      const updatedUser = await updateUserProfile(user)
+      // Update LocalStorage
+      const stored = JSON.parse(localStorage.getItem('user'))
+      const newStored = { ...stored, ...updatedUser }
+      localStorage.setItem('user', JSON.stringify(newStored))
+
+      setUser(newStored)
+      setMessage('Profile updated successfully!')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage(null)
+    setError(null)
+
+    try {
+      const res = await changePassword(passwords)
+      setMessage(res.message)
+      setPasswords({ oldPassword: '', newPassword: '' })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -29,18 +83,32 @@ export function SettingsPage() {
         </p>
       </div>
 
+      {message && (
+        <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-xl border border-green-200">
+          {message}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          {error}
+        </div>
+      )}
+
       {/* Account Settings */}
       <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
           <User className="h-5 w-5" />
           Account Settings
         </h2>
-        <div className="space-y-4">
+        <form onSubmit={handleProfileUpdate} className="space-y-4">
           <div>
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
             <input
               type="text"
-              defaultValue="John Doe"
+              value={user.name}
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
               className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
             />
           </div>
@@ -48,14 +116,20 @@ export function SettingsPage() {
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
             <input
               type="email"
-              defaultValue="john@example.com"
-              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              value={user.email}
+              readOnly
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-800 focus:outline-none cursor-not-allowed"
             />
           </div>
-          <button className="rounded-lg bg-sky-600 px-6 py-2 font-medium text-white transition-colors hover:bg-sky-700 dark:hover:bg-sky-500">
-            Save Changes
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex items-center gap-2 rounded-lg bg-sky-600 px-6 py-2 font-medium text-white transition-colors hover:bg-sky-700 dark:hover:bg-sky-500 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            Save Profile
           </button>
-        </div>
+        </form>
       </div>
 
       {/* Security Settings */}
@@ -64,12 +138,38 @@ export function SettingsPage() {
           <Lock className="h-5 w-5" />
           Security
         </h2>
-        <button className="rounded-lg border border-slate-300 dark:border-slate-600 px-6 py-2 font-medium text-slate-700 dark:text-slate-300 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
-          Change Password
-        </button>
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Current Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={passwords.oldPassword}
+              onChange={(e) => setPasswords({ ...passwords, oldPassword: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={passwords.newPassword}
+              onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-lg border border-slate-300 dark:border-slate-600 px-6 py-2 font-medium text-slate-700 dark:text-slate-300 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
+          >
+            Change Password
+          </button>
+        </form>
       </div>
 
-      {/* Preferences */}
+      {/* Preferences (Static for now as requested only Name/Password dynamic) */}
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
           <Bell className="h-5 w-5" />

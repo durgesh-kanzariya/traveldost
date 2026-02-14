@@ -1,6 +1,7 @@
 
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom';
+import { loginUser } from '../services/authService';
 import { Globe, Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
 
 export function LoginPage() {
@@ -12,23 +13,23 @@ export function LoginPage() {
     e.preventDefault()
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      const data = await response.json()
+      // Assuming loginUser is an imported function that handles the API call
+      // and returns data similar to the original fetch response's data.
+      // Also assuming it throws an error if login fails, which will be caught by the catch block.
+      const formData = { email, password }; // Define formData from state variables
+      const data = await loginUser(formData);
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        navigate('/dashboard')
-      } else {
-        alert(data.message || 'Login failed')
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      if (data.user.nativeLanguage) {
+        localStorage.setItem('nativeLanguage', data.user.nativeLanguage);
       }
+
+      navigate('/dashboard');
     } catch (error) {
       console.error("Login Error:", error)
-      alert(`Connection Failed: ${error.message}. Check console for CORS errors.`)
+      alert(error.message || 'Login failed. Please check your credentials.')
     }
   }
 

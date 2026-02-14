@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom';
+import { getChecklistItems, addChecklistItem, updateChecklistItem, deleteChecklistItem } from '../services/checklistService';
 import { Plus, Trash2 } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { Breadcrumbs } from '../components/Breadcrumbs'
@@ -12,16 +14,12 @@ export function ChecklistPage() {
   useEffect(() => {
     const fetchChecklist = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_URL}/api/checklist`, {
-          headers: { 'x-auth-token': token }
-        })
-        const data = await res.json()
+        const data = await getChecklistItems();
         // Sort: Unchecked items first, Checked items last
         const sortedData = data.sort((a, b) => a.id - b.id)
-        setChecklist(sortedData)
-      } catch (err) {
-        console.error("Error fetching checklist:", err)
+        setChecklist(sortedData);
+      } catch (error) {
+        console.error("Error fetching checklist:", error);
       }
     }
 
@@ -33,20 +31,11 @@ export function ChecklistPage() {
   const addItem = async () => {
     if (newItem.trim()) {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_URL}/api/checklist`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': token
-          },
-          body: JSON.stringify({ label: newItem })
-        })
-        const savedItem = await res.json()
-        setChecklist((prev) => [...prev, savedItem])
-        setNewItem('')
-      } catch (err) {
-        console.error(err)
+        const savedItem = await addChecklistItem(newItem);
+        setChecklist((prev) => [...prev, savedItem]);
+        setNewItem('');
+      } catch (error) {
+        console.error("Error adding item:", error);
       }
     }
   }
@@ -62,15 +51,7 @@ export function ChecklistPage() {
 
     // B. Send update to DB
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await fetch(`${API_URL}/api/checklist/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token
-        },
-        body: JSON.stringify({ checked: !currentStatus })
-      })
+      await updateChecklistItem(id, !currentStatus);
     } catch (err) {
       console.error(err)
       // C. ERROR HANDLER: Revert the UI back if server fails
@@ -90,11 +71,7 @@ export function ChecklistPage() {
     setChecklist((prev) => prev.filter((item) => item.id !== id))
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await fetch(`${API_URL}/api/checklist/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-auth-token': token }
-      })
+      await deleteChecklistItem(id);
     } catch (err) {
       console.error(err)
       // Revert if delete fails

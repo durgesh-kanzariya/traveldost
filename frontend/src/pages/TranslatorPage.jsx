@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom';
+import { translateText } from '../services/translationService';
 import { Languages, Volume2, ArrowRightLeft, RefreshCw, Star } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { Breadcrumbs } from '../components/Breadcrumbs'
@@ -87,9 +89,8 @@ export function TranslatorPage() {
     // B. Call API (Server handles the translation via MyMemory)
     setLoading(true)
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const res = await fetch(`${API_URL}/api/translate?text=${encodeURIComponent(textToTranslate)}&from=${sourceLang}&to=${targetLang}`)
-      const data = await res.json()
+
+      const data = await translateText(textToTranslate, sourceLang, targetLang);
 
       if (data.translatedText) {
         setTranslatedText(data.translatedText)

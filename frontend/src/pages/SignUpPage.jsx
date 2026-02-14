@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom';
+import { registerUser } from '../services/authService';
 import { Globe, Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
 
 export function SignUpPage() {
@@ -20,24 +21,19 @@ export function SignUpPage() {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      })
-      const data = await response.json()
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        navigate('/dashboard')
-      } else {
-        alert(data.message || 'Signup failed')
+      const data = await registerUser(userData); // Replaced fetch call
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      if (data.user.nativeLanguage) {
+        localStorage.setItem('nativeLanguage', data.user.nativeLanguage);
       }
+
+      navigate('/dashboard');
     } catch (error) {
       console.error("Signup Error:", error) // <--- Now 'error' is used!
-      alert('Cannot connect to server.')
+      alert(error.message || 'Signup failed. Please try again.'); // Modified alert to use error.message
     }
   }
 

@@ -4,6 +4,8 @@ import {
   Search, AlertOctagon, RefreshCw, Landmark, ChevronDown
 } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
+import { useNavigate } from 'react-router-dom';
+import { getAllGuides, getGuideByCountry } from '../services/guideService';
 import { Breadcrumbs } from '../components/Breadcrumbs'
 
 export function EmergencyPage() {
@@ -21,11 +23,15 @@ export function EmergencyPage() {
 
   // 1. Fetch the List of Countries (for Autocomplete)
   useEffect(() => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    fetch(`${API_URL}/api/guides/list`)
-      .then(res => res.json())
-      .then(data => setAllCountries(data))
-      .catch(err => console.error("Failed to load country list", err))
+    const fetchCountries = async () => {
+      try {
+        const data = await getAllGuides();
+        setAllCountries(data);
+      } catch (error) {
+        console.error("Error loading countries:", error);
+      }
+    };
+    fetchCountries();
   }, [])
 
   // 2. Fetch Emergency Data (The detailed info)

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-module.exports = function(req, res, next) {
+module.exports = function (req, res, next) {
   // 1. Get token from header
   const token = req.header('x-auth-token');
 
@@ -12,7 +12,7 @@ module.exports = function(req, res, next) {
 
   // 3. Verify token
   try {
-    const decoded = jwt.verify(token, 'secretKey123'); // Use same secret as auth.js
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use env secret
     req.user = decoded; // Adds the user ID to the request object
     next();
   } catch (err) {
