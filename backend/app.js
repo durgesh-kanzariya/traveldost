@@ -25,7 +25,15 @@ function createApp() {
   app.use(globalLimiter);
 
   app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:4173', 'http://127.0.0.1:4173', 'https://traveldost.vercel.app'],
+    origin: [
+      'http://localhost:5173', 
+      'http://localhost:3000', 
+      'http://localhost:4173', 
+      'http://127.0.0.1:4173', 
+      'https://traveldost.vercel.app',
+      'https://traveldost-git-main-durgeshjkanzariya.vercel.app',
+      'https://traveldost-git-*durgeshjkanzariya.vercel.app'
+    ],
     credentials: true
   }));
   
