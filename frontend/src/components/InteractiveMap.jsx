@@ -149,7 +149,7 @@ export function InteractiveMap({ lat, lng }) {
                 </Marker>
 
                 {/* SAFE ZONES MARKERS */}
-                {safeZones.map(zone => (
+                {Array.isArray(safeZones) && safeZones.map(zone => (
                     <Marker
                         key={zone.id}
                         position={[zone.lat, zone.lng]}
