@@ -1,38 +1,71 @@
 import { API_URL, getHeaders } from './api';
 
-export const getChecklistItems = async () => {
-    const response = await fetch(`${API_URL}/api/checklist`, {
-        headers: getHeaders()
-    });
-    if (!response.ok) throw new Error('Failed to fetch checklist');
-    return await response.json();
+const getCache = (key) => {
+    try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data).value : null;
+    } catch { return null; }
 };
 
-export const addChecklistItem = async (label) => {
-    const response = await fetch(`${API_URL}/api/checklist`, {
+const setCache = (key, value) => {
+    try {
+        localStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
+    } catch {}
+};
+
+const clearCache = () => {
+    localStorage.removeItem('checklist');
+};
+
+const getChecklistItems = async (tripId) => {
+    let url = `${API_URL}/api/checklist`;
+    if (tripId === null) url += '?trip_id=null';
+    else if (tripId) url += `?trip_id=${tripId}`;
+    
+    const res = await fetch(url, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Failed');
+    return await res.json();
+};
+
+export const getChecklistItemsByTrip = async (tripId) => {
+    const key = `checklist_${tripId || 'all'}`;
+    try {
+        const data = await getChecklistItems(tripId);
+        setCache(key, data);
+        return data;
+    } catch {
+        return getCache(key) || [];
+    }
+};
+
+export const addChecklistItem = async (label, tripId) => {
+    const res = await fetch(`${API_URL}/api/checklist`, {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({ label }),
+        body: JSON.stringify({ label, trip_id: tripId }),
     });
-    if (!response.ok) throw new Error('Failed to add item');
-    return await response.json();
+    if (!res.ok) throw new Error('Failed');
+    clearCache();
+    return await res.json();
 };
 
 export const updateChecklistItem = async (id, checked) => {
-    const response = await fetch(`${API_URL}/api/checklist/${id}`, {
+    const res = await fetch(`${API_URL}/api/checklist/${id}`, {
         method: 'PUT',
         headers: getHeaders(),
         body: JSON.stringify({ checked }),
     });
-    if (!response.ok) throw new Error('Failed to update item');
-    return await response.json();
+    if (!res.ok) throw new Error('Failed');
+    clearCache();
+    return await res.json();
 };
 
 export const deleteChecklistItem = async (id) => {
-    const response = await fetch(`${API_URL}/api/checklist/${id}`, {
+    const res = await fetch(`${API_URL}/api/checklist/${id}`, {
         method: 'DELETE',
-        headers: getHeaders()
+        headers: getHeaders(),
     });
-    if (!response.ok) throw new Error('Failed to delete item');
-    return await response.json();
+    if (!res.ok) throw new Error('Failed');
+    clearCache();
+    return await res.json();
 };

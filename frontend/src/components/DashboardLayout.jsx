@@ -1,4 +1,4 @@
-import { useState } from 'react' // Removed useEffect
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -13,7 +13,8 @@ import {
   Banknote,
   Sun,
   Moon,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Plane
 } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 
@@ -23,7 +24,7 @@ export function DashboardLayout({ children }) {
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
-  // 1. FIXED: Lazy Initialization (Reads storage once on load)
+  // Lazy Initialization
   const [userData] = useState(() => {
     const storedUser = localStorage.getItem('user')
     return storedUser ? JSON.parse(storedUser) : { name: 'Traveler', email: 'user@example.com' }
@@ -38,9 +39,10 @@ export function DashboardLayout({ children }) {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: Plane, label: 'My Trips', path: '/trips' },
     { icon: CheckSquare, label: 'Trip Checklist', path: '/checklist' },
     { icon: Globe, label: 'Translator', path: '/translator' },
-    { icon: Banknote, label: 'Currency', path: '/currency-converter' }, // <--- NEW LINK
+    { icon: Banknote, label: 'Currency', path: '/currency-converter' },
     { icon: Phone, label: 'Emergency', path: '/emergency' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ]

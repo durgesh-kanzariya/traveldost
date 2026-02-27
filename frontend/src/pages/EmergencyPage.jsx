@@ -7,6 +7,7 @@ import { DashboardLayout } from '../components/DashboardLayout'
 import { useNavigate } from 'react-router-dom';
 import { getAllGuides, getGuideByCountry } from '../services/guideService';
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { getCachedLocation, detectAndCacheLocation } from '../utils/locationService';
 
 export function EmergencyPage() {
   // Data States
@@ -63,41 +64,25 @@ export function EmergencyPage() {
     }
   }
 
-  // 3. Detect Location Logic
-  const detectLocation = () => {
+  // 3. Detect Location Logic (using cached location)
+  const detectLocation = async () => {
     setLoading(true)
     setLocationError(null)
 
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser")
-      setLoading(false)
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`)
-          const data = await res.json()
-
-          let rawCountry = data.countryName || 'India'
-
-          if (rawCountry.includes("United States")) rawCountry = "United States"
-          if (rawCountry.includes("United Kingdom")) rawCountry = "United Kingdom"
-
-          fetchEmergencyData(rawCountry)
-        } catch (err) {
-          console.error("Geocoding failed:", err) // <--- FIXED: Now we use 'err'
-          fetchEmergencyData('India')
-        }
-      },
-      (err) => {
-        console.error("Location access denied:", err) // This one was already fine
-        setLocationError("Location access denied")
-        fetchEmergencyData('India')
+    try {
+      const cachedLocation = getCachedLocation()
+      if (cachedLocation) {
+        fetchEmergencyData(cachedLocation.country)
+        return
       }
-    )
+
+      const location = await detectAndCacheLocation()
+      fetchEmergencyData(location.country)
+    } catch (err) {
+      console.error("Location detection failed:", err)
+      setLocationError("Location access denied")
+      fetchEmergencyData('India')
+    }
   }
 
   // Initial Load

@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 import { getGuideByCountry } from '../services/guideService';
+import { getUpcomingTrip } from '../services/tripService';
+import { detectAndCacheLocation, getCachedLocation } from '../utils/locationService';
 import {
   Shield,
   MapPin,
@@ -9,7 +11,10 @@ import {
   Phone,
   CheckCircle2,
   RefreshCw,
-  Info
+  Info,
+  Plane,
+  Calendar,
+  Briefcase
 } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { InteractiveMap } from '../components/InteractiveMap'
@@ -27,6 +32,39 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [countryData, setCountryData] = useState(null)
   const [error, setError] = useState(null)
+  const [upcomingTrip, setUpcomingTrip] = useState(null)
+  const [tripEmergencyData, setTripEmergencyData] = useState(null)
+
+  const fetchUpcomingTrip = async () => {
+    try {
+      const trip = await getUpcomingTrip()
+      if (trip) {
+        setUpcomingTrip(trip)
+        const guideData = await getGuideByCountry(trip.destination)
+        setTripEmergencyData({
+          police: guideData.police_number,
+          ambulance: guideData.ambulance_number
+        })
+      }
+    } catch (err) {
+      console.error("Failed to fetch upcoming trip:", err)
+    }
+  }
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return ''
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
+  const getDaysUntilTrip = (startDate) => {
+    if (!startDate) return 0
+    const start = new Date(startDate)
+    const today = new Date()
+    const diffTime = start - today
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
 
 
   // 1. FETCH DATA FROM YOUR BACKEND
@@ -56,81 +94,114 @@ export function Dashboard() {
     }
   }
 
-  // 2. DETECT LOCATION & CALL BACKEND
+  // 2. DETECT LOCATION & CALL BACKEND (using centralized location service)
   const detectLocation = () => {
     setLoading(true)
     setZoom(4)
     setError(null)
 
-    if (!navigator.geolocation) {
-      setError("Geolocation not supported")
-      setLoading(false)
-      return
-    }
+    detectAndCacheLocation()
+      .then(async (location) => {
+        let rawCountry = location.country;
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords
-
-          // A. Get Country Name from GPS
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`)
-          const data = await res.json()
-
-          let rawCountry = data.countryName || 'India';
-
-          // 🧹 CLEANER: Fix weird API names to match our Database
-          if (rawCountry.includes("United States")) {
-            rawCountry = "United States";
-          } else if (rawCountry.includes("United Kingdom")) {
-            rawCountry = "United Kingdom";
-          } else if (rawCountry.includes("United Arab Emirates")) {
-            rawCountry = "United Arab Emirates";
-          } else if (rawCountry.includes("Niger")) {
-            rawCountry = "Niger";
-          } else if (rawCountry.includes("Central African Republic")) {
-            rawCountry = "Central African Republic";
-          } else if (rawCountry.includes("Iran")) {
-            rawCountry = "Iran";
-          }
-
-          const detectedCountry = rawCountry;
-          const detectedCity = data.city || data.locality || '';
-
-          setLocation({ country: detectedCountry, city: detectedCity, lat: latitude, lng: longitude })
-
-          // B. Get Rules/Numbers from YOUR Database
-          await fetchGuideData(detectedCountry)
-
-          // C. Zoom in
-          setTimeout(() => {
-            setZoom(15)
-          }, 500)
-
-        } catch (err) {
-          console.error(err)
-          setLocation(prev => ({ ...prev, country: 'India', city: 'Default' }))
-        } finally {
-          setLoading(false)
+        // 🧹 CLEANER: Fix weird API names to match our Database
+        if (rawCountry.includes("United States")) {
+          rawCountry = "United States";
+        } else if (rawCountry.includes("United Kingdom")) {
+          rawCountry = "United Kingdom";
+        } else if (rawCountry.includes("United Arab Emirates")) {
+          rawCountry = "United Arab Emirates";
+        } else if (rawCountry.includes("Niger")) {
+          rawCountry = "Niger";
+        } else if (rawCountry.includes("Central African Republic")) {
+          rawCountry = "Central African Republic";
+        } else if (rawCountry.includes("Iran")) {
+          rawCountry = "Iran";
         }
-      },
-      (err) => {
-        console.error(err)
+
+        setLocation({ 
+          country: rawCountry, 
+          city: location.city, 
+          lat: location.lat, 
+          lng: location.lng 
+        })
+
+        // Get Rules/Numbers from YOUR Database
+        await fetchGuideData(rawCountry)
+
+        // Zoom in
+        setTimeout(() => {
+          setZoom(15)
+        }, 500)
+      })
+      .catch((err) => {
+        console.error("Location detection failed:", err)
         setError("Location access denied")
-        // Default to India if permission denied
         fetchGuideData('India')
+      })
+      .finally(() => {
         setLoading(false)
-      }
-    )
+      })
   }
 
-  useEffect(() => { detectLocation() }, [])
+  useEffect(() => { 
+    detectLocation()
+    fetchUpcomingTrip()
+  }, [])
 
   // ... (inside component)
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
+        {/* Upcoming Trip Banner */}
+        {upcomingTrip && (
+          <div className="bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-900 dark:to-indigo-900 rounded-2xl p-6 shadow-lg shadow-violet-600/20 animate-fade-in">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Plane className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-white/80 text-sm font-medium">Upcoming Trip</p>
+                  <h2 className="text-xl font-bold text-white">{upcomingTrip.destination}</h2>
+                  <div className="flex items-center gap-3 mt-1 text-white/70 text-sm">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(upcomingTrip.start_date)} - {formatDate(upcomingTrip.end_date)}
+                    </span>
+                    <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                      {getDaysUntilTrip(upcomingTrip.start_date)} days away
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Trip Emergency Numbers */}
+              {tripEmergencyData && (
+                <div className="flex gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                    <p className="text-white/60 text-xs">Police</p>
+                    <p className="text-white font-bold">{tripEmergencyData.police || '--'}</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                    <p className="text-white/60 text-xs">Ambulance</p>
+                    <p className="text-white font-bold">{tripEmergencyData.ambulance || '--'}</p>
+                  </div>
+                </div>
+              )}
+
+              <Link 
+                to="/checklist"
+                className="flex items-center gap-2 bg-white text-violet-700 px-4 py-2 rounded-xl font-medium hover:bg-white/90 transition-colors"
+              >
+                <Briefcase className="h-4 w-4" />
+                Trip Checklist
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/20 dark:border-slate-800/50 shadow-sm animate-fade-in">
           <div>
@@ -232,7 +303,7 @@ export function Dashboard() {
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">Local Customs</h2>
             </div>
             <div className="space-y-2">
-              {countryData?.rules.map((rule, idx) => (
+              {Array.isArray(countryData?.rules) && countryData.rules.map((rule, idx) => (
                 <div
                   key={idx}
                   className="flex gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors border border-transparent hover:border-amber-100 dark:hover:border-amber-900/30"

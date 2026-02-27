@@ -1,15 +1,25 @@
 const pool = require('../config/db');
 
 const Checklist = {
-    findAllByUserId: async (userId) => {
-        const query = 'SELECT id, item_name as label, is_checked as checked FROM checklists WHERE user_id = $1 ORDER BY id ASC';
-        const result = await pool.query(query, [userId]);
+    findAllByUserId: async (userId, tripId = null) => {
+        let query = 'SELECT id, item_name as label, is_checked as checked, trip_id FROM checklists WHERE user_id = $1';
+        const values = [userId];
+        
+        if (tripId) {
+            query += ' AND trip_id = $2';
+            values.push(tripId);
+        } else {
+            query += ' AND trip_id IS NULL';
+        }
+        
+        query += ' ORDER BY id ASC';
+        const result = await pool.query(query, values);
         return result.rows;
     },
 
-    create: async (userId, label) => {
-        const query = 'INSERT INTO checklists (user_id, item_name, is_checked) VALUES ($1, $2, $3) RETURNING id, item_name as label, is_checked as checked';
-        const result = await pool.query(query, [userId, label, false]);
+    create: async (userId, label, tripId = null) => {
+        const query = 'INSERT INTO checklists (user_id, item_name, is_checked, trip_id) VALUES ($1, $2, $3, $4) RETURNING id, item_name as label, is_checked as checked, trip_id';
+        const result = await pool.query(query, [userId, label, false, tripId]);
         return result.rows[0];
     },
 

@@ -1,23 +1,25 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../services/authService';
-import { Globe, Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
+import { supportedLanguages } from '../utils/countryLanguages';
+import { Globe, Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react'
 
 export function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
-  const [nativeLanguage, setNativeLanguage] = useState('')
+  const [nativeLanguage, setNativeLanguage] = useState('en')
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    const selectedLang = supportedLanguages.find(l => l.code === nativeLanguage)
     const userData = {
       name: name,
       email: email,
       password: password,
-      nativeLanguage: nativeLanguage
+      nativeLanguage: selectedLang ? selectedLang.name : 'English'
     }
 
     try {
@@ -77,14 +79,17 @@ export function SignUpPage() {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Native Language</label>
               <div className="relative">
                 <Languages className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-                <input
-                  type="text"
+                <select
                   value={nativeLanguage}
                   onChange={(e) => setNativeLanguage(e.target.value)}
-                  placeholder="e.g. Hindi, French"
                   required
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-600 py-3 pl-10 pr-4 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                />
+                >
+                  <option value="" disabled>Select your language</option>
+                  {supportedLanguages.map(lang => (
+                    <option key={lang.code} value={lang.code}>{lang.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

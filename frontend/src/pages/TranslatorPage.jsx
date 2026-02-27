@@ -1,19 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { translateText } from '../services/translationService';
+import { getCachedLocation } from '../utils/locationService';
 import { Languages, Volume2, ArrowRightLeft, RefreshCw, Star } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { countryToLanguage, supportedLanguages } from '../utils/countryLanguages'
 
-// Common Phrases (User requested to keep these)
+// Pre-defined accurate translations for common travel phrases
 const quickPhrases = [
-  { id: 1, text: 'Hello', category: 'Greetings' },
-  { id: 2, text: 'Thank you', category: 'Greetings' },
-  { id: 3, text: 'Where is the hospital?', category: 'Emergency' },
-  { id: 4, text: 'I need help', category: 'Emergency' },
-  { id: 5, text: 'How much is this?', category: 'Shopping' },
-  { id: 6, text: 'Water please', category: 'Food' },
+  { id: 1, text: 'Hello', category: 'Greetings', translations: { es: 'Hola', fr: 'Bonjour', de: 'Hallo', ja: 'こんにちは', zh: '你好', ar: 'مرحبا', hi: 'नमस्ते', ru: 'Привет', pt: 'Olá', th: 'สวัสดี' } },
+  { id: 2, text: 'Thank you', category: 'Greetings', translations: { es: 'Gracias', fr: 'Merci', de: 'Danke', ja: 'ありがとう', zh: '谢谢', ar: 'شكرا', hi: 'धन्यवाद', ru: 'Спасибо', pt: 'Obrigado', th: 'ขอบคุณ' } },
+  { id: 3, text: 'Where is the hospital?', category: 'Emergency', translations: { es: '¿Dónde está el hospital?', fr: 'Où est l\'hôpital?', de: 'Wo ist das Krankenhaus?', ja: '病院はどこですか？', zh: '医院在哪里？', ar: 'أين المستشفى؟', hi: 'अस्पताल कहाँ है?', ru: 'Где больница?', pt: 'Onde fica o hospital?', th: 'โรงพยาบาลอยู่ที่ไหน?' } },
+  { id: 4, text: 'I need help', category: 'Emergency', translations: { es: 'Necesito ayuda', fr: 'J\'ai besoin d\'aide', de: 'Ich brauche Hilfe', ja: '助けて', zh: '我需要帮助', ar: 'أحتاج للمساعدة', hi: 'मुझे मदद चाहिए', ru: 'Мне нужна помощь', pt: 'Preciso de ajuda', th: 'ฉันต้องการความช่วยเหลือ' } },
+  { id: 5, text: 'How much is this?', category: 'Shopping', translations: { es: '¿Cuánto cuesta esto?', fr: 'Combien ça coûte?', de: 'Wie viel kostet das?', ja: 'これはいくらですか？', zh: '这个多少钱？', ar: 'كم سعر هذا؟', hi: 'यह कितने का है?', ru: 'Сколько это стоит?', pt: 'Quanto custa isso?', th: 'นี่ราคาเท่าไหร่?' } },
+  { id: 6, text: 'Water please', category: 'Food', translations: { es: 'Agua por favor', fr: 'De l\'eau s\'il vous plaît', de: 'Wasser bitte', ja: '水をください', zh: '请给我水', ar: 'ماء من فضلك', hi: 'पानी दीजिए', ru: 'Вода пожалуйста', pt: 'Água por favor', th: 'น้ำหน่อยครับ' } },
+  { id: 7, text: 'Goodbye', category: 'Greetings', translations: { es: 'Adiós', fr: 'Au revoir', de: 'Auf Wiedersehen', ja: 'さようなら', zh: '再见', ar: 'مع السلامة', hi: 'अलविदा', ru: 'До свидания', pt: 'Adeus', th: 'ลาก่อน' } },
+  { id: 8, text: 'Please', category: 'Greetings', translations: { es: 'Por favor', fr: 'S\'il vous plaît', de: 'Bitte', ja: 'お願いします', zh: '请', ar: 'من فضلك', hi: 'कृपया', ru: 'Пожалуйста', pt: 'Por favor', th: 'กรุณา' } },
+  { id: 9, text: 'Yes', category: 'Greetings', translations: { es: 'Sí', fr: 'Oui', de: 'Ja', ja: 'はい', zh: '是', ar: 'نعم', hi: 'हाँ', ru: 'Да', pt: 'Sim', th: 'ใช่' } },
+  { id: 10, text: 'No', category: 'Greetings', translations: { es: 'No', fr: 'Non', de: 'Nein', ja: 'いいえ', zh: '不', ar: 'لا', hi: 'नहीं', ru: 'Нет', pt: 'Não', th: 'ไม่' } },
+  { id: 11, text: 'I don\'t understand', category: 'Emergency', translations: { es: 'No entiendo', fr: 'Je ne comprends pas', de: 'Ich verstehe nicht', ja: 'わかりません', zh: '我不明白', ar: 'لا أفهم', hi: 'मुझे समझ नहीं आया', ru: 'Я не понимаю', pt: 'Não entendo', th: 'ฉันไม่เข้าใจ' } },
+  { id: 12, text: 'Call the police', category: 'Emergency', translations: { es: 'Llame a la policía', fr: 'Appelez la police', de: 'Rufen Sie die Polizei', ja: '警察を呼んでください', zh: '请报警', ar: 'اتصل بالشرطة', hi: 'पुलिस को बुलाओ', ru: 'Вызовите полицию', pt: 'Chame a polícia', th: 'เรียกตำรวจ' } },
 ]
 
 export function TranslatorPage() {
@@ -34,36 +41,22 @@ export function TranslatorPage() {
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
       const user = JSON.parse(storedUser)
-      // Map user's "Gujarati" string to "gu" code if possible, else default to 'en'
-      // Simple lookup for now:
       const native = user.nativeLanguage?.toLowerCase()
       const found = supportedLanguages.find(l => l.name.toLowerCase() === native)
       if (found) setSourceLang(found.code)
     }
 
-    // B. Detect Location for Target Language
-    // We try to find the "Dashboard" location from localStorage or just detect anew
-    // (Simulating location detection for now as Dashboard saves it usually)
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`)
-        const data = await res.json()
-        const country = data.countryName
-
-        if (country && countryToLanguage[country]) {
-          const detectedLang = countryToLanguage[country]
-          // Only set if different from source
-          if (detectedLang !== sourceLang) {
-            setTargetLang(detectedLang)
-            setUserLocation(country)
-          }
-        }
-      } catch (e) {
-        console.log("Geo-language detection failed", e)
+    // B. Detect Location for Target Language (using cached location)
+    const cachedLocation = getCachedLocation()
+    if (cachedLocation && cachedLocation.country && countryToLanguage[cachedLocation.country]) {
+      const detectedLang = countryToLanguage[cachedLocation.country]
+      if (detectedLang !== sourceLang) {
+        setTargetLang(detectedLang)
+        setUserLocation(cachedLocation.country)
       }
-    })
+    }
 
-    // C. Load Cache
+    // C. Load Translation Cache
     const storedCache = localStorage.getItem('translationCache')
     if (storedCache) setCache(JSON.parse(storedCache))
 
@@ -101,8 +94,8 @@ export function TranslatorPage() {
         localStorage.setItem('translationCache', JSON.stringify(newCache))
       }
     } catch (err) {
-      console.error(err)
-      alert("Translation failed. Check backend.")
+      console.error('Translation error:', err.message)
+      setTranslatedText('[Translation unavailable. Please try again.]')
     } finally {
       setLoading(false)
     }
@@ -236,7 +229,18 @@ export function TranslatorPage() {
                 key={phrase.id}
                 onClick={() => {
                   setInputText(phrase.text)
-                  handleTranslate(phrase.text) // Translate immediately
+                  // Use pre-defined translation if available, otherwise call API
+                  if (phrase.translations && phrase.translations[targetLang]) {
+                    const translated = phrase.translations[targetLang]
+                    setTranslatedText(translated)
+                    // Also save to cache
+                    const cacheKey = `${sourceLang}-${targetLang}-${phrase.text.toLowerCase().trim()}`
+                    const newCache = { ...cache, [cacheKey]: translated }
+                    setCache(newCache)
+                    localStorage.setItem('translationCache', JSON.stringify(newCache))
+                  } else {
+                    handleTranslate(phrase.text) // Fall back to API
+                  }
                 }}
                 className="text-left px-4 py-3 rounded-xl border border-white/60 dark:border-slate-700/50 bg-white/40 dark:bg-slate-800/40 hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:border-sky-200 dark:hover:border-sky-900 backdrop-blur-sm transition-all group shadow-sm"
               >

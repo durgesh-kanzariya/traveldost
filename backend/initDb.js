@@ -74,17 +74,26 @@ const initDb = async () => {
     // ---------------------------------------------------------
     // 5. CHECKLISTS TABLE
     // ---------------------------------------------------------
-    // Updated to match actual DB: user_id (not trip_id), item_name, is_checked (not is_packed), removed category
+    // Updated to support trip-specific checklists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS checklists (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        trip_id INTEGER REFERENCES trips(id) ON DELETE SET NULL,
         item_name VARCHAR(200) NOT NULL,
         is_checked BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     console.log('✅ Table "checklists" is ready.');
+
+    // Add trip_id column if it doesn't exist (for existing databases)
+    try {
+      await pool.query(`ALTER TABLE checklists ADD COLUMN IF NOT EXISTS trip_id INTEGER REFERENCES trips(id) ON DELETE SET NULL`);
+      console.log('✅ Added trip_id column to checklists.');
+    } catch (e) {
+      // Column might already exist
+    }
 
     console.log('\n🎉 Database Initialization Complete! All tables match current production schema.');
     process.exit(0);

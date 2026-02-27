@@ -28,7 +28,7 @@ export function CurrencyConverterPage() {
   const fetchRates = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/currency/rates/${fromCurrency}`)
       const data = await res.json()
 
       const rate = data.rates[toCurrency]

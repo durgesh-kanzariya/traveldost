@@ -4,6 +4,56 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { Shield, Hospital, MapPin, Navigation } from 'lucide-react'
 
+const CACHE_KEY = 'traveldost_safezones_cache'
+const CACHE_RADIUS_KM = 2
+const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    return R * c
+}
+
+const getCachedData = (lat, lng) => {
+    try {
+        const cached = sessionStorage.getItem(CACHE_KEY)
+        if (!cached) return null
+
+        const cacheData = JSON.parse(cached)
+        const { lat: cachedLat, lng: cachedLng, data, timestamp } = cacheData
+        
+        const distance = calculateDistance(lat, lng, cachedLat, cachedLng)
+        const age = Date.now() - timestamp
+
+        if (distance <= CACHE_RADIUS_KM && age < CACHE_MAX_AGE_MS) {
+            console.log('📍 Serving safe zones from cache (distance:', distance.toFixed(2), 'km)')
+            return data
+        }
+    } catch (err) {
+        console.error('Cache read error:', err)
+    }
+    return null
+}
+
+const setCachedData = (lat, lng, data) => {
+    try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+            lat,
+            lng,
+            data,
+            timestamp: Date.now()
+        }))
+    } catch (err) {
+        console.error('Cache write error:', err)
+    }
+}
+
 // --- CUSTOM ICONS ---
 const createIcon = (color, type) => {
     return L.divIcon({
@@ -50,16 +100,22 @@ export function InteractiveMap({ lat, lng }) {
         if (!lat || !lng) return
 
         const fetchSafeZones = async () => {
+            const cached = getCachedData(lat, lng)
+            if (cached) {
+                setSafeZones(cached)
+                return
+            }
+
             setLoading(true)
             try {
-                const query = constructOverpassQuery(lat, lng)
-                const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
-
-                const res = await fetch(url)
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/map/safezones`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lat, lng })
+                })
                 const data = await res.json()
-                const zones = parseOverpassResponse(data)
-
-                setSafeZones(zones)
+                setSafeZones(data)
+                setCachedData(lat, lng, data)
             } catch (err) {
                 console.error("Failed to fetch safe zones:", err)
             } finally {
@@ -134,33 +190,4 @@ export function InteractiveMap({ lat, lng }) {
 
         </div>
     )
-}
-
-// --- OVERPASS API LOGIC EXTRACTED FOR SIMPLICITY ---
-
-function constructOverpassQuery(lat, lng) {
-    return `
-      [out:json][timeout:25];
-      (
-        nwr["amenity"="police"](around:5000, ${lat}, ${lng});
-        nwr["amenity"="hospital"](around:2000, ${lat}, ${lng});
-      );
-      out center;
-    `
-}
-
-function parseOverpassResponse(data) {
-    return data.elements.map(el => {
-        // Handle Nodes (lat/lon) vs Ways/Relations (center.lat/center.lon)
-        const latitude = el.lat || (el.center && el.center.lat);
-        const longitude = el.lon || (el.center && el.center.lon);
-
-        return {
-            id: el.id,
-            lat: latitude,
-            lng: longitude,
-            type: el.tags.amenity,
-            name: el.tags.name || (el.tags.amenity === 'police' ? 'Unnamed Police Station' : 'Unnamed Hospital')
-        }
-    }).filter(z => z.lat && z.lng)
 }

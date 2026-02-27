@@ -1,9 +1,14 @@
 const checklistService = require('../services/checklistService');
 
-// GET /
 const getItems = async (req, res) => {
     try {
-        const items = await checklistService.getItems(req.user.id);
+        let tripId = req.query.trip_id;
+        if (tripId === 'null') {
+            tripId = null;
+        } else if (tripId) {
+            tripId = parseInt(tripId, 10);
+        }
+        const items = await checklistService.getItems(req.user.id, tripId);
         res.json(items);
     } catch (err) {
         console.error(err.message);
@@ -11,11 +16,11 @@ const getItems = async (req, res) => {
     }
 };
 
-// POST /
 const addItem = async (req, res) => {
     try {
-        const { label } = req.body;
-        const newItem = await checklistService.addItem(req.user.id, label);
+        const { label, trip_id } = req.body;
+        const tripId = trip_id === '' ? null : trip_id;
+        const newItem = await checklistService.addItem(req.user.id, label, tripId);
         res.json(newItem);
     } catch (err) {
         console.error(err.message);
@@ -26,7 +31,6 @@ const addItem = async (req, res) => {
     }
 };
 
-// PUT /:id
 const updateItem = async (req, res) => {
     try {
         const { checked } = req.body;
@@ -39,7 +43,6 @@ const updateItem = async (req, res) => {
     }
 };
 
-// DELETE /:id
 const deleteItem = async (req, res) => {
     try {
         const { id } = req.params;

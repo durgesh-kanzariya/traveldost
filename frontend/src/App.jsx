@@ -23,6 +23,7 @@ const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })))
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(module => ({ default: module.UserManagement })))
 const ManageGuides = lazy(() => import('./pages/admin/ManageGuides').then(module => ({ default: module.ManageGuides })))
+const TripsPage = lazy(() => import('./pages/TripsPage').then(module => ({ default: module.TripsPage })))
 
 import { BackToTop } from './components/BackToTop'
 import { AdminRoute } from './components/AdminRoute'
@@ -109,6 +110,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <CurrencyConverterPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/trips"
+            element={
+              <ProtectedRoute>
+                <TripsPage />
               </ProtectedRoute>
             }
           />
