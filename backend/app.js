@@ -11,6 +11,7 @@ const currencyRouter = require('./routes/currency');
 const geocodeRouter = require('./routes/geocode');
 const safezonesRouter = require('./routes/safezones');
 const adminRoutes = require('./routes/adminRoutes');
+const expensesRouter = require('./routes/expenses');
 const authMiddleware = require('./middleware/authMiddleware');
 
 function createApp() {
@@ -26,17 +27,17 @@ function createApp() {
 
   app.use(cors({
     origin: [
-      'http://localhost:5173', 
-      'http://localhost:3000', 
-      'http://localhost:4173', 
-      'http://127.0.0.1:4173', 
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://localhost:4173',
+      'http://127.0.0.1:4173',
       'https://traveldost.vercel.app',
       'https://traveldost-git-main-durgeshjkanzariya.vercel.app',
       'https://traveldost-git-*durgeshjkanzariya.vercel.app'
     ],
     credentials: true
   }));
-  
+
   app.use(express.json());
 
   app.get('/', (req, res) => {
@@ -63,6 +64,7 @@ function createApp() {
   app.use('/api/geocode', geocodeRouter);
   app.use('/api/map', safezonesRouter);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/expenses', expensesRouter);
 
   app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });

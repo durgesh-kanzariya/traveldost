@@ -3,9 +3,22 @@ import { Bell, Lock, User, Save, AlertCircle } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { updateUserProfile, changePassword } from '../services/authService'
+import { SearchableSelect } from '../components/ui/SearchableSelect'
+
+const LANGUAGES = [
+  'Afrikaans', 'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Bengali', 'Bosnian',
+  'Bulgarian', 'Burmese', 'Catalan', 'Chinese (Simplified)', 'Chinese (Traditional)',
+  'Croatian', 'Czech', 'Danish', 'Dutch', 'English', 'Estonian', 'Finnish', 'French',
+  'German', 'Greek', 'Gujarati', 'Hebrew', 'Hindi', 'Hungarian', 'Indonesian', 'Italian',
+  'Japanese', 'Kannada', 'Korean', 'Latvian', 'Lithuanian', 'Macedonian', 'Malay',
+  'Malayalam', 'Marathi', 'Nepali', 'Norwegian', 'Persian', 'Polish', 'Portuguese',
+  'Punjabi', 'Romanian', 'Russian', 'Serbian', 'Sinhala', 'Slovak', 'Slovenian',
+  'Somali', 'Spanish', 'Swahili', 'Swedish', 'Tagalog', 'Tamil', 'Telugu', 'Thai',
+  'Turkish', 'Ukrainian', 'Urdu', 'Uzbek', 'Vietnamese', 'Welsh', 'Zulu'
+]
 
 export function SettingsPage() {
-  const [user, setUser] = useState({ name: '', email: '' })
+  const [user, setUser] = useState({ name: '', email: '', nativeLanguage: 'English', defaultCurrency: 'USD' })
   const [passwords, setPasswords] = useState({ oldPassword: '', newPassword: '' })
   const [settings, setSettings] = useState({
     notifications: true,
@@ -21,7 +34,13 @@ export function SettingsPage() {
     // Load initial user data from localStorage
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      const parsed = JSON.parse(storedUser)
+      setUser({
+        name: parsed.name || '',
+        email: parsed.email || '',
+        nativeLanguage: parsed.native_language || 'English',
+        defaultCurrency: parsed.default_currency || 'USD',
+      })
     }
   }, [])
 
@@ -120,6 +139,31 @@ export function SettingsPage() {
               readOnly
               className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-800 focus:outline-none cursor-not-allowed"
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Native Language</label>
+              <div className="mt-1">
+                <SearchableSelect
+                  value={user.nativeLanguage}
+                  onChange={(val) => setUser({ ...user, nativeLanguage: val })}
+                  options={LANGUAGES}
+                  placeholder="Search language..."
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Default Currency</label>
+              <select
+                value={user.defaultCurrency}
+                onChange={(e) => setUser({ ...user, defaultCurrency: e.target.value })}
+                className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              >
+                {['USD', 'EUR', 'GBP', 'INR', 'JPY', 'AUD', 'CAD'].map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <button
             type="submit"

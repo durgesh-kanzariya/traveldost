@@ -24,6 +24,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(mo
 const UserManagement = lazy(() => import('./pages/admin/UserManagement').then(module => ({ default: module.UserManagement })))
 const ManageGuides = lazy(() => import('./pages/admin/ManageGuides').then(module => ({ default: module.ManageGuides })))
 const TripsPage = lazy(() => import('./pages/TripsPage').then(module => ({ default: module.TripsPage })))
+const ExpenseTrackerPage = lazy(() => import('./pages/ExpenseTrackerPage').then(module => ({ default: module.ExpenseTrackerPage })))
 
 import { BackToTop } from './components/BackToTop'
 import { AdminRoute } from './components/AdminRoute'
@@ -119,6 +120,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <TripsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/expenses"
+            element={
+              <ProtectedRoute>
+                <ExpenseTrackerPage />
               </ProtectedRoute>
             }
           />

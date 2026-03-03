@@ -30,8 +30,8 @@ const login = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { name, email } = req.body;
-        const updatedUser = await authService.updateUserProfile(req.user.id, { name, email });
+        const { name, email, nativeLanguage, defaultCurrency } = req.body;
+        const updatedUser = await authService.updateUserProfile(req.user.id, { name, email, nativeLanguage, defaultCurrency });
         res.json(updatedUser);
     } catch (err) {
         console.error(err.message);

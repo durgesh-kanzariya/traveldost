@@ -14,7 +14,8 @@ import {
   Sun,
   Moon,
   ArrowLeftRight,
-  Plane
+  Plane,
+  DollarSign
 } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 
@@ -40,6 +41,7 @@ export function DashboardLayout({ children }) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Plane, label: 'My Trips', path: '/trips' },
+    { icon: DollarSign, label: 'Expenses', path: '/expenses' },
     { icon: CheckSquare, label: 'Trip Checklist', path: '/checklist' },
     { icon: Globe, label: 'Translator', path: '/translator' },
     { icon: Banknote, label: 'Currency', path: '/currency-converter' },

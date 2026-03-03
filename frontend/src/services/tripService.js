@@ -10,7 +10,7 @@ const getCache = (key) => {
 const setCache = (key, value) => {
     try {
         localStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
-    } catch {}
+    } catch { }
 };
 
 const clearCache = (key) => {
@@ -53,6 +53,17 @@ export const deleteTrip = async (tripId, action = 'move_to_general') => {
         headers: getHeaders(),
     });
     if (!res.ok) throw new Error('Failed');
+    clearCache('trips');
+    return await res.json();
+};
+
+export const updateTrip = async (tripId, tripData) => {
+    const res = await fetch(`${API_URL}/api/trips/${tripId}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(tripData),
+    });
+    if (!res.ok) throw new Error('Failed to update trip');
     clearCache('trips');
     return await res.json();
 };

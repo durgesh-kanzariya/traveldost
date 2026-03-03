@@ -65,8 +65,8 @@ const loginUser = async ({ email, password }) => {
     };
 };
 
-const updateUserProfile = async (userId, { name, email }) => {
-    return await User.update(userId, { name, email });
+const updateUserProfile = async (userId, { name, email, nativeLanguage, defaultCurrency }) => {
+    return await User.update(userId, { name, email, nativeLanguage, defaultCurrency });
 };
 
 const changePassword = async (userId, { oldPassword, newPassword }) => {

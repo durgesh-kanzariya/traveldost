@@ -39,8 +39,8 @@ router.get('/:id/checklist-count', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const userId = req.user.id;
-        const { destination, start_date, end_date, budget, currency } = req.body;
-        const trip = await tripService.createTrip(userId, { destination, start_date, end_date, budget, currency });
+        const { destinations, destination, start_date, end_date, budget, currency } = req.body;
+        const trip = await tripService.createTrip(userId, { destinations, destination, start_date, end_date, budget, currency });
         res.status(201).json(trip);
     } catch (err) {
         console.error(err.message);
@@ -52,8 +52,8 @@ router.put('/:id', async (req, res) => {
     try {
         const userId = req.user.id;
         const tripId = req.params.id;
-        const { destination, start_date, end_date, budget, currency } = req.body;
-        const trip = await tripService.updateTrip(userId, tripId, { destination, start_date, end_date, budget, currency });
+        const { destinations, destination, start_date, end_date, budget, currency } = req.body;
+        const trip = await tripService.updateTrip(userId, tripId, { destinations, destination, start_date, end_date, budget, currency });
         res.json(trip);
     } catch (err) {
         console.error(err.message);
@@ -69,7 +69,7 @@ router.delete('/:id', async (req, res) => {
         const userId = req.user.id;
         const tripId = req.params.id;
         const { checklistAction } = req.query; // 'move_to_general' or 'delete_items'
-        
+
         await tripService.deleteTrip(userId, tripId, checklistAction);
         res.json({ message: 'Trip deleted successfully' });
     } catch (err) {
