@@ -84,24 +84,26 @@ export function Dashboard() {
         )}
 
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/20 dark:border-slate-800/50 shadow-sm animate-fade-in">
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-light tracking-tight text-slate-800 dark:text-slate-100 mb-1">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
               Travel Guide
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-slate-600 dark:text-slate-400">
               Local customs and emergency information for your destination
             </p>
           </div>
-          <button
-            onClick={detectLocation}
-            disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600/90 hover:bg-sky-700 text-white rounded-xl shadow-lg shadow-sky-600/20 backdrop-blur-sm transition-all disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Locating...' : 'Refresh Location'}
-          </button>
-        </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={detectLocation}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600/90 hover:bg-sky-700 text-white rounded-xl shadow-lg shadow-sky-600/20 backdrop-blur-sm transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Locating...' : 'Refresh Location'}
+            </button>
+          </div>
+        </header>
 
         {/* Map Section */}
         {loading ? (
@@ -188,6 +190,7 @@ export function Dashboard() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
+    </DashboardLayout >
   )
 }
