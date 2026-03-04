@@ -112,6 +112,7 @@ export function TranslatorPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
+    </DashboardLayout >
   )
 }
