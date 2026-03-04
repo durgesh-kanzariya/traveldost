@@ -181,7 +181,6 @@ export function EmergencyPage() {
           </div>
         </div>
       </div>
-    </div>
-    </DashboardLayout >
+    </DashboardLayout>
   )
 }
