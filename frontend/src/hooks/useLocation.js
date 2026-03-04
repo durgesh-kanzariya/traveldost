@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { detectAndCacheLocation, getCachedLocation } from '../utils/locationService'
+import { detectAndCacheLocation, getCachedLocation } from '../services/locationService'
 
 const COUNTRY_NORMALIZATION = {
   'United States': 'United States',

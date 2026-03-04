@@ -3,19 +3,18 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { getChecklistItemsByTrip, addChecklistItem, updateChecklistItem, deleteChecklistItem } from '../services/checklistService';
 import { getTrips } from '../services/tripService';
 import { Plus, Trash2, Plane, ListChecks, X } from 'lucide-react'
-import { DashboardLayout } from '../components/DashboardLayout'
-import { Breadcrumbs } from '../components/Breadcrumbs'
+import { DashboardLayout, Breadcrumbs } from '../components/layout'
+import { TripSelector } from '../components/trips'
 
 export function ChecklistPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialTripId = searchParams.get('trip_id')
-  
+
   const [trips, setTrips] = useState([])
   const [selectedTripId, setSelectedTripId] = useState(initialTripId ? parseInt(initialTripId) : null)
   const [checklist, setChecklist] = useState([])
   const [newItem, setNewItem] = useState('')
   const [loading, setLoading] = useState(true)
-  const [showTripSelector, setShowTripSelector] = useState(false)
 
   const fetchTrips = async () => {
     try {
@@ -53,7 +52,6 @@ export function ChecklistPage() {
     } else {
       setSearchParams({})
     }
-    setShowTripSelector(false)
   }
 
   const addItem = async () => {
@@ -120,71 +118,12 @@ export function ChecklistPage() {
               {completedCount} of {checklist.length} items completed
             </p>
           </div>
-          
-          <div className="relative">
-            <button
-              onClick={() => setShowTripSelector(!showTripSelector)}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Plane className="h-4 w-4" />
-              {selectedTrip ? selectedTrip.destination : 'General'}
-              <span className="text-xs bg-sky-100 dark:bg-sky-900/30 px-2 py-0.5 rounded-full">
-                {selectedTrip ? 'Trip' : 'General'}
-              </span>
-            </button>
 
-            {showTripSelector && (
-              <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-10 overflow-hidden">
-                <div className="p-2 border-b border-slate-100 dark:border-slate-700">
-                  <button
-                    onClick={() => handleTripChange(null)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      !selectedTripId 
-                        ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400' 
-                        : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <span className="font-medium">General</span>
-                    <span className="block text-xs text-slate-500">Standalone checklist</span>
-                  </button>
-                </div>
-                {trips.length > 0 ? (
-                  <div className="max-h-48 overflow-y-auto p-2">
-                    {trips.map(trip => (
-                      <button
-                        key={trip.id}
-                        onClick={() => handleTripChange(trip.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                          selectedTripId === trip.id 
-                            ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400' 
-                            : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        <span className="font-medium">{trip.destination}</span>
-                        <span className="block text-xs text-slate-500">
-                          {new Date(trip.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-slate-500 text-sm">
-                    No trips yet
-                  </div>
-                )}
-                <div className="p-2 border-t border-slate-100 dark:border-slate-700">
-                  <Link
-                    to="/trips"
-                    onClick={() => setShowTripSelector(false)}
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Create New Trip
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
+          <TripSelector
+            trips={trips}
+            selectedTripId={selectedTripId}
+            onSelect={handleTripChange}
+          />
         </div>
       </div>
 
@@ -242,8 +181,8 @@ export function ChecklistPage() {
           <p className="text-center text-slate-500 dark:text-slate-400 py-4">Loading...</p>
         ) : checklist.length === 0 ? (
           <p className="text-center text-slate-500 dark:text-slate-400 py-4">
-            {selectedTrip 
-              ? `No items for ${selectedTrip.destination} yet. Add some!` 
+            {selectedTrip
+              ? `No items for ${selectedTrip.destination} yet. Add some!`
               : 'Your list is empty. Add items to start!'}
           </p>
         ) : (
@@ -256,11 +195,10 @@ export function ChecklistPage() {
                 className="h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-sky-600 focus:ring-sky-500 cursor-pointer bg-white dark:bg-slate-700"
               />
               <span
-                className={`flex-1 text-sm break-all ${
-                  item.checked
-                    ? 'text-slate-400 dark:text-slate-600 line-through'
-                    : 'text-slate-700 dark:text-slate-200'
-                }`}
+                className={`flex-1 text-sm break-all ${item.checked
+                  ? 'text-slate-400 dark:text-slate-600 line-through'
+                  : 'text-slate-700 dark:text-slate-200'
+                  }`}
               >
                 {item.label}
               </span>

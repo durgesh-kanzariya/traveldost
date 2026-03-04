@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { getTrips, createTrip, deleteTrip, getChecklistCount } from '../services/tripService'
+import { getTrips, createTrip, deleteTrip, getChecklistCount, updateTrip as apiUpdateTrip } from '../services/tripService'
 
 export function useTrips() {
   const [trips, setTrips] = useState([])
@@ -26,6 +26,11 @@ export function useTrips() {
     await fetchTrips()
   }, [fetchTrips])
 
+  const editTrip = useCallback(async (tripId, formData) => {
+    await apiUpdateTrip(tripId, formData)
+    await fetchTrips()
+  }, [fetchTrips])
+
   const removeTrip = useCallback(async (tripId, deleteOption) => {
     await deleteTrip(tripId, deleteOption)
     await fetchTrips()
@@ -44,6 +49,7 @@ export function useTrips() {
     loading,
     fetchTrips,
     addTrip,
+    editTrip,
     removeTrip,
     getChecklistItemCount
   }

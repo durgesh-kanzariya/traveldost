@@ -1,4 +1,4 @@
-import { API_URL } from './api';
+import api from './api';
 
 const CACHE_DAYS = 7;
 
@@ -17,16 +17,15 @@ const getCache = (key) => {
 const setCache = (key, value) => {
     try {
         localStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
-    } catch {}
+    } catch { }
 };
 
 export const getGuideByCountry = async (countryName) => {
     const cached = getCache(`guide_${countryName}`);
     if (cached) return cached;
-    
-    const res = await fetch(`${API_URL}/api/guides/${countryName}`);
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
+
+    const res = await api.get(`/guides/${countryName}`);
+    const data = res.data;
     setCache(`guide_${countryName}`, data);
     return data;
 };
@@ -34,10 +33,9 @@ export const getGuideByCountry = async (countryName) => {
 export const getAllGuides = async () => {
     const cached = getCache('guides_list');
     if (cached) return cached;
-    
-    const res = await fetch(`${API_URL}/api/guides/list`);
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
+
+    const res = await api.get('/guides/list');
+    const data = res.data;
     setCache('guides_list', data);
     return data;
 };

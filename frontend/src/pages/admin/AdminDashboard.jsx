@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AdminLayout } from '../../components/AdminLayout'
+import { AdminLayout } from '../../components/layout/AdminLayout'
 import { getSystemStats } from '../../services/adminService'
 import { Users, BookOpen } from 'lucide-react'
 

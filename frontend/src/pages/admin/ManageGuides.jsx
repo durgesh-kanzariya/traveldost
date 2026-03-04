@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { AdminLayout } from '../../components/AdminLayout'
+import { AdminLayout } from '../../components/layout'
 import { getAllGuides, createGuide, updateGuide, deleteGuide } from '../../services/adminService'
-import { GuideFormModal } from '../../components/GuideFormModal'
+import { GuideFormModal } from '../../components/guides'
 import { Plus, Pencil, Trash2, Search, MapPin } from 'lucide-react'
 
 export function ManageGuides() {

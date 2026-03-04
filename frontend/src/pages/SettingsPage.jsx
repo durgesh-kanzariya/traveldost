@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Bell, Lock, User, Save, AlertCircle } from 'lucide-react'
-import { DashboardLayout } from '../components/DashboardLayout'
-import { Breadcrumbs } from '../components/Breadcrumbs'
+import { DashboardLayout, Breadcrumbs } from '../components/layout'
 import { updateUserProfile, changePassword } from '../services/authService'
-import { SearchableSelect } from '../components/ui/SearchableSelect'
+import { SearchableSelect } from '../components/ui'
 
 const LANGUAGES = [
   'Afrikaans', 'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Bengali', 'Bosnian',

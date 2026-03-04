@@ -1,4 +1,4 @@
-import { API_URL, getHeaders } from './api';
+import api from './api';
 
 const getCache = (key) => {
     try {
@@ -10,7 +10,7 @@ const getCache = (key) => {
 const setCache = (key, value) => {
     try {
         localStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
-    } catch {}
+    } catch { }
 };
 
 const clearCache = () => {
@@ -18,13 +18,12 @@ const clearCache = () => {
 };
 
 const getChecklistItems = async (tripId) => {
-    let url = `${API_URL}/api/checklist`;
+    let url = '/checklist';
     if (tripId === null) url += '?trip_id=null';
     else if (tripId) url += `?trip_id=${tripId}`;
-    
-    const res = await fetch(url, { headers: getHeaders() });
-    if (!res.ok) throw new Error('Failed');
-    return await res.json();
+
+    const res = await api.get(url);
+    return res.data;
 };
 
 export const getChecklistItemsByTrip = async (tripId) => {
@@ -39,33 +38,19 @@ export const getChecklistItemsByTrip = async (tripId) => {
 };
 
 export const addChecklistItem = async (label, tripId) => {
-    const res = await fetch(`${API_URL}/api/checklist`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({ label, trip_id: tripId }),
-    });
-    if (!res.ok) throw new Error('Failed');
+    const res = await api.post('/checklist', { label, trip_id: tripId });
     clearCache();
-    return await res.json();
+    return res.data;
 };
 
 export const updateChecklistItem = async (id, checked) => {
-    const res = await fetch(`${API_URL}/api/checklist/${id}`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify({ checked }),
-    });
-    if (!res.ok) throw new Error('Failed');
+    const res = await api.put(`/checklist/${id}`, { checked });
     clearCache();
-    return await res.json();
+    return res.data;
 };
 
 export const deleteChecklistItem = async (id) => {
-    const res = await fetch(`${API_URL}/api/checklist/${id}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-    });
-    if (!res.ok) throw new Error('Failed');
+    const res = await api.delete(`/checklist/${id}`);
     clearCache();
-    return await res.json();
+    return res.data;
 };

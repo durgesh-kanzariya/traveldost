@@ -1,14 +1,10 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-// Layout/Landing Components (from ./components/)
-import { Navbar } from './components/Navbar'
-import { HeroSection } from './components/HeroSection'
-import { FeaturesSection } from './components/FeaturesSection'
-import { HowItWorksSection } from './components/HowItWorksSection'
-import { AboutContactSection } from './components/AboutContactSection'
-import { Footer } from './components/Footer'
-import { ProtectedRoute } from './components/ProtectedRoute' // Ensure this file exists!
+// Layout/Landing Components
+import { Navbar, Footer, BackToTop } from './components/layout'
+import { ProtectedRoute, AdminRoute, AdminErrorBoundary } from './components/auth'
+import { HeroSection, FeaturesSection, HowItWorksSection, AboutContactSection } from './components/sections'
 
 // Lazy load Page Components (from ./pages/)
 const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })))
@@ -26,9 +22,7 @@ const ManageGuides = lazy(() => import('./pages/admin/ManageGuides').then(module
 const TripsPage = lazy(() => import('./pages/TripsPage').then(module => ({ default: module.TripsPage })))
 const ExpenseTrackerPage = lazy(() => import('./pages/ExpenseTrackerPage').then(module => ({ default: module.ExpenseTrackerPage })))
 
-import { BackToTop } from './components/BackToTop'
-import { AdminRoute } from './components/AdminRoute'
-import { AdminErrorBoundary } from './components/AdminErrorBoundary'
+
 
 function LandingPage() {
   return (

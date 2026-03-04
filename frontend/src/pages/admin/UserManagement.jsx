@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AdminLayout } from '../../components/AdminLayout'
+import { AdminLayout } from '../../components/layout'
 import { getAllUsers, deleteUser } from '../../services/adminService'
 import { Trash2, Search, User, Shield } from 'lucide-react'
 
@@ -122,8 +122,8 @@ export function UserManagement() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${user.role === 'admin'
-                                                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-                                                    : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                                                : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                                                 }`}>
                                                 {user.role === 'admin' ? <Shield className="mr-1 h-3 w-3" /> : <User className="mr-1 h-3 w-3" />}
                                                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}

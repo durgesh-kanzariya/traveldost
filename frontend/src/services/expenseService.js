@@ -1,32 +1,22 @@
-import { API_URL, getHeaders } from './api';
+import api from './api';
 
 export const getExpenses = async (tripId) => {
-    const res = await fetch(`${API_URL}/api/expenses/trip/${tripId}`, { headers: getHeaders() });
-    if (!res.ok) throw new Error('Failed to fetch expenses');
-    return await res.json();
+    const res = await api.get(`/expenses/trip/${tripId}`);
+    return res.data;
 };
 
 export const getExpenseSummary = async (tripId) => {
-    const res = await fetch(`${API_URL}/api/expenses/trip/${tripId}/summary`, { headers: getHeaders() });
-    if (!res.ok) throw new Error('Failed to fetch summary');
-    return await res.json();
+    const res = await api.get(`/expenses/trip/${tripId}/summary`);
+    return res.data;
 };
 
 export const addExpense = async (expenseData) => {
-    const res = await fetch(`${API_URL}/api/expenses`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(expenseData),
-    });
-    if (!res.ok) throw new Error('Failed to add expense');
-    return await res.json();
+    const res = await api.post('/expenses', expenseData);
+    return res.data;
 };
 
 export const deleteExpense = async (id) => {
-    const res = await fetch(`${API_URL}/api/expenses/${id}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-    });
-    if (!res.ok) throw new Error('Failed to delete expense');
-    return await res.json();
+    const res = await api.delete(`/expenses/${id}`);
+    return res.data;
 };
+

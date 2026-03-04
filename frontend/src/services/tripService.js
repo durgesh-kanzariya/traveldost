@@ -1,4 +1,4 @@
-import { API_URL, getHeaders } from './api';
+import api from './api';
 
 const getCache = (key) => {
     try {
@@ -19,9 +19,8 @@ const clearCache = (key) => {
 
 export const getTrips = async () => {
     try {
-        const res = await fetch(`${API_URL}/api/trips`, { headers: getHeaders() });
-        if (!res.ok) throw new Error('Failed');
-        const data = await res.json();
+        const res = await api.get('/trips');
+        const data = res.data;
         setCache('trips', data);
         return data;
     } catch {
@@ -31,46 +30,32 @@ export const getTrips = async () => {
 
 export const getUpcomingTrip = async () => {
     try {
-        const res = await fetch(`${API_URL}/api/trips/upcoming`, { headers: getHeaders() });
-        return res.ok ? await res.json() : null;
+        const res = await api.get('/trips/upcoming');
+        return res.data;
     } catch { return null; }
 };
 
 export const createTrip = async (tripData) => {
-    const res = await fetch(`${API_URL}/api/trips`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(tripData),
-    });
-    if (!res.ok) throw new Error('Failed');
+    const res = await api.post('/trips', tripData);
     clearCache('trips');
-    return await res.json();
+    return res.data;
 };
 
 export const deleteTrip = async (tripId, action = 'move_to_general') => {
-    const res = await fetch(`${API_URL}/api/trips/${tripId}?checklistAction=${action}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-    });
-    if (!res.ok) throw new Error('Failed');
+    const res = await api.delete(`/trips/${tripId}?checklistAction=${action}`);
     clearCache('trips');
-    return await res.json();
+    return res.data;
 };
 
 export const updateTrip = async (tripId, tripData) => {
-    const res = await fetch(`${API_URL}/api/trips/${tripId}`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify(tripData),
-    });
-    if (!res.ok) throw new Error('Failed to update trip');
+    const res = await api.put(`/trips/${tripId}`, tripData);
     clearCache('trips');
-    return await res.json();
+    return res.data;
 };
 
 export const getChecklistCount = async (tripId) => {
     try {
-        const res = await fetch(`${API_URL}/api/trips/${tripId}/checklist-count`, { headers: getHeaders() });
-        return res.ok ? (await res.json()).count : 0;
+        const res = await api.get(`/trips/${tripId}/checklist-count`);
+        return res.data.count;
     } catch { return 0; }
 };
