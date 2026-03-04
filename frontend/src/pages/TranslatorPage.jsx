@@ -35,7 +35,7 @@ export function TranslatorPage() {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
-          <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-xl border border-white/50 dark:border-slate-800/50 shadow-sm">
+          <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="p-2 rounded-lg border border-slate-300 dark:bg-slate-800 dark:text-white outline-none">
               {supportedLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
             </select>
@@ -53,14 +53,14 @@ export function TranslatorPage() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Type here..."
-                className="w-full h-48 p-4 text-lg rounded-2xl border border-white/50 dark:bg-slate-800/60 outline-none resize-none dark:text-white"
+                className="w-full h-48 p-4 text-lg rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/60 outline-none resize-none dark:text-white focus:border-sky-400 transition-colors"
               />
               {inputText && (
                 <button onClick={() => setInputText('')} className="absolute top-4 right-4 text-slate-400">✕</button>
               )}
             </div>
 
-            <div className="relative bg-slate-50/50 dark:bg-slate-800/50 rounded-2xl border border-white/50 h-48 p-4 flex flex-col justify-between shadow-inner">
+            <div className="relative bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 h-48 p-4 flex flex-col justify-between">
               {loading ? (
                 <div className="flex items-center justify-center h-full text-sky-600 gap-2">
                   <RefreshCw className="h-6 w-6 animate-spin" />
@@ -102,7 +102,7 @@ export function TranslatorPage() {
                 <button
                   key={phrase.id}
                   onClick={() => setInputAndTranslate(phrase.text, phrase.translations?.[targetLang])}
-                  className="text-left px-4 py-3 rounded-xl border border-white/60 dark:bg-slate-800/40 hover:bg-sky-50 transition-all group shadow-sm"
+                  className="text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800/40 hover:bg-sky-50 dark:hover:bg-sky-900/20 hover:border-sky-200 dark:hover:border-sky-800 transition-all group shadow-sm"
                 >
                   <span className="block text-xs font-semibold text-slate-400 dark:text-slate-500 group-hover:text-sky-600 mb-1">{phrase.category}</span>
                   <span className="font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">{phrase.text}</span>
@@ -112,7 +112,6 @@ export function TranslatorPage() {
           </div>
         </div>
       </div>
-    </div>
-    </DashboardLayout >
+    </DashboardLayout>
   )
 }
