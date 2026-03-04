@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../services/authService';
-import { Globe, Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
+import { Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -49,9 +49,6 @@ export function LoginPage() {
 
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 shadow-xl dark:shadow-slate-900/50">
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Globe className="h-10 w-10 text-sky-600 dark:text-sky-500" />
-            </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome Back</h1>
             <p className="text-slate-600 dark:text-slate-400">Sign in to continue your journey</p>
           </div>

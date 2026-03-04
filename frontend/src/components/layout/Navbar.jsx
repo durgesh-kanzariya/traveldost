@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Globe, Menu, X, Sun, Moon } from 'lucide-react'
+import { Menu, X, Sun, Moon } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 
 export function Navbar() {
@@ -32,7 +32,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-2">
-          <Globe className="h-8 w-8 text-sky-600 dark:text-sky-400" />
+          <img src="/logo.jpeg" alt="TravelDost Logo" className="w-10 h-10 object-cover rounded-md" />
           <span className="text-xl font-bold text-slate-900 dark:text-white">TravelDost</span>
         </Link>
 

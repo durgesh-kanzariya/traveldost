@@ -60,10 +60,12 @@ export function AdminLayout({ children }) {
                         }`}
                 >
                     <div className="flex h-full flex-col">
-                        {/* Logo */}
-                        <div className="flex h-16 items-center px-6 border-b border-slate-100 dark:border-slate-800">
-                            <span className="text-2xl font-bold text-sky-600 dark:text-sky-400">TravelDost</span>
-                            <span className="ml-2 text-xs bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded font-bold">ADMIN</span>
+                        <div className="flex h-16 items-center px-4 border-b border-slate-100 dark:border-slate-800">
+                            <Link to="/admin/dashboard" className="flex items-center gap-2">
+                                <img src="/logo.jpeg" alt="TravelDost Logo" className="w-8 h-8 object-cover rounded-md shrink-0" />
+                                <span className="text-lg font-bold text-sky-600 dark:text-sky-400 truncate">TravelDost</span>
+                                <span className="shrink-0 text-xs bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                            </Link>
                         </div>
 
                         {/* Navigation Links */}

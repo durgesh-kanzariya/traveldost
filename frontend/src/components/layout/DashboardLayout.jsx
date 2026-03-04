@@ -67,8 +67,11 @@ export function DashboardLayout({ children }) {
         >
           <div className="flex h-full flex-col">
             {/* Logo */}
-            <div className="flex h-16 items-center px-6">
-              <span className="text-2xl font-bold text-sky-600">TravelDost</span>
+            <div className="flex shrink-0 h-16 items-center px-6 border-b border-slate-100 dark:border-slate-800">
+              <Link to="/dashboard" className="flex items-center gap-2 mt-2">
+                <img src="/logo.jpeg" alt="TravelDost Logo" className="w-10 h-10 object-cover rounded-md" />
+                <span className="text-2xl font-bold text-sky-600 dark:text-sky-500">TravelDost</span>
+              </Link>
             </div>
 
             {/* Navigation Links */}

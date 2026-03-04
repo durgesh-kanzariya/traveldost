@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../services/authService';
 import { supportedLanguages } from '../utils/countryLanguages';
-import { Globe, Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react'
+import { Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react'
 
 export function SignUpPage() {
   const [email, setEmail] = useState('')
@@ -51,9 +51,6 @@ export function SignUpPage() {
 
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 shadow-xl dark:shadow-slate-900/50">
           <div className="flex flex-col items-center gap-2">
-            <Link to="/" className="flex items-center gap-2">
-              <Globe className="h-10 w-10 text-sky-600 dark:text-sky-500" />
-            </Link>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Create Account</h1>
             <p className="text-slate-600 dark:text-slate-400">Join us to explore the world safely</p>
           </div>
