@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AdminLayout } from '../../components/layout'
-import { getAllGuides, createGuide, updateGuide, deleteGuide } from '../../services/adminService'
+import { getAllGuidesAdmin, createGuide, updateGuide, deleteGuide } from '../../services/adminService'
 import { GuideFormModal } from '../../components/guides'
 import { Plus, Pencil, Trash2, Search, MapPin } from 'lucide-react'
 
@@ -20,7 +20,7 @@ export function ManageGuides() {
     const fetchGuides = async () => {
         try {
             setLoading(true)
-            const data = await getAllGuides()
+            const data = await getAllGuidesAdmin()
             setGuides(data)
         } catch (err) {
             setError('Failed to load guides.')

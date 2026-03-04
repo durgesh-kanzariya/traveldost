@@ -20,7 +20,7 @@ export const getSystemStats = async () => {
 
 // --- GUIDE MANAGEMENT ---
 
-export const getAllGuides = async () => {
+export const getAllGuidesAdmin = async () => {
     const response = await api.get('/admin/guides');
     return response.data;
 }
