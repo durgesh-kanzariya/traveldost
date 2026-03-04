@@ -17,7 +17,6 @@ export function CurrencyConverterPage() {
   } = useCurrency()
 
   return (
-  return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
