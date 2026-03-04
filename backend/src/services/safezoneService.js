@@ -28,7 +28,7 @@ const parseOverpassResponse = (data) => {
 
 exports.getSafeZones = async (lat, lng, policeRadius = 5000, hospitalRadius = 2000) => {
     const query = constructOverpassQuery(lat, lng, policeRadius, hospitalRadius);
-    const url = `https://overpass-api.de/api/interpreter`;
+    const url = `https://lz4.overpass-api.de/api/interpreter`;
 
     try {
         const response = await axios.post(url, `data=${encodeURIComponent(query)}`, {
@@ -36,8 +36,13 @@ exports.getSafeZones = async (lat, lng, policeRadius = 5000, hospitalRadius = 20
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'User-Agent': 'TravelDost/1.0 (https://github.com/traveldost)'
             },
-            timeout: 10000
+            timeout: 25000
         });
+
+        if (typeof response.data === 'string') {
+            console.error('Overpass API returned HTML/String instead of JSON. Likely rate limited or timeout.', response.data.substring(0, 200));
+            throw new Error('Overpass API rate limit or timeout');
+        }
 
         if (!response.data || !response.data.elements) {
             throw new Error('Invalid response format from Overpass API');
