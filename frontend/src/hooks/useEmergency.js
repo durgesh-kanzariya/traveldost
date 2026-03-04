@@ -28,16 +28,23 @@ export function useEmergency() {
         }
     }, [])
 
-    const detectLocation = useCallback(async () => {
+    const detectLocation = useCallback(async (forceRefresh = false) => {
         setLoading(true)
         setLocationError(null)
         try {
-            const cachedLocation = getCachedLocation()
-            if (cachedLocation) {
-                await fetchEmergencyData(cachedLocation.country)
-                return
+            if (!forceRefresh) {
+                const cachedLocation = getCachedLocation()
+                if (cachedLocation) {
+                    await fetchEmergencyData(cachedLocation.country)
+                    return
+                }
             }
-            const location = await detectAndCacheLocation()
+
+            if (forceRefresh) {
+                sessionStorage.removeItem('traveldost_safezones_cache');
+            }
+
+            const location = await detectAndCacheLocation(forceRefresh)
             await fetchEmergencyData(location.country)
         } catch (err) {
             console.error("Location detection failed:", err)

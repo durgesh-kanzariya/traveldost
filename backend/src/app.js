@@ -26,15 +26,26 @@ function createApp() {
   app.use(globalLimiter);
 
   app.use(cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://localhost:4173',
-      'http://127.0.0.1:4173',
-      'https://traveldost.vercel.app',
-      'https://traveldost-git-main-durgeshjkanzariya.vercel.app',
-      'https://traveldost-git-*durgeshjkanzariya.vercel.app'
-    ],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+
+      const allowedProduction = [
+        'https://traveldost.vercel.app',
+        'https://traveldost-git-main-durgeshjkanzariya.vercel.app',
+      ];
+
+      // Allow any localhost / 127.0.0.1 port in development
+      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+      // Allow any *.vercel.app subdomain for Vercel preview deployments
+      const isVercel = origin.endsWith('.vercel.app');
+
+      if (isLocalhost || isVercel || allowedProduction.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    },
     credentials: true
   }));
 

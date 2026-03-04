@@ -17,32 +17,43 @@ export function TranslatorPage() {
     handleTranslate,
     handleSpeak,
     handleSwap,
-    setInputAndTranslate
+    setInputAndTranslate,
+    refreshLocation
   } = useTranslator()
 
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <Breadcrumbs />
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl flex items-center gap-3 mt-2">
-            <Languages className="h-8 w-8 text-sky-600 dark:text-sky-400" />
-            AI Translator
-          </h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">
-            {userLocation ? `Detected location: ${userLocation}. Translating to local language.` : 'Translate text instantly.'}
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <Breadcrumbs />
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl flex items-center gap-3 mt-2">
+              <Languages className="h-8 w-8 text-sky-600 dark:text-sky-400" />
+              AI Translator
+            </h1>
+            <p className="mt-2 text-slate-600 dark:text-slate-400">
+              {userLocation ? `Detected location: ${userLocation}. Translating to local language.` : 'Translate text instantly.'}
+            </p>
+          </div>
+          <button
+            onClick={refreshLocation}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh Location
+          </button>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="p-2 rounded-lg border border-slate-300 dark:bg-slate-800 dark:text-white outline-none">
+            <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white outline-none focus:border-sky-500 transition-colors">
               {supportedLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
             </select>
             <button onClick={handleSwap} className="p-2 rounded-full hover:bg-white/50 transition-colors">
               <ArrowRightLeft className="h-5 w-5 text-slate-500" />
             </button>
-            <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="p-2 rounded-lg border border-slate-300 dark:bg-slate-800 dark:text-sky-300 outline-none">
+            <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-sky-300 outline-none focus:border-sky-500 transition-colors">
               {supportedLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
             </select>
           </div>

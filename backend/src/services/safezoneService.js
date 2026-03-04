@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 const constructOverpassQuery = (lat, lng, policeRadius, hospitalRadius) => {
     return `
       [out:json][timeout:25];
@@ -26,13 +28,24 @@ const parseOverpassResponse = (data) => {
 
 exports.getSafeZones = async (lat, lng, policeRadius = 5000, hospitalRadius = 2000) => {
     const query = constructOverpassQuery(lat, lng, policeRadius, hospitalRadius);
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-    const response = await fetch(url);
+    const url = `https://overpass-api.de/api/interpreter`;
 
-    if (!response.ok) {
+    try {
+        const response = await axios.post(url, `data=${encodeURIComponent(query)}`, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'TravelDost/1.0 (https://github.com/traveldost)'
+            },
+            timeout: 10000
+        });
+
+        if (!response.data || !response.data.elements) {
+            throw new Error('Invalid response format from Overpass API');
+        }
+
+        return parseOverpassResponse(response.data);
+    } catch (error) {
+        console.error('Overpass API Error Details:', error.response?.data || error.message);
         throw new Error('Failed to fetch safe zones from Overpass API');
     }
-
-    const data = await response.json();
-    return parseOverpassResponse(data);
 };

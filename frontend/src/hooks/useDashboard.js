@@ -48,12 +48,16 @@ export function useDashboard() {
         }
     }, [])
 
-    const detectLocation = useCallback(() => {
+    const detectLocation = useCallback((forceRefresh = false) => {
         setLoading(true)
         setZoom(4)
         setError(null)
 
-        detectAndCacheLocation()
+        if (forceRefresh) {
+            sessionStorage.removeItem('traveldost_safezones_cache');
+        }
+
+        detectAndCacheLocation(forceRefresh)
             .then(async (detectedLocation) => {
                 let rawCountry = detectedLocation.country;
 

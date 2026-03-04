@@ -1,3 +1,5 @@
+import api from './api';
+
 const LOCATION_CACHE_KEY = 'traveldost_user_location';
 const LOCATION_CACHE_DURATION = 24 * 60 * 60 * 1000;
 
@@ -29,10 +31,12 @@ export const setCachedLocation = (location) => {
     }
 };
 
-export const detectAndCacheLocation = async () => {
-    const cached = getCachedLocation();
-    if (cached) {
-        return cached;
+export const detectAndCacheLocation = async (forceRefresh = false) => {
+    if (!forceRefresh) {
+        const cached = getCachedLocation();
+        if (cached) {
+            return cached;
+        }
     }
 
     return new Promise((resolve, reject) => {
@@ -45,10 +49,10 @@ export const detectAndCacheLocation = async () => {
             async (position) => {
                 try {
                     const { latitude, longitude } = position.coords;
-                    const response = await fetch(
-                        `${import.meta.env.VITE_API_URL}/api/geocode/reverse?lat=${latitude}&lng=${longitude}`
+                    const response = await api.get(
+                        `/geocode/reverse?lat=${latitude}&lng=${longitude}`
                     );
-                    const data = await response.json();
+                    const data = response.data;
 
                     const location = {
                         lat: latitude,

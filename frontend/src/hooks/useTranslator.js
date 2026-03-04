@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { translateText, getCachedLocation } from '../services'
+import { translateText, getCachedLocation, detectAndCacheLocation } from '../services'
 import { countryToLanguage, supportedLanguages } from '../utils/countryLanguages'
 
 export function useTranslator() {
@@ -26,10 +26,30 @@ export function useTranslator() {
         const cachedLocation = getCachedLocation()
         if (cachedLocation && cachedLocation.country && countryToLanguage[cachedLocation.country]) {
             const detectedLang = countryToLanguage[cachedLocation.country]
-            if (detectedLang !== sourceLang) {
+            // Only set if the detected language is supported
+            if (supportedLanguages.some(l => l.code === detectedLang) && detectedLang !== sourceLang) {
                 setTargetLang(detectedLang)
                 setUserLocation(cachedLocation.country)
             }
+        }
+    }, [])
+
+    const refreshLocation = useCallback(async () => {
+        try {
+            setLoading(true)
+            // Force refresh location
+            const location = await detectAndCacheLocation(true)
+            if (location && location.country && countryToLanguage[location.country]) {
+                const detectedLang = countryToLanguage[location.country]
+                if (supportedLanguages.some(l => l.code === detectedLang)) {
+                    setTargetLang(detectedLang) // Auto-switch target language
+                    setUserLocation(location.country)
+                }
+            }
+        } catch (err) {
+            console.error("Location refresh failed:", err)
+        } finally {
+            setLoading(false)
         }
     }, [])
 
@@ -101,6 +121,7 @@ export function useTranslator() {
         handleTranslate,
         handleSpeak,
         handleSwap,
-        setInputAndTranslate
+        setInputAndTranslate,
+        refreshLocation
     }
 }

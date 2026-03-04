@@ -44,16 +44,16 @@ export function CurrencyConverterPage() {
             <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">From</label>
-                <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)} className="w-full rounded-xl border border-slate-300 dark:bg-slate-800 dark:text-white p-3 font-medium outline-none">
+                <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white p-3 font-medium outline-none focus:border-sky-500 transition-colors">
                   {currencies.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
                 </select>
               </div>
-              <button onClick={handleSwap} className="mt-6 rounded-full bg-slate-100 dark:bg-slate-800 p-3 text-slate-600 hover:text-sky-600 transition-colors">
+              <button onClick={handleSwap} className="mt-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 text-slate-600 hover:text-sky-600 transition-colors">
                 <ArrowRightLeft className="h-5 w-5" />
               </button>
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">To</label>
-                <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)} className="w-full rounded-xl border border-slate-300 dark:bg-slate-800 dark:text-white p-3 font-medium outline-none">
+                <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white p-3 font-medium outline-none focus:border-sky-500 transition-colors">
                   {currencies.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
                 </select>
               </div>

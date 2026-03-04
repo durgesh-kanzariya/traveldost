@@ -95,7 +95,7 @@ export function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={detectLocation}
+              onClick={() => detectLocation(true)}
               disabled={loading}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600/90 hover:bg-sky-700 text-white rounded-xl shadow-lg shadow-sky-600/20 backdrop-blur-sm transition-all disabled:opacity-50"
             >
