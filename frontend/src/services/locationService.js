@@ -1,4 +1,5 @@
 import api from './api';
+import axios from 'axios';
 
 const LOCATION_CACHE_KEY = 'traveldost_user_location';
 const LOCATION_CACHE_DURATION = 24 * 60 * 60 * 1000;
@@ -49,8 +50,8 @@ export const detectAndCacheLocation = async (forceRefresh = false) => {
             async (position) => {
                 try {
                     const { latitude, longitude } = position.coords;
-                    const response = await api.get(
-                        `/geocode/reverse?lat=${latitude}&lng=${longitude}`
+                    const response = await axios.get(
+                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
                     );
                     const data = response.data;
 
