@@ -38,8 +38,8 @@ export function SettingsPage() {
         firstName: parsed.firstName || parsed.first_name || '',
         lastName: parsed.lastName || parsed.last_name || '',
         email: parsed.email || '',
-        nativeLanguage: parsed.native_language || 'English',
-        defaultCurrency: parsed.default_currency || 'USD',
+        nativeLanguage: parsed.nativeLanguage || parsed.native_language || 'English',
+        defaultCurrency: parsed.defaultCurrency || parsed.default_currency || 'USD',
       })
     }
   }, [])
