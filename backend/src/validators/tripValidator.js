@@ -4,7 +4,7 @@ exports.tripRules = [
     check('destinations', 'Destinations must be a non-empty array')
         .isArray({ min: 1 }),
     check('destinations.*', 'Destination names must be strings').isString().trim().escape(),
-    check('destination', 'Primary destination is required').notEmpty().isString().trim().escape(),
+    check('destination', 'Primary destination is required').optional({ nullable: true }).isString().trim().escape(),
     check('start_date', 'Valid start date is required').isISO8601(),
     check('end_date', 'Valid end date is required').isISO8601()
         .custom((value, { req }) => {

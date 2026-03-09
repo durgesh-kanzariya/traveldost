@@ -8,7 +8,14 @@ export function TripForm({ initialData, onSubmit, countries, countriesLoading, s
         start_date: '',
         end_date: '',
         budget: '',
-        currency: 'USD'
+        currency: (() => {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                return user?.default_currency || user?.defaultCurrency || 'USD';
+            } catch (e) {
+                return 'USD';
+            }
+        })()
     })
 
     const handleSubmit = (e) => {

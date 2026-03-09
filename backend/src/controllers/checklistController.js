@@ -18,9 +18,9 @@ const getItems = async (req, res) => {
 
 const addItem = async (req, res) => {
     try {
-        const { label, trip_id } = req.body;
-        const tripId = trip_id === '' ? null : trip_id;
-        const newItem = await checklistService.addItem(req.user.id, label, tripId);
+        const { label, tripId } = req.body;
+        const finalTripId = tripId === '' ? null : tripId;
+        const newItem = await checklistService.addItem(req.user.id, label, finalTripId);
         res.json(newItem);
     } catch (err) {
         console.error(err.message);

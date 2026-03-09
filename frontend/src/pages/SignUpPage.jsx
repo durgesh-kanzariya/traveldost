@@ -28,8 +28,9 @@ export function SignUpPage() {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      if (data.user.nativeLanguage) {
-        localStorage.setItem('nativeLanguage', data.user.nativeLanguage);
+      const nativeLang = data.user.native_language || data.user.nativeLanguage;
+      if (nativeLang) {
+        localStorage.setItem('nativeLanguage', nativeLang);
       }
 
       navigate('/dashboard');

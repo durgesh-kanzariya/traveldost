@@ -13,6 +13,8 @@ const validateRequest = (req, res, next) => {
             message: err.msg
         }));
 
+        console.error('Validation Failed:', formattedErrors);
+
         return res.status(400).json({
             message: 'Validation Failed',
             errors: formattedErrors

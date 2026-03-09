@@ -15,23 +15,33 @@ export function useTranslator() {
     })
 
     useEffect(() => {
+        let initialSourceLang = 'en'
         const storedUser = localStorage.getItem('user')
         if (storedUser) {
             const user = JSON.parse(storedUser)
-            const native = user.nativeLanguage?.toLowerCase()
+            const native = (user.native_language || user.nativeLanguage || 'English').toLowerCase()
             const found = supportedLanguages.find(l => l.name.toLowerCase() === native)
-            if (found) setSourceLang(found.code)
-        }
-
-        const cachedLocation = getCachedLocation()
-        if (cachedLocation && cachedLocation.country && countryToLanguage[cachedLocation.country]) {
-            const detectedLang = countryToLanguage[cachedLocation.country]
-            // Only set if the detected language is supported
-            if (supportedLanguages.some(l => l.code === detectedLang) && detectedLang !== sourceLang) {
-                setTargetLang(detectedLang)
-                setUserLocation(cachedLocation.country)
+            if (found) {
+                initialSourceLang = found.code
+                setSourceLang(initialSourceLang)
             }
         }
+
+        const initLocation = async () => {
+            let cachedLocation = getCachedLocation()
+            if (!cachedLocation) {
+                cachedLocation = await detectAndCacheLocation()
+            }
+            if (cachedLocation && cachedLocation.country && countryToLanguage[cachedLocation.country]) {
+                const detectedLang = countryToLanguage[cachedLocation.country]
+                // Only set if the detected language is supported and not the same as source
+                if (supportedLanguages.some(l => l.code === detectedLang) && detectedLang !== initialSourceLang) {
+                    setTargetLang(detectedLang)
+                    setUserLocation(cachedLocation.country)
+                }
+            }
+        }
+        initLocation()
     }, [])
 
     const refreshLocation = useCallback(async () => {

@@ -38,7 +38,7 @@ export const getChecklistItemsByTrip = async (tripId) => {
 };
 
 export const addChecklistItem = async (label, tripId) => {
-    const res = await api.post('/checklist', { label, trip_id: tripId });
+    const res = await api.post('/checklist', { label, tripId });
     clearCache();
     return res.data;
 };
