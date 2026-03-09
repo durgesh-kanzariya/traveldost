@@ -4,7 +4,7 @@ const User = {
     // Find a user by email
     findByEmail: async (email) => {
         const query = `
-            SELECT u.id, u.name, u.email, u.password, u.created_at,
+            SELECT u.id, u.first_name, u.last_name, u.email, u.password, u.created_at,
                    up.native_language, r.role_name as role
             FROM users u
             LEFT JOIN user_profiles up ON u.id = up.user_id
@@ -21,13 +21,13 @@ const User = {
 
     // Create a new user
     create: async (user) => {
-        const { name, email, password, nativeLanguage = 'English', role = 'user' } = user;
+        const { firstName, lastName, email, password, nativeLanguage = 'English', role = 'user' } = user;
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
 
-            const userQuery = 'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *';
-            const userResult = await client.query(userQuery, [name, email, password]);
+            const userQuery = 'INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *';
+            const userResult = await client.query(userQuery, [firstName, lastName, email, password]);
             const newUser = userResult.rows[0];
 
             await client.query('INSERT INTO user_profiles (user_id, native_language) VALUES ($1, $2)', [newUser.id, nativeLanguage]);
@@ -55,7 +55,7 @@ const User = {
     // Find all users (for Admin)
     findAll: async () => {
         const query = `
-            SELECT u.id, u.name, u.email, u.created_at, up.native_language, LOWER(r.role_name) as role
+            SELECT u.id, u.first_name, u.last_name, u.email, u.created_at, up.native_language, LOWER(r.role_name) as role
             FROM users u
             LEFT JOIN user_profiles up ON u.id = up.user_id
             LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -81,14 +81,14 @@ const User = {
     },
 
     // Update user profile
-    update: async (id, { name, email, nativeLanguage, defaultCurrency }) => {
+    update: async (id, { firstName, lastName, email, nativeLanguage, defaultCurrency }) => {
         const query = `
             UPDATE users 
-            SET name = COALESCE($1, name), email = COALESCE($2, email)
-            WHERE id = $3
-            RETURNING id, name, email
+            SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), email = COALESCE($3, email)
+            WHERE id = $4
+            RETURNING id, first_name, last_name, email
         `;
-        const result = await pool.query(query, [name, email, id]);
+        const result = await pool.query(query, [firstName, lastName, email, id]);
 
         // Also update user_profiles for the new fields
         await pool.query(`
@@ -116,7 +116,7 @@ const User = {
     // Find by ID
     findById: async (id) => {
         const query = `
-            SELECT u.id, u.name, u.email, u.password, u.created_at,
+            SELECT u.id, u.first_name, u.last_name, u.email, u.password, u.created_at,
                    up.native_language, r.role_name as role
             FROM users u
             LEFT JOIN user_profiles up ON u.id = up.user_id

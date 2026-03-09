@@ -4,13 +4,13 @@ const Trip = {
     findAllByUserId: async (userId) => {
         const query = `
             SELECT t.*, 
-                   (SELECT d.city_name 
+                   (SELECT d.location_name 
                     FROM trip_destinations td 
                     JOIN destinations d ON td.destination_id = d.id 
                     WHERE td.trip_id = t.id 
                     ORDER BY td.visit_order ASC LIMIT 1) as destination,
                    ARRAY(
-                    SELECT d.city_name 
+                    SELECT d.location_name 
                     FROM trip_destinations td 
                     JOIN destinations d ON td.destination_id = d.id 
                     WHERE td.trip_id = t.id 
@@ -27,7 +27,7 @@ const Trip = {
     findUpcomingByUserId: async (userId) => {
         const query = `
             SELECT t.*, 
-                   (SELECT d.city_name 
+                   (SELECT d.location_name 
                     FROM trip_destinations td 
                     JOIN destinations d ON td.destination_id = d.id 
                     WHERE td.trip_id = t.id 

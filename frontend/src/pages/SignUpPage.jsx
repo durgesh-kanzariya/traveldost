@@ -7,7 +7,8 @@ import { Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react
 export function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [nativeLanguage, setNativeLanguage] = useState('en')
   const navigate = useNavigate()
 
@@ -16,7 +17,8 @@ export function SignUpPage() {
 
     const selectedLang = supportedLanguages.find(l => l.code === nativeLanguage)
     const userData = {
-      name: name,
+      firstName: firstName,
+      lastName: lastName,
       email: email,
       password: password,
       nativeLanguage: selectedLang ? selectedLang.name : 'English'
@@ -57,19 +59,36 @@ export function SignUpPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  autoFocus
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 py-3 pl-10 pr-4 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    required
+                    autoFocus
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 py-3 pl-10 pr-4 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Last Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    required
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 py-3 pl-10 pr-4 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                  />
+                </div>
               </div>
             </div>
 

@@ -28,7 +28,7 @@ export function DashboardLayout({ children }) {
   // Lazy Initialization
   const [userData] = useState(() => {
     const storedUser = localStorage.getItem('user')
-    return storedUser ? JSON.parse(storedUser) : { name: 'Traveler', email: 'user@example.com' }
+    return storedUser ? JSON.parse(storedUser) : { firstName: 'Traveler', lastName: '', email: 'user@example.com' }
   })
 
   // 2. LOGOUT FUNCTION
@@ -103,7 +103,7 @@ export function DashboardLayout({ children }) {
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
-                    {userData.name}
+                    {userData.firstName} {userData.lastName}
                   </p>
                   <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                     {userData.email}

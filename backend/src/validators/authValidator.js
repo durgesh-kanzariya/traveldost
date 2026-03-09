@@ -1,7 +1,8 @@
 const { check } = require('express-validator');
 
 exports.registerRules = [
-    check('name', 'Name is required').notEmpty().trim().escape(),
+    check('firstName', 'First Name is required').notEmpty().trim().escape(),
+    check('lastName', 'Last Name must be a string').optional().isString().trim().escape(),
     check('email', 'Please include a valid email').isEmail().normalizeEmail(),
     check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
     check('nativeLanguage', 'Native language must be a string').optional().isString().trim().escape()
@@ -13,7 +14,8 @@ exports.loginRules = [
 ];
 
 exports.updateProfileRules = [
-    check('name', 'Name must be a string').optional().isString().trim().escape(),
+    check('firstName', 'First Name must be a string').optional().isString().trim().escape(),
+    check('lastName', 'Last Name must be a string').optional().isString().trim().escape(),
     check('email', 'Please include a valid email').optional().isEmail().normalizeEmail(),
     check('nativeLanguage', 'Native language must be a string').optional().isString().trim().escape(),
     check('defaultCurrency', 'Currency code must be strings').optional().isString().isLength({ min: 3, max: 3 }).trim().toUpperCase()

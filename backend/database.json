@@ -15,9 +15,6 @@
         },
         "port": {
             "ENV": "DB_PORT"
-        },
-        "ssl": {
-            "rejectUnauthorized": false
         }
     },
     "production": {
@@ -36,7 +33,6 @@
         },
         "port": {
             "ENV": "DB_PORT"
-        },
-        "ssl": true
+        }
     }
 }

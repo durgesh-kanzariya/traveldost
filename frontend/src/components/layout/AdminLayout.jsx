@@ -23,10 +23,10 @@ export function AdminLayout({ children }) {
     const [userData] = useState(() => {
         try {
             const storedUser = localStorage.getItem('user')
-            return storedUser ? JSON.parse(storedUser) : { name: 'Admin', email: 'admin@example.com' }
+            return storedUser ? JSON.parse(storedUser) : { firstName: 'Admin', lastName: '', email: 'admin@example.com' }
         } catch (e) {
             console.error("Failed to parse user data", e);
-            return { name: 'Admin', email: 'admin@example.com' };
+            return { firstName: 'Admin', lastName: '', email: 'admin@example.com' };
         }
     })
 
@@ -97,7 +97,7 @@ export function AdminLayout({ children }) {
                                 </div>
                                 <div className="flex-1 overflow-hidden">
                                     <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
-                                        {userData.name}
+                                        {userData.firstName} {userData.lastName}
                                     </p>
                                     <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                                         {userData.email}

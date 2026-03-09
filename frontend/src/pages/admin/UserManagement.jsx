@@ -43,7 +43,7 @@ export function UserManagement() {
 
     // Filter Users
     const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.first_name + ' ' + user.last_name).toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
@@ -111,11 +111,11 @@ export function UserManagement() {
                                             <div className="flex items-center">
                                                 <div className="h-10 w-10 flex-shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                                                     <span className="text-lg font-bold text-slate-600 dark:text-slate-400">
-                                                        {user.name.charAt(0).toUpperCase()}
+                                                        {user.first_name?.charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>
                                                 <div className="ml-4">
-                                                    <div className="text-sm font-medium text-slate-900 dark:text-white">{user.name}</div>
+                                                    <div className="text-sm font-medium text-slate-900 dark:text-white">{user.first_name} {user.last_name}</div>
                                                     <div className="text-sm text-slate-500 dark:text-slate-400">{user.email}</div>
                                                 </div>
                                             </div>

@@ -40,8 +40,8 @@ const Checklist = {
             let checklistId;
 
             if (listResult.rows.length === 0) {
-                const createListQuery = 'INSERT INTO custom_checklists (trip_id, user_id, list_title) VALUES ($1, $2, $3) RETURNING id';
-                const createListResult = await client.query(createListQuery, [tripId, userId, 'My Default Checklist']);
+                const createListQuery = 'INSERT INTO custom_checklists (trip_id, user_id) VALUES ($1, $2) RETURNING id';
+                const createListResult = await client.query(createListQuery, [tripId, userId]);
                 checklistId = createListResult.rows[0].id;
             } else {
                 checklistId = listResult.rows[0].id;

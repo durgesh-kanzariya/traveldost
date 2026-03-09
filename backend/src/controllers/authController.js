@@ -2,8 +2,8 @@ const authService = require('../services/authService');
 
 const register = async (req, res) => {
     try {
-        const { name, email, password, nativeLanguage } = req.body;
-        const result = await authService.registerUser({ name, email, password, nativeLanguage });
+        const { firstName, lastName, email, password, nativeLanguage } = req.body;
+        const result = await authService.registerUser({ firstName, lastName, email, password, nativeLanguage });
         res.json(result);
     } catch (err) {
         console.error(err.message);
@@ -30,8 +30,8 @@ const login = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { name, email, nativeLanguage, defaultCurrency } = req.body;
-        const updatedUser = await authService.updateUserProfile(req.user.id, { name, email, nativeLanguage, defaultCurrency });
+        const { firstName, lastName, email, nativeLanguage, defaultCurrency } = req.body;
+        const updatedUser = await authService.updateUserProfile(req.user.id, { firstName, lastName, email, nativeLanguage, defaultCurrency });
         res.json(updatedUser);
     } catch (err) {
         console.error(err.message);

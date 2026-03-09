@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 require('dotenv').config();
 
-const registerUser = async ({ name, email, password, nativeLanguage }) => {
+const registerUser = async ({ firstName, lastName, email, password, nativeLanguage }) => {
     // 1. Check if user exists (Delegated to Model)
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
@@ -16,7 +16,8 @@ const registerUser = async ({ name, email, password, nativeLanguage }) => {
 
     // 3. Create User (Delegated to Model)
     const newUser = await User.create({
-        name,
+        firstName,
+        lastName,
         email,
         password: hashedPassword,
         nativeLanguage
@@ -29,7 +30,8 @@ const registerUser = async ({ name, email, password, nativeLanguage }) => {
         token,
         user: {
             id: newUser.id,
-            name: newUser.name,
+            firstName: newUser.first_name,
+            lastName: newUser.last_name,
             email: newUser.email,
             nativeLanguage: newUser.native_language,
             role: newUser.role
@@ -57,7 +59,8 @@ const loginUser = async ({ email, password }) => {
         token,
         user: {
             id: user.id,
-            name: user.name,
+            firstName: user.first_name,
+            lastName: user.last_name,
             email: user.email,
             nativeLanguage: user.native_language,
             role: user.role
@@ -65,8 +68,8 @@ const loginUser = async ({ email, password }) => {
     };
 };
 
-const updateUserProfile = async (userId, { name, email, nativeLanguage, defaultCurrency }) => {
-    return await User.update(userId, { name, email, nativeLanguage, defaultCurrency });
+const updateUserProfile = async (userId, { firstName, lastName, email, nativeLanguage, defaultCurrency }) => {
+    return await User.update(userId, { firstName, lastName, email, nativeLanguage, defaultCurrency });
 };
 
 const changePassword = async (userId, { oldPassword, newPassword }) => {

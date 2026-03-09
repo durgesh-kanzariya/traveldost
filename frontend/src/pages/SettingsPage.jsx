@@ -17,7 +17,7 @@ const LANGUAGES = [
 ]
 
 export function SettingsPage() {
-  const [user, setUser] = useState({ name: '', email: '', nativeLanguage: 'English', defaultCurrency: 'USD' })
+  const [user, setUser] = useState({ firstName: '', lastName: '', email: '', nativeLanguage: 'English', defaultCurrency: 'USD' })
   const [passwords, setPasswords] = useState({ oldPassword: '', newPassword: '' })
   const [settings, setSettings] = useState({
     notifications: true,
@@ -35,7 +35,8 @@ export function SettingsPage() {
     if (storedUser) {
       const parsed = JSON.parse(storedUser)
       setUser({
-        name: parsed.name || '',
+        firstName: parsed.firstName || parsed.first_name || '',
+        lastName: parsed.lastName || parsed.last_name || '',
         email: parsed.email || '',
         nativeLanguage: parsed.native_language || 'English',
         defaultCurrency: parsed.default_currency || 'USD',
@@ -121,14 +122,25 @@ export function SettingsPage() {
           Account Settings
         </h2>
         <form onSubmit={handleProfileUpdate} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
-            <input
-              type="text"
-              value={user.name}
-              onChange={(e) => setUser({ ...user, name: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
+              <input
+                type="text"
+                value={user.firstName}
+                onChange={(e) => setUser({ ...user, firstName: e.target.value })}
+                className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Last Name</label>
+              <input
+                type="text"
+                value={user.lastName}
+                onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+                className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              />
+            </div>
           </div>
           <div>
             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
