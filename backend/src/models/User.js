@@ -5,7 +5,7 @@ const User = {
     findByEmail: async (email) => {
         const query = `
             SELECT u.id, u.first_name, u.last_name, u.email, u.password, u.created_at,
-                   up.native_language, r.role_name as role
+                   up.native_language, up.default_currency, r.role_name as role
             FROM users u
             LEFT JOIN user_profiles up ON u.id = up.user_id
             LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -55,7 +55,7 @@ const User = {
     // Find all users (for Admin)
     findAll: async () => {
         const query = `
-            SELECT u.id, u.first_name, u.last_name, u.email, u.created_at, up.native_language, LOWER(r.role_name) as role
+            SELECT u.id, u.first_name, u.last_name, u.email, u.created_at, up.native_language, up.default_currency, LOWER(r.role_name) as role
             FROM users u
             LEFT JOIN user_profiles up ON u.id = up.user_id
             LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -117,7 +117,7 @@ const User = {
     findById: async (id) => {
         const query = `
             SELECT u.id, u.first_name, u.last_name, u.email, u.password, u.created_at,
-                   up.native_language, r.role_name as role
+                   up.native_language, up.default_currency, r.role_name as role
             FROM users u
             LEFT JOIN user_profiles up ON u.id = up.user_id
             LEFT JOIN user_roles ur ON u.id = ur.user_id

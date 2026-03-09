@@ -34,6 +34,7 @@ const registerUser = async ({ firstName, lastName, email, password, nativeLangua
             lastName: newUser.last_name,
             email: newUser.email,
             nativeLanguage: newUser.native_language,
+            defaultCurrency: newUser.default_currency || 'INR',
             role: newUser.role
         }
     };
@@ -63,6 +64,7 @@ const loginUser = async ({ email, password }) => {
             lastName: user.last_name,
             email: user.email,
             nativeLanguage: user.native_language,
+            defaultCurrency: user.default_currency,
             role: user.role
         }
     };
