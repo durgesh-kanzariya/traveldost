@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   Phone, Shield, Ambulance, Flame, MapPin,
-  Search, AlertOctagon, RefreshCw, Landmark, ChevronDown
+  Search, AlertOctagon, RefreshCw, Landmark, ChevronDown,
+  AlertTriangle
 } from 'lucide-react'
 import { DashboardLayout, Breadcrumbs } from '../components/layout'
 import { useEmergency } from '../hooks'
@@ -155,8 +156,8 @@ export function EmergencyPage() {
           })}
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="md:col-span-2 rounded-xl bg-slate-900 dark:bg-slate-800 p-4 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
+        <div className="mt-6">
+          <div className="rounded-xl bg-slate-900 dark:bg-slate-800 p-4 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-white/10 rounded-lg">
                 <Landmark className="h-6 w-6 text-sky-300" />
@@ -170,16 +171,62 @@ export function EmergencyPage() {
               Call {activeData?.embassy || '...'}
             </a>
           </div>
-
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm flex flex-col justify-center transition-colors">
-            <div className="flex items-start gap-2">
-              <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
-              <p className="text-xs font-medium text-slate-600 dark:text-slate-300 italic">
-                "{activeData?.note || 'Use standard emergency protocols'}"
-              </p>
-            </div>
-          </div>
         </div>
+
+        {/* Local Customs & Rules Section */}
+        <section className="mt-10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-9 w-9 rounded-xl bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Local Customs & Rules</h2>
+          </div>
+
+          {activeData?.rules && activeData.rules.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(() => {
+                const parsed = activeData.rules.map(rule => {
+                  const match = rule.match(/^\[([^\]]+)\]\s*(.+)$/);
+                  if (match) {
+                    return { category: match[1], text: match[2] };
+                  }
+                  return { category: 'General', text: rule };
+                });
+                const grouped = {};
+                parsed.forEach(r => {
+                  if (!grouped[r.category]) grouped[r.category] = [];
+                  grouped[r.category].push(r);
+                });
+
+                return Object.entries(grouped).map(([category, rules]) => (
+                  <div
+                    key={category}
+                    className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-colors"
+                  >
+                    <div className="px-3 py-2.5 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+                      <AlertTriangle className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                      <span className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-400">{category}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto tabular-nums">{rules.length}</span>
+                    </div>
+                    <ul className="px-3 py-2.5 space-y-2">
+                      {rules.map((r, idx) => (
+                        <li key={idx} className="flex gap-2.5 text-sm text-slate-700 dark:text-slate-300 leading-snug">
+                          <span className="mt-2 h-1 w-1 rounded-full bg-sky-600 dark:bg-sky-400 shrink-0" />
+                          {r.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ));
+              })()}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2 p-8 text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm">No customs available for this location</span>
+            </div>
+          )}
+        </section>
       </div>
     </DashboardLayout>
   )

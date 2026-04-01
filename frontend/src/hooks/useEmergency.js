@@ -17,7 +17,8 @@ export function useEmergency() {
                 ambulance: data.ambulance_number || '112',
                 fire: data.fire_number || '112',
                 embassy: data.embassy_number || 'Check Local Listings',
-                note: `Emergency contacts for ${data.country_name || countryName}`
+                note: `Emergency contacts for ${data.country_name || countryName}`,
+                rules: data.local_rules || []
             })
             setSelectedCountry(data.country_name || countryName)
         } catch (err) {
