@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import {
-  Shield, MapPin, AlertTriangle, Phone, CheckCircle2,
+  Shield, MapPin, AlertTriangle, Phone,
   RefreshCw, Info, Plane, Calendar, Briefcase
-} from 'lucide-react'
-import { DashboardLayout } from '../components/layout'
-import { InteractiveMap, Skeleton } from '../components/ui'
-import { useDashboard } from '../hooks'
+} from 'lucide-react';
+import { DashboardLayout } from '../components/layout';
+import { InteractiveMap, Skeleton } from '../components/ui';
+import { useDashboard } from '../hooks';
 
 export function Dashboard() {
   const {
@@ -140,53 +140,115 @@ export function Dashboard() {
           )}
         </div>
 
-        {/* Content Grid */}
-        <div className="grid md:grid-cols-2 gap-8">
+        {/* Content Section */}
+        <div className="space-y-8">
+          {/* Emergency Contacts Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <div className="h-8 w-8 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+                <Shield className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               </div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">Emergency Contacts</h2>
             </div>
-            <div className="space-y-3">
-              {['Police', 'Ambulance'].map((type) => (
-                <div key={type} className="p-4 border border-white/50 dark:border-slate-800/50 rounded-xl hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { type: 'Police', key: 'police' },
+                { type: 'Ambulance', key: 'ambulance' }
+              ].map(({ type, key }) => (
+                <div key={type} className="p-4 border border-sky-200 dark:border-sky-900/50 hover:bg-sky-50/50 dark:hover:bg-sky-900/10 rounded-xl transition-all bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{type}</span>
                     </div>
-                    <span className="text-xl font-bold text-red-600 dark:text-red-400 tabular-nums">
-                      {countryData?.emergency[type.toLowerCase()] || '--'}
-                    </span>
+                    <a
+                      href={`tel:${countryData?.emergency[key] || '112'}`}
+                      className="text-xl font-bold text-sky-600 dark:text-sky-400 tabular-nums hover:underline"
+                    >
+                      {countryData?.emergency[key] || '112'}
+                    </a>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Local Rules Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="h-8 w-8 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+                <AlertTriangle className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Local Customs</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Local Customs & Rules</h2>
             </div>
-            <div className="space-y-2">
-              {Array.isArray(countryData?.rules) && countryData.rules.map((rule, idx) => (
-                <div key={idx} className="flex gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-transparent hover:border-amber-100 transition-colors">
-                  <CheckCircle2 className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
-                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">{rule}</p>
-                </div>
-              ))}
-              {!countryData && !loading && (
-                <div className="flex items-center justify-center gap-2 p-8 text-slate-400 border border-dashed border-slate-200 rounded-xl">
-                  <Info className="h-4 w-4" />
-                  <span className="text-sm">Information unavailable</span>
-                </div>
-              )}
-            </div>
+
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : Array.isArray(countryData?.rules) && countryData.rules.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Group rules by category - 2x2 grid layout */}
+                {(() => {
+                  // Parse rules: "[Etiquette] Never tip..." → { category: 'Etiquette', text: 'Never tip...' }
+                  const parsedRules = countryData.rules.map(rule => {
+                    const match = rule.match(/^\[([^\]]+)\]\s*(.+)$/);
+                    if (match) {
+                      return { category: match[1], text: match[2], raw: rule };
+                    }
+                    return { category: 'General', text: rule, raw: rule };
+                  });
+
+                  // Group by category
+                  const grouped = {};
+                  parsedRules.forEach(r => {
+                    if (!grouped[r.category]) grouped[r.category] = [];
+                    grouped[r.category].push(r);
+                  });
+
+                  return Object.entries(grouped).map(([category, rules]) => (
+                    <div
+                      key={category}
+                      className="rounded-xl border border-sky-200 dark:border-sky-900/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm hover:shadow-md transition-all hover:border-sky-300 dark:hover:border-sky-800"
+                    >
+                      {/* Category Header */}
+                      <div className="px-4 py-3 border-b border-sky-200 dark:border-sky-900/50">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
+                            {category}
+                          </span>
+                          <span className="text-xs text-sky-700 dark:text-sky-300">
+                            ({rules.length})
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Rules List */}
+                      <div className="p-3 space-y-2">
+                        {rules.map((r, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent transition-all hover:border-sky-200 dark:hover:border-sky-800"
+                          >
+                            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                              {r.text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            ) : !countryData && !loading ? (
+              <div className="flex items-center justify-center gap-2 p-8 text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl bg-white/30 dark:bg-slate-900/30">
+                <Info className="h-4 w-4" />
+                <span className="text-sm">No custom rules available for this location</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
