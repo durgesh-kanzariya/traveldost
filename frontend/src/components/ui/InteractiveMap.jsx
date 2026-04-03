@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { Shield, Hospital, MapPin, Navigation } from 'lucide-react'
-import api from '../../services/api'
+import api from '../../shared/services/api'
 
 const CACHE_KEY = 'traveldost_safezones_cache'
 const CACHE_RADIUS_KM = 2

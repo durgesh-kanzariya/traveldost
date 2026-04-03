@@ -5,3 +5,33 @@ frontend/.env
 dist
 build
 .DS_Store
+
+# AI / Agent configs
+.claude/
+.agents/
+skills-lock.json
+agile-rolling-snowflake.md
+CLAUDE.md
+
+# Lint output files
+frontend/lint-results.json
+frontend/lint-results-clean.txt
+frontend/lint_json.json
+frontend/lint_results.txt
+frontend/pure_lint.json
+
+# Temp/generated files
+backend/diffs.txt
+backend/traveldost_sync.sql
+backend/compareDbSchemas.js
+country.json
+uncommon_rules_by_country.json
+CODEBASE_CLEANUP_REPORT.md
+CODE_MAP.md
+POST_CLEANUP_IMPROVEMENTS_REPORT.md
+React_Router_DOM_Complete_Guide.md
+useEffect_Complete_Guide.md
+LOCAL_SETUP_GUIDE.md
+frontend/DELETED_PATHS.txt
+frontend/ESLINT_UNUSED_IMPORTS_SETUP.md
+frontend/REFACTORING_CLEANUP_REPORT.md

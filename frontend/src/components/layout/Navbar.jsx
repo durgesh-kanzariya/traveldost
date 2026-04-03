@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X, Sun, Moon } from 'lucide-react'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../shared/context/ThemeContext'
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)

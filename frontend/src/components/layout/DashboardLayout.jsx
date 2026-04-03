@@ -17,7 +17,7 @@ import {
   Plane,
   DollarSign
 } from 'lucide-react'
-import { useTheme } from '../../context/ThemeContext'
+import { useTheme } from '../../shared/context/ThemeContext'
 
 export function DashboardLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
