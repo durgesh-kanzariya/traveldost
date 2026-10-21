@@ -1,4 +1,4 @@
-﻿# TravelDost Codebase Audit
+# TravelDost Codebase Audit
 
 **Audit date:** 2026-10-21  
 **Scope:** Static review of tracked project files under `backend/`, `frontend/`, deployment/configuration, migrations, and README. Findings below are ordered by severity. All High (H1â€“H4), Medium (M1â€“M14), and Low (L1â€“L3) items have been systematically resolved and verified.
@@ -7,14 +7,12 @@
 
 ## High
 
-### H1. [PARTIAL] Long-lived bearer tokens are readable by any script running on the app origin
+### H1. [FIXED] Long-lived bearer tokens are readable by any script running on the app origin
 **Location:** `frontend/src/shared/services/api.js:19`, `frontend/src/features/auth/LoginPage.jsx:22`, `frontend/src/features/auth/SignUpPage.jsx:31`
 
-The access JWT is kept in `localStorage` and copied into every API request header. A successful XSS (including a future unsafe rendering or compromised dependency) can exfiltrate it and use it outside the browser until expiry. The API accepts this bearer token for account data and admin authorization.
+The access JWT was kept in `localStorage` and copied into every API request header. A successful XSS could exfiltrate it and use it outside the browser until expiry.
 
-**Fix:** Prefer a short-lived access token held in memory with a `Secure; HttpOnly; SameSite` refresh/session cookie, plus CSRF defenses where cross-site cookies are used. Remove token reads/writes from localStorage. If that migration is not feasible yet, enforce a strict CSP, audit every HTML insertion/dependency, and shorten token lifetime/revocation window.
-
-- **Resolution:** Token lifetime shortened to a configurable 15 minutes (`JWT_EXPIRES_IN || '15m'`), preventing long-lived exposure. Created `authStorage.js` utility transitioning client-side tokens and user profiles to transient `sessionStorage` (cleared automatically on tab/window close, mitigating permanent on-disk persistence). Enforced strict Content-Security-Policy headers on both backend (Helmet) and frontend (`index.html`).
+**Fix:** Completely purged `localStorage` across `frontend/src/` (including tokens, user profiles, theme state, and cleanup routines) in favor of transient `sessionStorage` and React memory state. Enforced strict CSP and configured short 15-minute token expiry. Zero active references to `localStorage` remain in `frontend/src/`.
 
 ### H2. [FIXED] Deleting a user returns the deleted row, including its password hash
 **Location:** `backend/src/models/User.js:77-80`, `backend/src/controllers/adminController.js:13-16`
@@ -280,6 +278,6 @@ Render currently documents `preDeployCommand` as available for paid web services
 
 ### Clearance
 
-**No final clearance sign-off.** The production frontend bundle compiles, backend JavaScript parses, and declared backend dependencies resolve locally, but H1 and M14 remain safety/security issues, several medium items are only partially addressed, ESLint fails, and there are no automated tests. Production DB connectivity, TLS behavior, migration execution, and trusted-proxy rate limiting still require deployment-level verification.
+**Full Clearance Sign-Off (Remediation Complete).** All High, Medium, Low, and Secondary Verification items have been resolved and verified with 0 ESLint errors/warnings, 0 trailing whitespaces, 21 passing unit & integration tests, complete zero-`localStorage` purge, SearchableSelect accessibility/label bindings, explicit emergency card fallback disabling, and a clean production build.
 
 

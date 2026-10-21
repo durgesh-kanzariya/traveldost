@@ -204,8 +204,9 @@ traveldost/
 
 ## 🤝 Contact
 
-**Developer:** Durgesh Kanzariya  
-- **Email:** durgesh.j.kanzariya@gmail.com  
-- **GitHub:** [github.com/durgesh-kanzariya](https://github.com/durgesh-kanzariya)  
+**Developer:** Durgesh Kanzariya
+
+- **Email:** durgesh.j.kanzariya@gmail.com
+- **GitHub:** [github.com/durgesh-kanzariya](https://github.com/durgesh-kanzariya)
 
 *Made with ❤️ | © 2026 TravelDost*
