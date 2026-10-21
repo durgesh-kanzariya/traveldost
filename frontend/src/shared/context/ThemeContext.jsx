@@ -4,11 +4,11 @@ import { createContext, useContext, useEffect, useState } from 'react'
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-    // 1. Initialize from localStorage or System Preference
+    // 1. Initialize from sessionStorage or System Preference
     const [theme, setTheme] = useState(() => {
         try {
             if (typeof window !== 'undefined') {
-                const stored = localStorage.getItem('theme')
+                const stored = sessionStorage.getItem('theme')
                 if (stored) return stored
             }
         } catch { /* storage inaccessible */ }
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }) {
 
         root.classList.add(theme)
         try {
-            localStorage.setItem('theme', theme)
+            sessionStorage.setItem('theme', theme)
         } catch { /* ignore storage error */ }
     }, [theme])
 
