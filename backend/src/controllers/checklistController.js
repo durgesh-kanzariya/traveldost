@@ -27,6 +27,9 @@ const addItem = async (req, res) => {
         if (err.message === 'Label is required') {
             return res.status(400).send(err.message);
         }
+        if (err.statusCode === 404 || err.message === 'Trip not found') {
+            return res.status(404).json({ message: 'Trip not found' });
+        }
         res.status(500).send('Server Error');
     }
 };
@@ -39,7 +42,10 @@ const updateItem = async (req, res) => {
         res.json(result);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        if (err.statusCode === 404 || err.message === 'Checklist item not found') {
+            return res.status(404).json({ message: 'Checklist item not found' });
+        }
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 
@@ -50,7 +56,10 @@ const deleteItem = async (req, res) => {
         res.json(result);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        if (err.statusCode === 404 || err.message === 'Checklist item not found') {
+            return res.status(404).json({ message: 'Checklist item not found' });
+        }
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 

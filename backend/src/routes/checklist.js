@@ -9,6 +9,6 @@ const { validateRequest } = require('../middleware/validationMiddleware');
 router.get('/', auth, checklistController.getItems);
 router.post('/', auth, checklistValidator.checklistRules, validateRequest, checklistController.addItem);
 router.put('/:id', auth, checklistValidator.updateChecklistRules, validateRequest, checklistController.updateItem);
-router.delete('/:id', auth, checklistController.deleteItem);
+router.delete('/:id', auth, checklistValidator.itemIdRule, validateRequest, checklistController.deleteItem);
 
 module.exports = router;

@@ -14,7 +14,16 @@ const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedUser = await adminService.deleteUser(id);
-        res.json({ message: 'User deleted successfully', user: deletedUser });
+        res.json({
+            message: 'User deleted successfully',
+            user: {
+                id: deletedUser.id,
+                firstName: deletedUser.first_name,
+                lastName: deletedUser.last_name,
+                email: deletedUser.email,
+                createdAt: deletedUser.created_at
+            }
+        });
     } catch (err) {
         console.error(err.message);
         if (err.message === 'User not found') {

@@ -5,7 +5,8 @@ exports.getTripExpenses = async (req, res) => {
     try {
         const userId = req.user.id;
         const { tripId } = req.params;
-        const expenses = await expenseService.getExpensesByTrip(tripId, userId);
+        const { limit, offset } = req.query;
+        const expenses = await expenseService.getExpensesByTrip(tripId, userId, { limit, offset });
         res.json(expenses);
     } catch (err) {
         console.error(err.message);
@@ -37,6 +38,9 @@ exports.createExpense = async (req, res) => {
         res.status(201).json(savedExpense);
     } catch (err) {
         console.error(err.message);
+        if (err.statusCode === 404 || err.message === 'Trip not found') {
+            return res.status(404).json({ message: 'Trip not found' });
+        }
         res.status(500).json({ message: 'Server Error' });
     }
 };
@@ -50,6 +54,9 @@ exports.deleteExpense = async (req, res) => {
         res.json({ message: 'Expense deleted' });
     } catch (err) {
         console.error(err.message);
+        if (err.statusCode === 404 || err.message === 'Expense not found') {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
         res.status(500).json({ message: 'Server Error' });
     }
 };

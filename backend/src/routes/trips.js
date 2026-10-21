@@ -9,9 +9,9 @@ router.use(authMiddleware);
 
 router.get('/', tripController.getTrips);
 router.get('/upcoming', tripController.getUpcomingTrip);
-router.get('/:id/checklist-count', tripController.getChecklistCount);
+router.get('/:id/checklist-count', tripValidator.tripIdParamRule, validateRequest, tripController.getChecklistCount);
 router.post('/', tripValidator.tripRules, validateRequest, tripController.createTrip);
-router.put('/:id', tripValidator.tripRules, validateRequest, tripController.updateTrip);
-router.delete('/:id', tripController.deleteTrip);
+router.put('/:id', tripValidator.tripIdParamRule, tripValidator.tripRules, validateRequest, tripController.updateTrip);
+router.delete('/:id', tripValidator.tripIdParamRule, validateRequest, tripController.deleteTrip);
 
 module.exports = router;

@@ -23,8 +23,12 @@ const registerUser = async ({ firstName, lastName, email, password, nativeLangua
         nativeLanguage
     });
 
-    // 4. Generate Token (Business Logic)
-    const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // 4. Generate Token (Business Logic) - Shortened lifetime to limit token exposure window
+    const token = jwt.sign(
+        { id: newUser.id, role: newUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    );
 
     return {
         token,
@@ -53,8 +57,12 @@ const loginUser = async ({ email, password }) => {
         throw new Error('Invalid Credentials');
     }
 
-    // 3. Generate Token
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // 3. Generate Token - Shortened lifetime to limit token exposure window
+    const token = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    );
 
     return {
         token,

@@ -10,7 +10,9 @@ const getExchangeRates = async (base) => {
     }
 
     try {
-        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`);
+        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`, {
+            signal: AbortSignal.timeout(10000)
+        });
         if (!response.ok) {
             throw new Error('Failed to fetch exchange rates');
         }

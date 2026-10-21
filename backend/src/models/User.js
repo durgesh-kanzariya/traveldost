@@ -75,7 +75,7 @@ const User = {
 
     // Delete user
     delete: async (id) => {
-        const query = 'DELETE FROM users WHERE id = $1 RETURNING *';
+        const query = 'DELETE FROM users WHERE id = $1 RETURNING id, first_name, last_name, email, created_at';
         const result = await pool.query(query, [id]);
         return result.rows[0];
     },

@@ -2,8 +2,8 @@ const Trip = require('../models/Trip');
 const Destination = require('../models/Destination');
 const pool = require('../config/db');
 
-const getTripsByUser = async (userId) => {
-    return await Trip.findAllByUserId(userId);
+const getTripsByUser = async (userId, pagination) => {
+    return await Trip.findAllByUserId(userId, pagination);
 };
 
 const getUpcomingTrip = async (userId) => {
@@ -83,20 +83,36 @@ const updateTrip = async (userId, tripId, tripData) => {
 };
 
 const deleteTrip = async (userId, tripId, checklistAction = 'move_to_general') => {
-    const trip = await Trip.findByIdAndUserId(tripId, userId);
-    if (!trip) {
-        throw new Error('Trip not found');
-    }
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    if (checklistAction === 'delete_items') {
-        const Expense = require('../models/Expense'); // Lazy load or move to top if needed
-        await Expense.deleteByTripId(tripId, userId);
-    } else {
-        const Expense = require('../models/Expense');
-        await Expense.moveChecklistToGeneral(tripId, userId);
-    }
+        // Verify trip ownership within the same transaction using FOR UPDATE lock
+        const tripCheck = await client.query(
+            'SELECT id FROM trips WHERE id = $1 AND user_id = $2 FOR UPDATE',
+            [tripId, userId]
+        );
+        if (tripCheck.rowCount === 0) {
+            const err = new Error('Trip not found');
+            err.statusCode = 404;
+            throw err;
+        }
 
-    await Trip.delete(tripId, userId);
+        if (checklistAction === 'delete_items') {
+            await client.query('DELETE FROM custom_checklists WHERE trip_id = $1 AND user_id = $2', [tripId, userId]);
+        } else {
+            await client.query('UPDATE custom_checklists SET trip_id = NULL WHERE trip_id = $1 AND user_id = $2', [tripId, userId]);
+        }
+
+        await client.query('DELETE FROM trips WHERE id = $1 AND user_id = $2', [tripId, userId]);
+
+        await client.query('COMMIT');
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    } finally {
+        client.release();
+    }
 };
 
 const getChecklistCount = async (userId, tripId) => {

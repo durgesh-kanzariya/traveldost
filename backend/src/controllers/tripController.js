@@ -4,7 +4,8 @@ const tripService = require('../services/tripService');
 exports.getTrips = async (req, res) => {
     try {
         const userId = req.user.id;
-        const trips = await tripService.getTripsByUser(userId);
+        const { limit, offset } = req.query;
+        const trips = await tripService.getTripsByUser(userId, { limit, offset });
         res.json(trips);
     } catch (err) {
         console.error(err.message);

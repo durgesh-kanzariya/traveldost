@@ -1,9 +1,11 @@
 const pool = require('../config/db');
 
 const Trip = {
-    findAllByUserId: async (userId) => {
+    findAllByUserId: async (userId, { limit = 50, offset = 0 } = {}) => {
+        const boundedLimit = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 100);
+        const boundedOffset = Math.max(parseInt(offset, 10) || 0, 0);
         const query = `
-            SELECT t.*, 
+            SELECT t.id, t.user_id, t.start_date, t.end_date, t.budget, t.currency, t.created_at,
                    (SELECT d.location_name 
                     FROM trip_destinations td 
                     JOIN destinations d ON td.destination_id = d.id 
@@ -19,8 +21,9 @@ const Trip = {
             FROM trips t
             WHERE t.user_id = $1 
             ORDER BY t.start_date DESC
+            LIMIT $2 OFFSET $3
         `;
-        const result = await pool.query(query, [userId]);
+        const result = await pool.query(query, [userId, boundedLimit, boundedOffset]);
         return result.rows;
     },
 

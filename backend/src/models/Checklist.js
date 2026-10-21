@@ -27,23 +27,38 @@ const Checklist = {
         try {
             await client.query('BEGIN');
 
-            let findQuery = 'SELECT id FROM custom_checklists WHERE user_id = $1';
-            let findValues = [userId];
             if (tripId) {
-                findQuery += ' AND trip_id = $2';
-                findValues.push(tripId);
-            } else {
-                findQuery += ' AND trip_id IS NULL';
+                const tripCheck = await client.query(
+                    'SELECT id FROM trips WHERE id = $1 AND user_id = $2 FOR KEY SHARE',
+                    [tripId, userId]
+                );
+                if (tripCheck.rowCount === 0) {
+                    const error = new Error('Trip not found');
+                    error.statusCode = 404;
+                    throw error;
+                }
             }
 
-            let listResult = await client.query(findQuery, findValues);
             let checklistId;
-
-            if (listResult.rows.length === 0) {
-                const createListQuery = 'INSERT INTO custom_checklists (trip_id, user_id) VALUES ($1, $2) RETURNING id';
-                const createListResult = await client.query(createListQuery, [tripId, userId]);
-                checklistId = createListResult.rows[0].id;
+            if (tripId) {
+                const upsertQuery = `
+                    INSERT INTO custom_checklists (trip_id, user_id)
+                    VALUES ($1, $2)
+                    ON CONFLICT (user_id, trip_id) WHERE trip_id IS NOT NULL
+                    DO UPDATE SET user_id = EXCLUDED.user_id
+                    RETURNING id
+                `;
+                const listResult = await client.query(upsertQuery, [tripId, userId]);
+                checklistId = listResult.rows[0].id;
             } else {
+                const upsertQuery = `
+                    INSERT INTO custom_checklists (trip_id, user_id)
+                    VALUES (NULL, $1)
+                    ON CONFLICT (user_id) WHERE trip_id IS NULL
+                    DO UPDATE SET user_id = EXCLUDED.user_id
+                    RETURNING id
+                `;
+                const listResult = await client.query(upsertQuery, [userId]);
                 checklistId = listResult.rows[0].id;
             }
 
@@ -72,7 +87,12 @@ const Checklist = {
               AND checklist_items.id = $2
               AND custom_checklists.user_id = $3
         `;
-        await pool.query(query, [checked, id, userId]);
+        const result = await pool.query(query, [checked, id, userId]);
+        if (result.rowCount === 0) {
+            const err = new Error('Checklist item not found');
+            err.statusCode = 404;
+            throw err;
+        }
         return { message: 'Updated' };
     },
 
@@ -84,7 +104,12 @@ const Checklist = {
               AND checklist_items.id = $1
               AND custom_checklists.user_id = $2
         `;
-        await pool.query(query, [id, userId]);
+        const result = await pool.query(query, [id, userId]);
+        if (result.rowCount === 0) {
+            const err = new Error('Checklist item not found');
+            err.statusCode = 404;
+            throw err;
+        }
         return { message: 'Deleted' };
     }
 };
