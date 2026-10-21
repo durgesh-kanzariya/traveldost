@@ -4,7 +4,7 @@ const CHECKLIST_CACHE_TTL = 15 * 60 * 1000; // 15 minutes TTL
 
 const getCache = (key) => {
     try {
-        const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
+        const raw = sessionStorage.getItem(key);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
         if (Date.now() - parsed.time > CHECKLIST_CACHE_TTL) {

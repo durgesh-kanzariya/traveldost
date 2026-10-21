@@ -131,22 +131,22 @@ export function EmergencyPage() {
           </div>
         )}
 
-        {activeData && !activeData.isVerified && (
+        {activeData && !activeData.isDatabase && (
           <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-sm text-amber-800 dark:text-amber-200">
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Unverified Fallback Numbers</p>
+              <p className="font-semibold">112 Universal Emergency Number — Available in EU and select global networks (verify local carrier)</p>
               <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
-                Verified local emergency services for <strong>{selectedCountry}</strong> are not yet cataloged in our database. Displaying universal international emergency fallback (112). Please verify local dispatch numbers with hotel staff or local police.
+                Regional emergency services for <strong>{selectedCountry}</strong> are not yet cataloged in our directory. Displaying 112 Universal Emergency Number — Available in EU and select global networks (verify local carrier). Please verify local dispatch numbers with your local network carrier, accommodation, or local authorities.
               </p>
             </div>
           </div>
         )}
 
-        {activeData && activeData.isVerified && (
-          <div className="mb-6 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-2 text-xs font-medium text-emerald-800 dark:text-emerald-300">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>Verified emergency directory data active for <strong>{selectedCountry}</strong>.</span>
+        {activeData && activeData.isDatabase && (
+          <div className="mb-6 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-xl flex items-center gap-2 text-xs font-medium text-sky-800 dark:text-sky-300">
+            <CheckCircle2 className="h-4 w-4 text-sky-600 dark:text-sky-400 shrink-0" />
+            <span>Listed Regional Contact numbers active for <strong>{selectedCountry}</strong>. (Cross-verify with local authorities when possible).</span>
           </div>
         )}
 
@@ -157,6 +157,9 @@ export function EmergencyPage() {
             { title: 'Fire Dept', type: 'Fire & Rescue', icon: Flame, color: 'orange', value: activeData?.fire },
           ].map((card) => {
             const style = colorStyles[card.color]
+            const hasValue = Boolean(card.value && typeof card.value === 'string' && card.value.trim() && card.value !== '--')
+            const badgeLabel = hasValue ? 'Listed Regional Contact' : 'Not Available'
+
             return (
               <div key={card.title} className={`group relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 p-4 shadow-md dark:shadow-slate-900/20 border-t-4 ${style.border} hover:-translate-y-0.5 transition-transform duration-300`}>
                 <div className="flex items-start justify-between mb-3">
@@ -164,18 +167,24 @@ export function EmergencyPage() {
                     <card.icon className="h-5 w-5" />
                   </div>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                    activeData?.isVerified
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-                      : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                    hasValue
+                      ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300'
+                      : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                   }`}>
-                    {activeData?.isVerified ? 'Verified Local' : 'Universal Fallback'}
+                    {badgeLabel}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">{card.title}</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-xs mb-4">{card.type}</p>
-                <a href={`tel:${card.value}`} className={`flex w-full items-center justify-center gap-2 rounded-lg ${style.btn} py-2.5 text-sm font-bold text-white transition-all active:scale-95`}>
-                  <Phone className="h-4 w-4" /> Call {card.value || '...'}
-                </a>
+                {hasValue ? (
+                  <a href={`tel:${card.value}`} className={`flex w-full items-center justify-center gap-2 rounded-lg ${style.btn} py-2.5 text-sm font-bold text-white transition-all active:scale-95`}>
+                    <Phone className="h-4 w-4" /> Call {card.value}
+                  </a>
+                ) : (
+                  <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 py-2.5 text-sm font-medium text-slate-400 dark:text-slate-500 select-none cursor-not-allowed">
+                    <Phone className="h-4 w-4" /> Not Available
+                  </div>
+                )}
               </div>
             )
           })}
@@ -192,9 +201,15 @@ export function EmergencyPage() {
                 <p className="text-slate-400 text-sm">For lost passports & legal help</p>
               </div>
             </div>
-            <a href={`tel:${activeData?.embassy}`} className="px-4 py-2 bg-white text-slate-900 text-sm font-bold rounded-lg hover:bg-sky-50 transition-colors shrink-0">
-              Call {activeData?.embassy || '...'}
-            </a>
+            {activeData?.embassy ? (
+              <a href={`tel:${activeData.embassy}`} className="px-4 py-2 bg-white text-slate-900 text-sm font-bold rounded-lg hover:bg-sky-50 transition-colors shrink-0">
+                Call {activeData.embassy}
+              </a>
+            ) : (
+              <span className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-slate-400 text-sm font-medium rounded-lg shrink-0">
+                Not Available
+              </span>
+            )}
           </div>
         </div>
 

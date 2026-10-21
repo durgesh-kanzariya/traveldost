@@ -4,7 +4,7 @@ const CACHE_DAYS = 7;
 
 const getCache = (key) => {
     try {
-        const data = localStorage.getItem(key);
+        const data = sessionStorage.getItem(key);
         if (!data) return null;
         const parsed = JSON.parse(data);
         if (Date.now() - parsed.time > CACHE_DAYS * 24 * 60 * 60 * 1000) {
@@ -16,7 +16,7 @@ const getCache = (key) => {
 
 const setCache = (key, value) => {
     try {
-        localStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
+        sessionStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
     } catch { /* ignore */ }
 };
 

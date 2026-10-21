@@ -5,7 +5,7 @@ const LOCATION_CACHE_DURATION = 24 * 60 * 60 * 1000;
 
 export const getCachedLocation = () => {
     try {
-        const cached = localStorage.getItem(LOCATION_CACHE_KEY);
+        const cached = sessionStorage.getItem(LOCATION_CACHE_KEY);
         if (!cached) return null;
 
         const { location, timestamp } = JSON.parse(cached);
@@ -22,7 +22,7 @@ export const getCachedLocation = () => {
 
 export const setCachedLocation = (location) => {
     try {
-        localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify({
+        sessionStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify({
             location,
             timestamp: Date.now()
         }));

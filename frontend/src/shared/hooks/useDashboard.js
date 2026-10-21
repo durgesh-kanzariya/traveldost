@@ -15,6 +15,7 @@ export function useDashboard() {
     const [upcomingTrip, setUpcomingTrip] = useState(null)
     const [tripEmergencyData, setTripEmergencyData] = useState(null)
     const locationRequestIdRef = useRef(0)
+    const zoomTimeoutRef = useRef(null)
 
     const fetchUpcomingTrip = useCallback(async () => {
         try {
@@ -32,9 +33,12 @@ export function useDashboard() {
         }
     }, [])
 
-    const fetchGuideData = useCallback(async (countryName) => {
+    const fetchGuideData = useCallback(async (countryName, passedRequestId) => {
+        const localId = passedRequestId !== undefined ? passedRequestId : ++locationRequestIdRef.current
         try {
-            const data = await getGuideByCountry(countryName);
+            const data = await getGuideByCountry(countryName)
+            if (locationRequestIdRef.current !== localId) return
+
             const formattedData = {
                 emergency: {
                     police: data.police_number,
@@ -44,12 +48,14 @@ export function useDashboard() {
             }
             setCountryData(formattedData)
         } catch (err) {
+            if (locationRequestIdRef.current !== localId) return
             console.error("Failed to fetch guide:", err)
             setCountryData(null)
         }
     }, [])
 
     useEffect(() => {
+        let isCancelled = false
         const requestId = ++locationRequestIdRef.current
 
         async function loadLocation() {
@@ -59,6 +65,8 @@ export function useDashboard() {
 
             try {
                 const detectedLocation = await detectAndCacheLocation(false)
+                if (isCancelled || requestId !== locationRequestIdRef.current) return
+
                 let rawCountry = detectedLocation.country
 
                 const fixes = {
@@ -82,24 +90,36 @@ export function useDashboard() {
                         lat: detectedLocation.lat,
                         lng: detectedLocation.lng
                     })
-                    await fetchGuideData(rawCountry)
-                    setTimeout(() => setZoom(15), 500)
+                    await fetchGuideData(rawCountry, requestId)
+                    if (requestId === locationRequestIdRef.current) {
+                        if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current)
+                        zoomTimeoutRef.current = setTimeout(() => {
+                            if (requestId === locationRequestIdRef.current) {
+                                setZoom(15)
+                            }
+                        }, 500)
+                    }
                 }
             } catch (err) {
-                if (requestId === locationRequestIdRef.current) {
+                if (!isCancelled && requestId === locationRequestIdRef.current) {
                     console.error("Location detection failed:", err)
                     setError("Location access denied")
-                    await fetchGuideData('India')
+                    await fetchGuideData('India', requestId)
                 }
             } finally {
-                if (requestId === locationRequestIdRef.current) setLoading(false)
+                if (!isCancelled && requestId === locationRequestIdRef.current) {
+                    setLoading(false)
+                }
             }
         }
 
         loadLocation()
         fetchUpcomingTrip()
 
-        return () => { locationRequestIdRef.current++ }
+        return () => {
+            isCancelled = true
+            if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current)
+        }
     }, [fetchUpcomingTrip, fetchGuideData])
 
     // Manual location refresh function (callable from components)
@@ -138,14 +158,21 @@ export function useDashboard() {
                     lat: detectedLocation.lat,
                     lng: detectedLocation.lng
                 })
-                await fetchGuideData(rawCountry)
-                setTimeout(() => setZoom(15), 500)
+                await fetchGuideData(rawCountry, requestId)
+                if (requestId === locationRequestIdRef.current) {
+                    if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current)
+                    zoomTimeoutRef.current = setTimeout(() => {
+                        if (requestId === locationRequestIdRef.current) {
+                            setZoom(15)
+                        }
+                    }, 500)
+                }
             }
         } catch (err) {
             if (requestId === locationRequestIdRef.current) {
-                console.error("Location detection failed:", err)
+                console.error("Location refresh failed:", err)
                 setError("Location access denied")
-                await fetchGuideData('India')
+                await fetchGuideData('India', requestId)
             }
         } finally {
             if (requestId === locationRequestIdRef.current) setLoading(false)

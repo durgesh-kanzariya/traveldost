@@ -24,7 +24,7 @@ export function useTranslator() {
     const [userLocation, setUserLocation] = useState(null)
     const [cache, setCache] = useState(() => {
         try {
-            const stored = sessionStorage.getItem('translationCache') || localStorage.getItem('translationCache')
+            const stored = sessionStorage.getItem('translationCache')
             return stored ? JSON.parse(stored) : {}
         } catch {
             return {}
