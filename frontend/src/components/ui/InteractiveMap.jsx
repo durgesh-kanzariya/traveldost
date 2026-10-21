@@ -84,11 +84,13 @@ const userIcon = L.divIcon({
 })
 
 // --- HELPER TO RE-CENTER MAP ---
-function RecenterAutomatically({ lat, lng }) {
+function RecenterAutomatically({ lat, lng, zoom }) {
     const map = useMap()
     useEffect(() => {
-        map.flyTo([lat, lng], map.getZoom())
-    }, [lat, lng, map])
+        if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
+            map.flyTo([lat, lng], zoom || map.getZoom())
+        }
+    }, [lat, lng, zoom, map])
     return null
 }
 
@@ -106,7 +108,7 @@ function WheelZoomController({ enabled }) {
     return null
 }
 
-export function InteractiveMap({ lat, lng }) {
+export function InteractiveMap({ lat, lng, zoom = 14 }) {
     const [safeZones, setSafeZones] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -145,7 +147,7 @@ export function InteractiveMap({ lat, lng }) {
         <div className="relative h-96 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner [&_.leaflet-tile-pane]:dark:invert-[.9] [&_.leaflet-tile-pane]:dark:hue-rotate-180 [&_.leaflet-tile-pane]:dark:contrast-75">
             <MapContainer
                 center={[lat, lng]}
-                zoom={14}
+                zoom={zoom}
                 style={{ height: '100%', width: '100%', background: '#0f172a' }}
                 scrollWheelZoom={false}
             >
@@ -154,7 +156,7 @@ export function InteractiveMap({ lat, lng }) {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                <RecenterAutomatically lat={lat} lng={lng} />
+                <RecenterAutomatically lat={lat} lng={lng} zoom={zoom} />
                 <WheelZoomController enabled={scrollZoomEnabled} />
 
                 {/* USER MARKER */}

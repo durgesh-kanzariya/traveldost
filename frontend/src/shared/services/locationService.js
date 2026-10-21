@@ -39,18 +39,62 @@ export const detectAndCacheLocation = async (forceRefresh = false) => {
         }
     }
 
-    return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-            reject(new Error('Geolocation not supported'));
+    // Fast fallback using BigDataCloud's IP geolocation when GPS is denied, timed out, or unprompted
+    const fetchIpLocation = async () => {
+        try {
+            const response = await axios.get(
+                'https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en',
+                { timeout: 5000 }
+            );
+            const data = response.data;
+            const location = {
+                lat: data.latitude || 28.6139,
+                lng: data.longitude || 77.2090,
+                country: data.countryName || 'India',
+                city: data.city || data.locality || ''
+            };
+            setCachedLocation(location);
+            return location;
+        } catch {
+            const defaultLocation = {
+                lat: 28.6139,
+                lng: 77.2090,
+                country: 'India',
+                city: 'New Delhi'
+            };
+            return defaultLocation;
+        }
+    };
+
+    return new Promise((resolve) => {
+        if (typeof navigator === 'undefined' || !navigator.geolocation) {
+            fetchIpLocation().then(resolve);
             return;
         }
 
+        let settled = false;
+        const handleFailure = async () => {
+            if (settled) return;
+            settled = true;
+            const loc = await fetchIpLocation();
+            resolve(loc);
+        };
+
+        // Safety timer: resolve with IP location if browser permission prompt hangs or is ignored
+        const safetyTimer = setTimeout(() => {
+            handleFailure();
+        }, 4500);
+
         navigator.geolocation.getCurrentPosition(
             async (position) => {
+                if (settled) return;
+                clearTimeout(safetyTimer);
+                settled = true;
                 try {
                     const { latitude, longitude } = position.coords;
                     const response = await axios.get(
-                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+                        { timeout: 5000 }
                     );
                     const data = response.data;
 
@@ -63,12 +107,19 @@ export const detectAndCacheLocation = async (forceRefresh = false) => {
 
                     setCachedLocation(location);
                     resolve(location);
-                } catch (err) {
-                    reject(err);
+                } catch {
+                    const fallbackLoc = await fetchIpLocation();
+                    resolve(fallbackLoc);
                 }
             },
-            (err) => {
-                reject(err);
+            () => {
+                clearTimeout(safetyTimer);
+                handleFailure();
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 4000,
+                maximumAge: 5 * 60 * 1000
             }
         );
     });

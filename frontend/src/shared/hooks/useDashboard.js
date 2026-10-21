@@ -3,10 +3,10 @@ import { getGuideByCountry, getUpcomingTrip, detectAndCacheLocation } from '../s
 
 export function useDashboard() {
     const [location, setLocation] = useState({
-        country: 'Loading...',
-        city: '',
-        lat: 20.5937,
-        lng: 78.9629
+        country: 'India',
+        city: 'New Delhi',
+        lat: 28.6139,
+        lng: 77.2090
     })
     const [zoom, setZoom] = useState(4)
     const [loading, setLoading] = useState(true)
@@ -104,6 +104,12 @@ export function useDashboard() {
                 if (!isCancelled && requestId === locationRequestIdRef.current) {
                     console.error("Location detection failed:", err)
                     setError("Location access denied")
+                    setLocation({
+                        country: 'India',
+                        city: 'New Delhi',
+                        lat: 28.6139,
+                        lng: 77.2090
+                    })
                     await fetchGuideData('India', requestId)
                 }
             } finally {
@@ -172,6 +178,12 @@ export function useDashboard() {
             if (requestId === locationRequestIdRef.current) {
                 console.error("Location refresh failed:", err)
                 setError("Location access denied")
+                setLocation({
+                    country: 'India',
+                    city: 'New Delhi',
+                    lat: 28.6139,
+                    lng: 77.2090
+                })
                 await fetchGuideData('India', requestId)
             }
         } finally {
