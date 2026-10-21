@@ -252,8 +252,8 @@ export function DashboardLayout({ children }) {
               to="/dashboard"
               className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 rounded"
             >
-              <div className="w-5 h-5 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center shrink-0">
-                <Plane className="w-3 h-3 text-white dark:text-zinc-950 -rotate-45" />
+              <div className="w-6 h-6 rounded overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-white shrink-0 flex items-center justify-center">
+                <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
                 TravelDost
@@ -340,8 +340,8 @@ export function DashboardLayout({ children }) {
             {/* Header */}
             <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center shrink-0">
-                  <Plane className="w-3 h-3 text-white dark:text-zinc-950 -rotate-45" />
+                <div className="w-6 h-6 rounded overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-white shrink-0 flex items-center justify-center">
+                  <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
                   TravelDost

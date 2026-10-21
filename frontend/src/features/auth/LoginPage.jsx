@@ -56,9 +56,9 @@ export function LoginPage() {
         {/* Card */}
         <div className="p-6 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-xl">
           {/* Logo & Header */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center shrink-0">
-              <Plane className="w-3.5 h-3.5 text-white dark:text-zinc-950 -rotate-45" />
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 bg-white flex items-center justify-center overflow-hidden shrink-0">
+              <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
               TravelDost

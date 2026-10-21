@@ -43,8 +43,8 @@ export function AdminLayout({ children }) {
             {/* Mobile Header */}
             <div className="lg:hidden flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/90 px-4 py-3 sticky top-0 z-40 backdrop-blur-md">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                        <Shield className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />
+                    <div className="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
                     </div>
                     <span className="font-mono text-xs font-semibold tracking-wider uppercase text-zinc-900 dark:text-zinc-100">
                         Admin Terminal
@@ -79,8 +79,8 @@ export function AdminLayout({ children }) {
                             {/* Brand Header */}
                             <div className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800/80">
                                 <Link to="/admin/dashboard" className="flex items-center gap-2.5 group">
-                                    <div className="w-7 h-7 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-900 text-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-mono text-xs font-bold">
-                                        TD
+                                    <div className="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                                        <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">

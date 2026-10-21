@@ -34,8 +34,8 @@ export function Navbar() {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-7 h-7 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-900 text-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-mono text-xs font-bold transition-transform group-hover:scale-105">
-            TD
+          <div className="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 bg-white flex items-center justify-center overflow-hidden shrink-0 transition-transform group-hover:scale-105">
+            <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">

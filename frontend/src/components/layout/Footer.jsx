@@ -8,8 +8,8 @@ export function Footer() {
           {/* Brand & Mission Tag */}
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-900 text-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-mono text-[10px] font-bold">
-                TD
+              <div className="w-6 h-6 rounded border border-zinc-200 dark:border-zinc-700 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                <img src="/logo.jpeg" alt="TravelDost Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
                 TravelDost
