@@ -18,6 +18,9 @@ const authMiddleware = require('./middleware/authMiddleware');
 function createApp() {
   const app = express();
 
+  // Trust first proxy hop behind reverse proxies (e.g. Render, Vercel)
+  app.set('trust proxy', 1);
+
   app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
   }));
@@ -30,12 +33,37 @@ function createApp() {
 
   app.use(globalLimiter);
 
-  const externalProxyLimiter = rateLimit({
+  // Dedicated per-route rate limiter instances to prevent shared exhaustion
+  const translateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { message: 'Too many external API requests, please try again later.' }
+    message: { message: 'Too many translation requests, please try again later.' }
+  });
+
+  const currencyLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many currency requests, please try again later.' }
+  });
+
+  const geocodeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many geocoding requests, please try again later.' }
+  });
+
+  const mapLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many map/safezone requests, please try again later.' }
   });
 
   app.use(cors({
@@ -88,11 +116,11 @@ function createApp() {
   app.use('/api/auth', authRoutes);
   app.use('/api/checklist', checklistRoutes);
   app.use('/api/guides', guideRoutes);
-  app.use('/api/trips', authMiddleware, tripsRouter);
-  app.use('/api/translate', externalProxyLimiter, translateRouter);
-  app.use('/api/currency', externalProxyLimiter, currencyRouter);
-  app.use('/api/geocode', externalProxyLimiter, geocodeRouter);
-  app.use('/api/map', externalProxyLimiter, safezonesRouter);
+  app.use('/api/trips', tripsRouter);
+  app.use('/api/translate', translateLimiter, translateRouter);
+  app.use('/api/currency', currencyLimiter, currencyRouter);
+  app.use('/api/geocode', geocodeLimiter, geocodeRouter);
+  app.use('/api/map', mapLimiter, safezonesRouter);
   app.use('/api/admin', adminRoutes);
   app.use('/api/expenses', expensesRouter);
 

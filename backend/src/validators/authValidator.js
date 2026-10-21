@@ -20,7 +20,12 @@ exports.updateProfileRules = [
     check('lastName', 'Last Name must be a string').optional().isString().trim().escape(),
     check('email', 'Please include a valid email').optional().isEmail().normalizeEmail(),
     check('nativeLanguage', 'Native language must be a string').optional().isString().trim().escape(),
-    check('defaultCurrency', 'Currency code must be strings').optional().isString().isLength({ min: 3, max: 3 }).trim().toUpperCase()
+    check('defaultCurrency', 'Currency must be one of: USD, EUR, INR, GBP, CAD, AUD, JPY')
+        .optional({ nullable: true })
+        .isString()
+        .trim()
+        .toUpperCase()
+        .isIn(['USD', 'EUR', 'INR', 'GBP', 'CAD', 'AUD', 'JPY'])
 ];
 
 exports.changePasswordRules = [

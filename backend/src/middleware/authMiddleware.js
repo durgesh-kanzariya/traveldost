@@ -11,15 +11,27 @@ module.exports = async function (req, res, next) {
     return res.status(401).json({ message: 'No token, authorization denied' });
   }
 
-  // 3. Verify token and validate that account currently exists
+  // 3. Verify JWT signature and payload
+  let decoded;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({ message: 'Token is not valid' });
+    }
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token has expired, please log in again' });
+    }
+    return res.status(401).json({ message: 'Token is not valid' });
+  }
 
+  // 4. Validate user account status in database (separate from JWT error handling)
+  try {
     const userResult = await pool.query(
-      `SELECT u.id, LOWER(r.role_name) as role 
-       FROM users u 
-       LEFT JOIN user_roles ur ON u.id = ur.user_id 
-       LEFT JOIN roles r ON ur.role_id = r.id 
+      `SELECT u.id, LOWER(r.role_name) as role
+       FROM users u
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN roles r ON ur.role_id = r.id
        WHERE u.id = $1`,
       [decoded.id]
     );
@@ -33,7 +45,8 @@ module.exports = async function (req, res, next) {
       role: userResult.rows[0].role || decoded.role || 'user'
     };
     next();
-  } catch (err) {
-    res.status(401).json({ message: 'Token is not valid' });
+  } catch (dbErr) {
+    console.error('Database error in authMiddleware:', dbErr);
+    return next(dbErr);
   }
 };

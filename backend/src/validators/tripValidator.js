@@ -1,5 +1,9 @@
 const { check, param } = require('express-validator');
 
+const ALLOWED_CURRENCIES = ['USD', 'EUR', 'INR', 'GBP', 'CAD', 'AUD', 'JPY'];
+
+exports.ALLOWED_CURRENCIES = ALLOWED_CURRENCIES;
+
 exports.tripRules = [
     check('destinations', 'Destinations must be an array with 1 to 10 entries')
         .isArray({ min: 1, max: 10 }),
@@ -17,8 +21,10 @@ exports.tripRules = [
         }),
     check('budget', 'Budget must be a non-negative numeric value up to 100,000,000')
         .optional({ nullable: true }).isFloat({ min: 0, max: 100000000 }),
-    check('currency', 'Currency must be a 3-letter currency code')
-        .optional({ nullable: true }).isString().trim().isLength({ min: 3, max: 3 }).toUpperCase()
+    check('currency', `Currency must be one of: ${ALLOWED_CURRENCIES.join(', ')}`)
+        .optional({ nullable: true })
+        .isString().trim().toUpperCase()
+        .isIn(ALLOWED_CURRENCIES)
 ];
 
 exports.tripIdParamRule = [
