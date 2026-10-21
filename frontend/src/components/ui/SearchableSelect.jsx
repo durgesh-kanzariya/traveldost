@@ -1,16 +1,8 @@
 import { useState, useRef, useEffect, useId } from 'react'
-import { ChevronDown, Search } from 'lucide-react'
+import { ChevronDown, Search, X } from 'lucide-react'
 
 /**
- * Reusable accessible searchable dropdown component.
- * Props:
- *  - value: currently selected value (string)
- *  - onChange: callback(newValue)
- *  - options: array of strings
- *  - placeholder: input placeholder string
- *  - loading: bool
- *  - id: optional id
- *  - ariaLabel: accessible label for screen readers
+ * Reusable accessible searchable dropdown component with polished combobox UX.
  */
 export function SearchableSelect({
     value,
@@ -34,7 +26,7 @@ export function SearchableSelect({
     const ref = useRef(null)
     const listRef = useRef(null)
 
-    // Sync state during render when parent prop changes, avoiding cascading render effects
+    // Sync state during render when parent prop changes
     if (value !== prevValue) {
         setPrevValue(value || '')
         setQuery(value || '')
@@ -59,6 +51,14 @@ export function SearchableSelect({
     const handleSelect = (option) => {
         setQuery(option)
         onChange(option)
+        setIsOpen(false)
+        setHighlightedIndex(-1)
+    }
+
+    const handleClear = (e) => {
+        e.stopPropagation()
+        setQuery('')
+        onChange('')
         setIsOpen(false)
         setHighlightedIndex(-1)
     }
@@ -121,8 +121,8 @@ export function SearchableSelect({
 
     return (
         <div className="relative" ref={ref}>
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <div className="relative flex items-center">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                 <input
                     id={inputId}
                     type="text"
@@ -139,13 +139,25 @@ export function SearchableSelect({
                         if (filtered.length > 0) setHighlightedIndex(0)
                     }}
                     onKeyDown={handleKeyDown}
-                    placeholder={loading ? 'Loading...' : placeholder}
+                    placeholder={loading ? 'Loading options...' : placeholder}
                     disabled={disabled || loading}
-                    className="w-full pl-9 pr-9 py-2 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 disabled:opacity-50"
+                    className="w-full pl-10 pr-16 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 disabled:opacity-50 transition-all duration-200"
                 />
-                <ChevronDown
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 transition-transform pointer-events-none ${isOpen ? 'rotate-180' : ''}`}
-                />
+                <div className="absolute right-2.5 flex items-center gap-1">
+                    {query && !disabled && (
+                        <button
+                            type="button"
+                            onClick={handleClear}
+                            aria-label="Clear selection"
+                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
+                    <ChevronDown
+                        className={`h-4 w-4 text-slate-400 transition-transform duration-200 pointer-events-none ${isOpen ? 'rotate-180 text-sky-500' : ''}`}
+                    />
+                </div>
             </div>
 
             {isOpen && filtered.length > 0 && (
@@ -154,7 +166,7 @@ export function SearchableSelect({
                     role="listbox"
                     aria-label={ariaLabel || placeholder}
                     ref={listRef}
-                    className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1"
+                    className="absolute z-50 w-full mt-1.5 max-h-56 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150"
                 >
                     {filtered.map((option, idx) => {
                         const isSelected = option === value
@@ -167,15 +179,18 @@ export function SearchableSelect({
                                 aria-selected={isSelected}
                                 onClick={() => handleSelect(option)}
                                 onMouseEnter={() => setHighlightedIndex(idx)}
-                                className={`px-4 py-2.5 text-sm cursor-pointer select-none transition-colors ${
+                                className={`px-4 py-2.5 text-sm cursor-pointer select-none transition-colors flex items-center justify-between ${
                                     isHighlighted
-                                        ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-900 dark:text-sky-200'
+                                        ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-900 dark:text-sky-200 font-medium'
                                         : isSelected
-                                        ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 font-medium'
-                                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                        ? 'bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 font-semibold'
+                                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'
                                 }`}
                             >
                                 <span>{option}</span>
+                                {isSelected && (
+                                    <span className="h-1.5 w-1.5 rounded-full bg-sky-500 shrink-0" />
+                                )}
                             </li>
                         )
                     })}
@@ -186,7 +201,7 @@ export function SearchableSelect({
                 <div
                     id={listboxId}
                     role="status"
-                    className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg px-4 py-3 text-sm text-slate-400"
+                    className="absolute z-50 w-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xl px-4 py-3 text-xs text-slate-400 animate-in fade-in duration-150"
                 >
                     No matches found for "{query}"
                 </div>

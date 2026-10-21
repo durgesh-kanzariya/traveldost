@@ -1,8 +1,16 @@
 import { useEffect, useRef, useId } from 'react'
 import { X } from 'lucide-react'
 
-export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  subtitle,
+  children,
+  maxWidth = 'max-w-md'
+}) {
   const titleId = useId()
+  const subtitleId = useId()
   const modalRef = useRef(null)
   const previousActiveElementRef = useRef(null)
 
@@ -28,7 +36,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
           modalRef.current.focus()
         }
       }
-    }, 10)
+    }, 15)
 
     // Keydown handler for Escape and Focus Trap
     const handleKeyDown = (e) => {
@@ -79,7 +87,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm transition-all duration-300 animate-in fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
@@ -92,22 +100,32 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
+        aria-describedby={subtitle ? subtitleId : undefined}
         tabIndex={-1}
-        className={`bg-white dark:bg-slate-900 rounded-2xl p-6 w-full ${maxWidth} shadow-xl relative outline-none animate-in fade-in zoom-in-95 duration-150`}
+        className={`bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 w-full ${maxWidth} shadow-2xl relative outline-none animate-in zoom-in-95 duration-200`}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
           aria-label="Close dialog"
         >
           <X className="h-5 w-5" />
         </button>
+
         {title && (
-          <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-white mb-4 pr-8">
-            {title}
-          </h2>
+          <div className="mb-5 pr-8">
+            <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {title}
+            </h2>
+            {subtitle && (
+              <p id={subtitleId} className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {subtitle}
+              </p>
+            )}
+          </div>
         )}
+
         {children}
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import { Shield, Hospital, MapPin, Navigation, ZoomIn } from 'lucide-react'
+import { ZoomIn, RotateCcw, AlertCircle } from 'lucide-react'
 import api from '../../shared/services/api'
 
 const CACHE_KEY = 'traveldost_safezones_cache'
@@ -58,13 +58,11 @@ const setCachedData = (lat, lng, data) => {
 const createIcon = (color, type) => {
     return L.divIcon({
         className: 'custom-icon',
-        html: `<div style="background-color: ${color}; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        html: `<div style="background-color: ${color}; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.35);">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 ${type === 'police'
                 ? '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>'
-                : type === 'hospital'
-                    ? '<path d="M12 6v12m-6-6h12"></path>'
-                    : '<circle cx="12" cy="12" r="3"></circle>'
+                : '<path d="M12 6v12m-6-6h12"></path>'
             }
              </svg>
            </div>`,
@@ -74,13 +72,13 @@ const createIcon = (color, type) => {
     })
 }
 
-const policeIcon = createIcon('#dc2626', 'police') // Red
-const hospitalIcon = createIcon('#16a34a', 'hospital') // Green
+const policeIcon = createIcon('#ef4444', 'police') // Red-500
+const hospitalIcon = createIcon('#10b981', 'hospital') // Emerald-500
 const userIcon = L.divIcon({
     className: 'user-marker-pulse',
-    html: `<div style="background-color: #0284c7; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.3);"></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
+    html: `<div style="background-color: #0284c7; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 5px rgba(2, 132, 199, 0.4), 0 4px 10px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
 })
 
 // --- HELPER TO RE-CENTER MAP ---
@@ -88,7 +86,10 @@ function RecenterAutomatically({ lat, lng, zoom }) {
     const map = useMap()
     useEffect(() => {
         if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
-            map.flyTo([lat, lng], zoom || map.getZoom())
+            map.flyTo([lat, lng], zoom || map.getZoom(), {
+                duration: 1.2,
+                easeLinearity: 0.25
+            })
         }
     }, [lat, lng, zoom, map])
     return null
@@ -144,11 +145,11 @@ export function InteractiveMap({ lat, lng, zoom = 14 }) {
     }, [fetchSafeZones])
 
     return (
-        <div className="relative h-96 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner [&_.leaflet-tile-pane]:dark:invert-[.9] [&_.leaflet-tile-pane]:dark:hue-rotate-180 [&_.leaflet-tile-pane]:dark:contrast-75">
+        <div className="relative h-96 w-full overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md [&_.leaflet-tile-pane]:dark:invert-[.92] [&_.leaflet-tile-pane]:dark:hue-rotate-180 [&_.leaflet-tile-pane]:dark:contrast-80">
             <MapContainer
                 center={[lat, lng]}
                 zoom={zoom}
-                style={{ height: '100%', width: '100%', background: '#0f172a' }}
+                style={{ height: '100%', width: '100%', background: '#090d16' }}
                 scrollWheelZoom={false}
             >
                 <TileLayer
@@ -161,8 +162,8 @@ export function InteractiveMap({ lat, lng, zoom = 14 }) {
 
                 {/* USER MARKER */}
                 <Marker position={[lat, lng]} icon={userIcon}>
-                    <Popup>
-                        <div className="font-semibold text-sky-700">You are here</div>
+                    <Popup className="rounded-xl overflow-hidden font-sans">
+                        <div className="font-semibold text-sky-800 text-xs py-0.5">Your Current Location</div>
                     </Popup>
                 </Marker>
 
@@ -173,68 +174,71 @@ export function InteractiveMap({ lat, lng, zoom = 14 }) {
                         position={[zone.lat, zone.lng]}
                         icon={zone.type === 'police' ? policeIcon : hospitalIcon}
                     >
-                        <Popup>
-                            <div className="text-sm">
-                                <strong className={`block mb-1 ${zone.type === 'police' ? 'text-red-700' : 'text-green-700'}`}>
+                        <Popup className="rounded-xl overflow-hidden font-sans">
+                            <div className="text-xs">
+                                <strong className={`block mb-1 font-bold ${zone.type === 'police' ? 'text-rose-600' : 'text-emerald-600'}`}>
                                     {zone.type === 'police' ? '👮 Police Station' : '🏥 Hospital'}
                                 </strong>
-                                {zone.name}
+                                <span className="text-slate-700 font-medium">{zone.name}</span>
                             </div>
                         </Popup>
                     </Marker>
                 ))}
-
             </MapContainer>
 
-            {/* WHEEL ZOOM CONTROL OVERLAY */}
-            <button
-                type="button"
-                onClick={() => setScrollZoomEnabled(prev => !prev)}
-                title={scrollZoomEnabled ? "Scroll wheel zoom is active. Click to lock." : "Click to enable zoom with mouse scroll wheel"}
-                className={`absolute top-4 left-14 z-[400] px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md transition-all flex items-center gap-1.5 border backdrop-blur ${
-                    scrollZoomEnabled
-                        ? 'bg-sky-600 text-white border-sky-500 shadow-sky-500/20'
-                        : 'bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
-            >
-                <ZoomIn className="h-3.5 w-3.5" />
-                <span>Scroll Zoom: {scrollZoomEnabled ? 'On' : 'Off'}</span>
-            </button>
+            {/* FLOATING CONTROLS BAR */}
+            <div className="absolute top-4 left-14 z-[400] flex items-center gap-2">
+                <button
+                    type="button"
+                    onClick={() => setScrollZoomEnabled(prev => !prev)}
+                    title={scrollZoomEnabled ? "Scroll wheel zoom is active. Click to lock." : "Click to enable zoom with mouse scroll wheel"}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md transition-all flex items-center gap-1.5 border backdrop-blur-md cursor-pointer ${
+                        scrollZoomEnabled
+                            ? 'bg-sky-600/90 text-white border-sky-400/50 shadow-sky-600/30'
+                            : 'bg-white/85 dark:bg-slate-900/85 text-slate-700 dark:text-slate-300 border-white/40 dark:border-slate-700/60 hover:bg-white dark:hover:bg-slate-900'
+                    }`}
+                >
+                    <ZoomIn className="h-3.5 w-3.5" />
+                    <span>Scroll Zoom: {scrollZoomEnabled ? 'On' : 'Off'}</span>
+                </button>
+            </div>
 
             {/* ERROR BANNER WITH RETRY */}
             {error && (
-                <div className="absolute top-16 left-4 right-4 z-[400] bg-red-500/95 text-white px-3 py-2 rounded-xl text-xs flex items-center justify-between shadow-lg backdrop-blur animate-in fade-in">
-                    <span>{error}</span>
+                <div className="absolute top-16 left-4 right-4 z-[400] bg-rose-600/90 text-white px-3.5 py-2 rounded-xl text-xs flex items-center justify-between shadow-xl backdrop-blur-md border border-rose-400/30 animate-in fade-in">
+                    <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>{error}</span>
+                    </div>
                     <button
                         type="button"
                         onClick={fetchSafeZones}
-                        className="px-2.5 py-1 bg-white text-red-600 font-bold rounded-lg hover:bg-red-50 text-[11px] transition-colors shrink-0 ml-2 shadow-xs"
+                        className="px-2.5 py-1 bg-white text-rose-600 font-bold rounded-lg hover:bg-rose-50 text-[11px] transition-colors shrink-0 ml-2 shadow-xs cursor-pointer flex items-center gap-1"
                     >
-                        Retry
+                        <RotateCcw className="h-3 w-3" /> Retry
                     </button>
                 </div>
             )}
 
-            {/* OVERLAY LOADING INDICATOR */}
+            {/* OVERLAY LOADING BADGE */}
             {loading && (
-                <div className="absolute top-4 right-4 z-[400] bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm flex items-center gap-2">
-                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-sky-600 dark:border-sky-400 border-t-transparent"></div>
-                    Scanning Safe Zones...
+                <div className="absolute top-4 right-4 z-[400] bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-300 shadow-md border border-white/30 dark:border-slate-700/60 flex items-center gap-2 animate-in fade-in">
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
+                    <span>Locating safe zones...</span>
                 </div>
             )}
 
-            {/* LEGEND */}
-            <div className="absolute bottom-4 left-4 z-[400] bg-white/90 dark:bg-slate-900/90 backdrop-blur p-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2 mb-1">
-                    <div className="w-3 h-3 rounded-full bg-red-600 border border-white dark:border-slate-800 shadow-sm"></div>
-                    Police
+            {/* REFINED LEGEND */}
+            <div className="absolute bottom-4 left-4 z-[400] bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 shadow-lg border border-white/30 dark:border-slate-700/60 flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500 border border-white dark:border-slate-900 shadow-xs" />
+                    <span className="text-[11px] font-semibold">Police</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-600 border border-white dark:border-slate-800 shadow-sm"></div>
-                    Hospital
+                <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 border border-white dark:border-slate-900 shadow-xs" />
+                    <span className="text-[11px] font-semibold">Hospital</span>
                 </div>
             </div>
-
         </div>
     )
 }
