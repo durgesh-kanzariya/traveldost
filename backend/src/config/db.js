@@ -5,12 +5,22 @@ require('dotenv').config();
 // But cleanest is to use connectionString OR the object.
 // Let's make it robust:
 
+const isLocalhostUrl = process.env.DATABASE_URL && (
+  process.env.DATABASE_URL.includes('localhost') || 
+  process.env.DATABASE_URL.includes('127.0.0.1')
+);
+
+// Enforce verified TLS certificate validation by default; can be overridden via DB_SSL_REJECT_UNAUTHORIZED for custom environments
+const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false' ? false : true;
+
 const poolConfig = process.env.DATABASE_URL
   ? {
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false, // Required for most cloud DBs
-    },
+    ...(isLocalhostUrl ? {} : {
+      ssl: {
+        rejectUnauthorized
+      }
+    })
   }
   : {
     user: process.env.DB_USER,
@@ -20,28 +30,25 @@ const poolConfig = process.env.DATABASE_URL
     port: process.env.DB_PORT,
   };
 
-console.log('--- DB CONFIG START ---');
-if (process.env.DATABASE_URL) {
-  console.log('Using DATABASE_URL');
-  // Mask password for security
-  console.log('Connection String:', process.env.DATABASE_URL.replace(/:[^:@]+@/, ':****@'));
-} else {
-  console.log('Using Individual Env Vars');
-  console.log('DB_HOST:', process.env.DB_HOST);
-  console.log('DB_USER:', process.env.DB_USER);
-  console.log('DB_NAME:', process.env.DB_NAME);
-  console.log('DB_PORT:', process.env.DB_PORT);
+if (process.env.NODE_ENV !== 'production' && !process.env.CI) {
+  if (process.env.DATABASE_URL) {
+    const maskedUrl = process.env.DATABASE_URL.replace(/:[^:@]+@/, ':****@');
+    console.log(`[Database] Connecting using DATABASE_URL: ${maskedUrl}`);
+  } else {
+    console.log(`[Database] Connecting to ${process.env.DB_USER}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+  }
 }
-console.log('--- DB CONFIG END ---');
 
 const pool = new Pool(poolConfig);
 
 pool.on('connect', () => {
-  console.log('✅ Connected to LOCAL Database');
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('✅ Connected to Database pool');
+  }
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Database Connection Error:', err);
+  console.error('❌ Database Connection Error:', err.message);
 });
 
 module.exports = pool;
