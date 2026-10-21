@@ -50,6 +50,7 @@ export function TripForm({ initialData, onSubmit, countries, countriesLoading, s
                         <button
                             type="button"
                             onClick={addStop}
+                            aria-label="Add another destination stop"
                             className="flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400 hover:text-sky-700 font-medium"
                         >
                             <Plus className="h-3.5 w-3.5" /> Add stop
@@ -70,13 +71,15 @@ export function TripForm({ initialData, onSubmit, countries, countriesLoading, s
                                     options={countries}
                                     placeholder="Search country..."
                                     loading={countriesLoading}
+                                    ariaLabel={idx === 0 ? "Starting trip destination country" : `Destination stop ${idx} country`}
                                 />
                             </div>
                             {formData.destinations.length > 1 && (
                                 <button
                                     type="button"
                                     onClick={() => removeStop(idx)}
-                                    className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                    aria-label={`Remove destination stop ${idx === 0 ? 'Start' : idx}`}
+                                    className="p-1 text-slate-400 hover:text-red-500 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>

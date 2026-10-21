@@ -1,20 +1,37 @@
 import { api } from '../../shared/services';
 
+const CHECKLIST_CACHE_TTL = 15 * 60 * 1000; // 15 minutes TTL
+
 const getCache = (key) => {
     try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data).value : null;
-    } catch { return null; }
+        const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.time > CHECKLIST_CACHE_TTL) {
+            return null; // Expired cache
+        }
+        return parsed.value;
+    } catch {
+        return null;
+    }
 };
 
 const setCache = (key, value) => {
     try {
-        localStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
-    } catch { /* ignore */ }
+        sessionStorage.setItem(key, JSON.stringify({ value, time: Date.now() }));
+    } catch { /* ignore quota */ }
 };
 
 const clearCache = () => {
-    localStorage.removeItem('checklist');
+    try {
+        sessionStorage.removeItem('checklist_all');
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const k = sessionStorage.key(i);
+            if (k && k.startsWith('checklist_')) {
+                sessionStorage.removeItem(k);
+            }
+        }
+    } catch { /* ignore */ }
 };
 
 const getChecklistItems = async (tripId) => {

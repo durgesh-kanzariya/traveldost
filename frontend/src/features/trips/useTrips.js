@@ -26,36 +26,23 @@ export function useTrips() {
   }, [])
 
   const addTrip = useCallback(async (formData) => {
-    await createTrip(formData)
-    // Re-fetch trips after adding
-    try {
-      const data = await getTrips()
-      setTrips(data)
-    } catch (err) {
-      console.error('Failed to refresh trips:', err)
-    }
+    const created = await createTrip(formData)
+    const data = await getTrips()
+    setTrips(data)
+    return created
   }, [])
 
   const editTrip = useCallback(async (tripId, formData) => {
-    await apiUpdateTrip(tripId, formData)
-    // Re-fetch trips after editing
-    try {
-      const data = await getTrips()
-      setTrips(data)
-    } catch (err) {
-      console.error('Failed to refresh trips:', err)
-    }
+    const updated = await apiUpdateTrip(tripId, formData)
+    const data = await getTrips()
+    setTrips(data)
+    return updated
   }, [])
 
   const removeTrip = useCallback(async (tripId, deleteOption) => {
     await deleteTrip(tripId, deleteOption)
-    // Re-fetch trips after deleting
-    try {
-      const data = await getTrips()
-      setTrips(data)
-    } catch (err) {
-      console.error('Failed to refresh trips:', err)
-    }
+    const data = await getTrips()
+    setTrips(data)
   }, [])
 
   const getChecklistItemCount = useCallback(async (tripId) => {

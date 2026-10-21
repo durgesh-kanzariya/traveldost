@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Shield, Ambulance, Flame, RefreshCw, Search, ChevronDown, MapPin, Phone, Landmark, AlertTriangle, AlertOctagon } from 'lucide-react'
+import { Shield, Ambulance, Flame, RefreshCw, Search, ChevronDown, MapPin, Phone, Landmark, AlertTriangle, AlertOctagon, CheckCircle2 } from 'lucide-react'
 import { useEmergency } from './useEmergency'
 import { DashboardLayout } from '../../components/layout/DashboardLayout'
 import { Breadcrumbs } from '../../components/layout/Breadcrumbs'
@@ -131,6 +131,25 @@ export function EmergencyPage() {
           </div>
         )}
 
+        {activeData && !activeData.isVerified && (
+          <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-sm text-amber-800 dark:text-amber-200">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Unverified Fallback Numbers</p>
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                Verified local emergency services for <strong>{selectedCountry}</strong> are not yet cataloged in our database. Displaying universal international emergency fallback (112). Please verify local dispatch numbers with hotel staff or local police.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {activeData && activeData.isVerified && (
+          <div className="mb-6 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-2 text-xs font-medium text-emerald-800 dark:text-emerald-300">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Verified emergency directory data active for <strong>{selectedCountry}</strong>.</span>
+          </div>
+        )}
+
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { title: 'Police', type: 'Crime & Safety', icon: Shield, color: 'blue', value: activeData?.police },
@@ -140,8 +159,17 @@ export function EmergencyPage() {
             const style = colorStyles[card.color]
             return (
               <div key={card.title} className={`group relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 p-4 shadow-md dark:shadow-slate-900/20 border-t-4 ${style.border} hover:-translate-y-0.5 transition-transform duration-300`}>
-                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${style.bgIcon} ${style.hoverIcon} group-hover:text-white transition-colors`}>
-                  <card.icon className="h-5 w-5" />
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${style.bgIcon} ${style.hoverIcon} group-hover:text-white transition-colors`}>
+                    <card.icon className="h-5 w-5" />
+                  </div>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                    activeData?.isVerified
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                      : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                  }`}>
+                    {activeData?.isVerified ? 'Verified Local' : 'Universal Fallback'}
+                  </span>
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">{card.title}</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-xs mb-4">{card.type}</p>

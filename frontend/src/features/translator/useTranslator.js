@@ -1,6 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { translateText, getCachedLocation, detectAndCacheLocation } from '../../shared/services'
 import { countryToLanguage, supportedLanguages } from '../../shared/utils/countryLanguages'
+import { getStoredUser } from '../../shared/utils/authStorage'
+
+const MAX_TRANSLATION_CACHE = 50
+
+const pruneCache = (obj) => {
+    const keys = Object.keys(obj)
+    if (keys.length <= MAX_TRANSLATION_CACHE) return obj
+    const pruned = {}
+    keys.slice(keys.length - MAX_TRANSLATION_CACHE).forEach(k => {
+        pruned[k] = obj[k]
+    })
+    return pruned
+}
 
 export function useTranslator() {
     const [inputText, setInputText] = useState('')
@@ -10,15 +23,18 @@ export function useTranslator() {
     const [loading, setLoading] = useState(false)
     const [userLocation, setUserLocation] = useState(null)
     const [cache, setCache] = useState(() => {
-        const stored = localStorage.getItem('translationCache')
-        return stored ? JSON.parse(stored) : {}
+        try {
+            const stored = sessionStorage.getItem('translationCache') || localStorage.getItem('translationCache')
+            return stored ? JSON.parse(stored) : {}
+        } catch {
+            return {}
+        }
     })
 
     // Effect 1: Set source language from user profile
     useEffect(() => {
-        const storedUser = localStorage.getItem('user')
-        if (storedUser) {
-            const user = JSON.parse(storedUser)
+        const user = getStoredUser()
+        if (user) {
             const native = (user.native_language || user.nativeLanguage || 'English').toLowerCase()
             const found = supportedLanguages.find(l => l.name.toLowerCase() === native)
             if (found) {
@@ -88,9 +104,11 @@ export function useTranslator() {
             const data = await translateText(textToTranslate, sourceLang, targetLang);
             if (data.translatedText) {
                 setTranslatedText(data.translatedText)
-                const newCache = { ...cache, [cacheKey]: data.translatedText }
+                const newCache = pruneCache({ ...cache, [cacheKey]: data.translatedText })
                 setCache(newCache)
-                localStorage.setItem('translationCache', JSON.stringify(newCache))
+                try {
+                    sessionStorage.setItem('translationCache', JSON.stringify(newCache))
+                } catch { /* storage quota exceeded */ }
             }
         } catch (err) {
             console.error('Translation error:', err)
@@ -119,9 +137,11 @@ export function useTranslator() {
         if (translated) {
             setTranslatedText(translated)
             const cacheKey = `${sourceLang}-${targetLang}-${text.toLowerCase().trim()}`
-            const newCache = { ...cache, [cacheKey]: translated }
+            const newCache = pruneCache({ ...cache, [cacheKey]: translated })
             setCache(newCache)
-            localStorage.setItem('translationCache', JSON.stringify(newCache))
+            try {
+                sessionStorage.setItem('translationCache', JSON.stringify(newCache))
+            } catch { /* storage quota exceeded */ }
         } else {
             handleTranslate(text)
         }
