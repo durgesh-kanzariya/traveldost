@@ -7,7 +7,7 @@ export function Modal({
   title,
   subtitle,
   children,
-  maxWidth = 'max-w-md'
+  maxWidth = 'max-w-md',
 }) {
   const titleId = useId()
   const subtitleId = useId()
@@ -17,14 +17,11 @@ export function Modal({
   useEffect(() => {
     if (!isOpen) return
 
-    // Save previously focused element to restore on close
     previousActiveElementRef.current = document.activeElement
 
-    // Prevent background scrolling
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
-    // Focus the modal or its first focusable element
     const timer = setTimeout(() => {
       if (modalRef.current) {
         const focusable = modalRef.current.querySelectorAll(
@@ -38,7 +35,6 @@ export function Modal({
       }
     }, 15)
 
-    // Keydown handler for Escape and Focus Trap
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
@@ -87,7 +83,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm transition-all duration-300 animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs transition-opacity duration-200 animate-in fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
@@ -102,24 +98,26 @@ export function Modal({
         aria-labelledby={title ? titleId : undefined}
         aria-describedby={subtitle ? subtitleId : undefined}
         tabIndex={-1}
-        className={`bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 w-full ${maxWidth} shadow-2xl relative outline-none animate-in zoom-in-95 duration-200`}
+        className={`bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-5 w-full ${maxWidth} shadow-xl relative outline-none animate-in zoom-in-95 duration-150`}
       >
+        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-md transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer"
           aria-label="Close dialog"
         >
-          <X className="h-5 w-5" />
+          <X className="w-4 h-4" />
         </button>
 
+        {/* Modal Header */}
         {title && (
-          <div className="mb-5 pr-8">
-            <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+          <div className="mb-4 pr-7 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+            <h2 id={titleId} className="text-base font-semibold text-zinc-950 dark:text-zinc-50 tracking-tight">
               {title}
             </h2>
             {subtitle && (
-              <p id={subtitleId} className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p id={subtitleId} className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                 {subtitle}
               </p>
             )}

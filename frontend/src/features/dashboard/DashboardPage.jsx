@@ -1,11 +1,27 @@
-import { Link } from 'react-router-dom';
+import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
-  Shield, MapPin, AlertTriangle, Phone,
-  RefreshCw, Info, Plane, Calendar, Briefcase
-} from 'lucide-react';
-import { DashboardLayout } from '../../components/layout';
-import { InteractiveMap, Skeleton } from '../../components/ui';
-import { useDashboard } from '../../shared/hooks';
+  Shield,
+  MapPin,
+  AlertTriangle,
+  Phone,
+  RefreshCw,
+  Info,
+  Plane,
+  Calendar,
+  Briefcase,
+  ArrowRight,
+  ChevronRight,
+  Globe,
+  Banknote,
+  DollarSign,
+  Compass,
+  Radio,
+  ExternalLink,
+} from 'lucide-react'
+import { DashboardLayout } from '../../components/layout'
+import { InteractiveMap, Skeleton } from '../../components/ui'
+import { useDashboard } from '../../shared/hooks'
 
 export function Dashboard() {
   const {
@@ -16,8 +32,10 @@ export function Dashboard() {
     error,
     upcomingTrip,
     tripEmergencyData,
-    detectLocation
+    detectLocation,
   } = useDashboard()
+
+  const [activeRuleCategory, setActiveRuleCategory] = useState('all')
 
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
@@ -33,243 +51,509 @@ export function Dashboard() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   }
 
+  // Parse and categorize local rules
+  const { categories, parsedRules } = useMemo(() => {
+    if (!countryData?.rules || !Array.isArray(countryData.rules)) {
+      return { categories: ['all'], parsedRules: [] }
+    }
+
+    const rules = countryData.rules.map((rule, idx) => {
+      const match = rule.match(/^\[([^\]]+)\]\s*(.+)$/)
+      if (match) {
+        return { id: idx, category: match[1].trim(), text: match[2].trim(), raw: rule }
+      }
+      return { id: idx, category: 'General', text: rule.trim(), raw: rule }
+    })
+
+    const uniqueCats = ['all', ...Array.from(new Set(rules.map((r) => r.category)))]
+    return { categories: uniqueCats, parsedRules: rules }
+  }, [countryData])
+
+  const filteredRules = useMemo(() => {
+    if (activeRuleCategory === 'all') return parsedRules
+    return parsedRules.filter((r) => r.category.toLowerCase() === activeRuleCategory.toLowerCase())
+  }, [parsedRules, activeRuleCategory])
+
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Upcoming Trip Banner */}
-        {upcomingTrip && (
-          <div
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-900 dark:to-indigo-900 rounded-2xl p-6 shadow-lg shadow-violet-600/20 animate-fade-in">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Plane className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-white/80 text-sm font-medium">Upcoming Trip</p>
-                  <h2 className="text-xl font-bold text-white">{upcomingTrip.destination}</h2>
-                  <div className="flex items-center gap-3 mt-1 text-white/70 text-sm">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(upcomingTrip.start_date)} - {formatDate(upcomingTrip.end_date)}
-                    </span>
-                    <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                      {getDaysUntilTrip(upcomingTrip.start_date)} days away
-                    </span>
-                  </div>
-                </div>
-              </div>
+      <div className="space-y-5">
+        {/* ════════════════════════════════════════
+            1. TOP HUD / TELEMETRY TICKER BAR
+        ═════════════════════════════════════════ */}
+        <header
+          aria-label="System Status & Telemetry"
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800"
+        >
+          {/* Left: GPS telemetry readout */}
+          <div className="flex flex-wrap items-center gap-2.5 text-xs">
+            <div className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">
+                GPS LOCK
+              </span>
+            </div>
 
-              {tripEmergencyData && (
-                <div className="flex gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
-                    <p className="text-white/60 text-xs">Police</p>
-                    <p className="text-white font-bold">{tripEmergencyData.police || '--'}</p>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
-                    <p className="text-white/60 text-xs">Ambulance</p>
-                    <p className="text-white font-bold">{tripEmergencyData.ambulance || '--'}</p>
-                  </div>
-                </div>
+            <span className="text-zinc-300 dark:text-zinc-700">|</span>
+
+            <div className="flex items-center gap-1 text-zinc-900 dark:text-zinc-100 font-medium">
+              <MapPin className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
+              {loading ? (
+                <Skeleton className="h-3.5 w-28" />
+              ) : (
+                <span>{location.city ? `${location.city}, ${location.country}` : location.country}</span>
               )}
+            </div>
 
-              <Link
-                to="/checklist"
-                className="flex items-center gap-2 bg-white text-violet-700 px-4 py-2 rounded-xl font-medium hover:bg-white/90 transition-colors">
-                <Briefcase className="h-4 w-4" />
-                Trip Checklist
-              </Link>
+            <span className="text-zinc-300 dark:text-zinc-700 hidden sm:inline">|</span>
+
+            <div className="hidden sm:flex items-center gap-2 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+              <span>{location.lat?.toFixed(4)}°N</span>
+              <span>{location.lng?.toFixed(4)}°E</span>
             </div>
           </div>
-        )}
 
-        {/* Header Section */}
-        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
-              Travel Guide
-            </h1>
-            <p className="mt-1 text-slate-600 dark:text-slate-400">
-              Local customs and emergency information for your destination
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
+          {/* Right: Quick actions */}
+          <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+            {error && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/40 bg-rose-50 dark:bg-rose-950/30 text-[10px] font-mono text-rose-600 dark:text-rose-400">
+                <AlertTriangle className="w-3 h-3 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <button
+              type="button"
               onClick={() => detectLocation(true)}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600/90 hover:bg-sky-700 text-white rounded-xl shadow-lg shadow-sky-600/20 backdrop-blur-sm transition-all disabled:opacity-50"
+              title="Recalibrate GPS coordinates"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-medium rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Locating...' : 'Refresh Location'}
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+              <span>{loading ? 'SYNCING' : 'RE-SYNC'}</span>
             </button>
           </div>
         </header>
 
-        {/* Map Section */}
-        {loading ? (
-          <Skeleton className="h-96 w-full rounded-2xl" />
-        ) : (
-          <div className="animate-fade-in">
-            <InteractiveMap lat={location.lat} lng={location.lng} zoom={zoom} />
-          </div>
-        )}
-
-        {/* Location Info Bar */}
-        <div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/50 dark:border-slate-800/50 shadow-sm animate-fade-in">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-              <MapPin className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Current Location
-              </p>
-              {loading ? (
-                <Skeleton className="h-6 w-32 mt-1" />
-              ) : (
-                <p className="text-base font-bold text-slate-900 dark:text-white">
-                  {`${location.city || 'Unknown'}, ${location.country}`}
-                </p>
-              )}
-            </div>
-          </div>
-          {error && (
-            <div
-              className="text-xs bg-red-50 text-red-600 px-3 py-1 rounded-full font-medium border border-red-100">
-              ⚠️ {error}
-            </div>
-          )}
-        </div>
-
-        {/* Content Section */}
-        <div className="space-y-8">
-          {/* Emergency Contacts Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-                  <Shield className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                </div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Emergency Contacts</h2>
-              </div>
-              <Link
-                to="/emergency"
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:border-sky-300 dark:hover:border-sky-700 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
-              >
-                View All
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                { type: 'Police', key: 'police' },
-                { type: 'Ambulance', key: 'ambulance' }
-              ].map(({ type, key }) => (
-                <div key={type}
-                  className="p-4 border border-sky-200 dark:border-sky-900/50 hover:bg-sky-50/50 dark:hover:bg-sky-900/10 rounded-xl transition-all bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{type}</span>
-                    </div>
-                    <a
-                      href={`tel:${countryData?.emergency[key] || '112'}`}
-                      className="text-xl font-bold text-sky-600 dark:text-sky-400 tabular-nums hover:underline">
-                      {countryData?.emergency[key] || '112'}
-                    </a>
+        {/* ════════════════════════════════════════
+            2. ASYMMETRIC COMMAND HERO (7 cols / 5 cols)
+        ═════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Left Column (7 cols): Active Trip Dossier / Departure Card */}
+          <div className="lg:col-span-7 flex flex-col justify-between p-5 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 relative overflow-hidden">
+            {upcomingTrip ? (
+              <div className="space-y-4">
+                {/* Dossier Header */}
+                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
+                      Active Flight Dossier
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
+                    <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    <span>{getDaysUntilTrip(upcomingTrip.start_date)}d to departure</span>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Main Trip Path Visualizer */}
+                <div className="py-2">
+                  <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">
+                    Target Destination
+                  </div>
+                  <div className="flex flex-wrap items-baseline gap-3 mt-1">
+                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
+                      {upcomingTrip.destination}
+                    </h2>
+                  </div>
+
+                  {/* Route & Dates bar */}
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-mono text-zinc-400">
+                    <div className="flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1 rounded border border-zinc-800">
+                      <Calendar className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>
+                        {formatDate(upcomingTrip.start_date)} → {formatDate(upcomingTrip.end_date)}
+                      </span>
+                    </div>
+
+                    {tripEmergencyData && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-zinc-600">|</span>
+                        <span className="text-zinc-400">
+                          SOS:{' '}
+                          <span className="text-zinc-200 font-semibold">
+                            {tripEmergencyData.police || '112'}
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer Quick Action */}
+                <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between">
+                  <span className="text-xs text-zinc-500 hidden sm:inline">
+                    Itinerary synced with destination emergency registry
+                  </span>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <Link
+                      to="/checklist"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-zinc-100 hover:bg-white text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                    >
+                      <Briefcase className="w-3.5 h-3.5" />
+                      <span>Packing Checklist</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                    <Link
+                      to="/trips"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                    >
+                      <span>Manage Trip</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full flex flex-col justify-between py-2 space-y-4">
+                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-zinc-400" />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
+                      Flight Departure Desk
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-500">
+                    Standby Mode
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight text-white">
+                    No active itinerary on file
+                  </h2>
+                  <p className="mt-1 text-xs text-zinc-400 max-w-md leading-relaxed">
+                    Create a new travel itinerary to activate intelligent destination advisory,
+                    offline maps, and emergency consular dispatches.
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between">
+                  <span className="text-xs text-zinc-500 font-mono">
+                    System ready for route configuration
+                  </span>
+                  <Link
+                    to="/trips"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-zinc-100 hover:bg-white text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                  >
+                    <Plane className="w-3.5 h-3.5" />
+                    <span>Create Itinerary</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Local Rules Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-                  <AlertTriangle className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+          {/* Right Column (5 cols): Regional Emergency & Telephony Hub */}
+          <div className="lg:col-span-5 flex flex-col justify-between p-5 rounded-lg bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/80 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-zinc-700 dark:text-zinc-300" />
+                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    Emergency Dispatch Hotline
+                  </span>
                 </div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Local Customs & Rules</h2>
+                <span className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">
+                  {location.country || 'Global'}
+                </span>
               </div>
+
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Direct cellular gateway to primary regional emergency services. Tap to dial.
+              </p>
+
+              {/* 2-Cell Hot-Dial Grid */}
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
+                {/* Police */}
+                <a
+                  href={`tel:${countryData?.emergency?.police || '112'}`}
+                  className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors group block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">
+                      Police
+                    </span>
+                    <Phone className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                  </div>
+                  <div className="mt-2 font-mono text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    {countryData?.emergency?.police || '112'}
+                  </div>
+                  <div className="mt-0.5 text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                    Instant Connect
+                  </div>
+                </a>
+
+                {/* Ambulance */}
+                <a
+                  href={`tel:${countryData?.emergency?.ambulance || '112'}`}
+                  className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors group block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">
+                      Medical
+                    </span>
+                    <Phone className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                  </div>
+                  <div className="mt-2 font-mono text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    {countryData?.emergency?.ambulance || '112'}
+                  </div>
+                  <div className="mt-0.5 text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                    Ambulance SOS
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* Hub Link */}
+            <div className="pt-3 mt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
+                Consular & Embassy Support
+              </span>
               <Link
                 to="/emergency"
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:border-sky-300 dark:hover:border-sky-700 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
               >
-                View All
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                <span>Full Directory</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full rounded-lg" />
-                ))}
-              </div>
-            ) : Array.isArray(countryData?.rules) && countryData.rules.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Group rules by category - 2x2 grid layout */}
-                {(() => {
-                  // Parse rules: "[Etiquette] Never tip..." → { category: 'Etiquette', text: 'Never tip...' }
-                  const parsedRules = countryData.rules.map(rule => {
-                    const match = rule.match(/^\[([^\]]+)\]\s*(.+)$/);
-                    if (match) {
-                      return { category: match[1], text: match[2], raw: rule };
-                    }
-                    return { category: 'General', text: rule, raw: rule };
-                  });
-
-                  // Group by category
-                  const grouped = {};
-                  parsedRules.forEach(r => {
-                    if (!grouped[r.category]) grouped[r.category] = [];
-                    grouped[r.category].push(r);
-                  });
-
-                  return Object.entries(grouped).map(([category, rules]) => (
-                    <div
-                      key={category}
-                      className="rounded-xl border border-sky-200 dark:border-sky-900/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm hover:shadow-md transition-all hover:border-sky-300 dark:hover:border-sky-800">
-                      {/* Category Header */}
-                      <div className="px-4 py-3 border-b border-sky-200 dark:border-sky-900/50">
-                        <div className="flex items-center gap-2">
-                          <AlertTriangle className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                          <span className="text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
-                            {category}
-                          </span>
-                          <span className="text-xs text-sky-700 dark:text-sky-300">
-                            ({rules.length})
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Rules List */}
-                      <div className="p-3 space-y-2">
-                        {rules.slice(0, 2).map((r, idx) => (
-                          <div
-                            key={idx}
-                            className="p-3 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent transition-all hover:border-sky-200 dark:hover:border-sky-800">
-                            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                              {r.text}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ));
-                })()}
-              </div>
-            ) : !countryData && !loading ? (
-              <div
-                className="flex items-center justify-center gap-2 p-8 text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl bg-white/30 dark:bg-slate-900/30">
-                <Info className="h-4 w-4" />
-                <span className="text-sm">No custom rules available for this location</span>
-              </div>
-            ) : null}
           </div>
         </div>
+
+        {/* ════════════════════════════════════════
+            3. CORE BENTO MODULES (Map + Cultural Dossier)
+        ═════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Geospatial Map Canvas (7 cols) */}
+          <div className="lg:col-span-7 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden flex flex-col">
+            {/* Map Toolbar HUD */}
+            <div className="px-3.5 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Compass className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                  Geospatial Viewport
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">
+                  {location.city || 'Regional Radar'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                <span>ZOOM: {zoom}x</span>
+                <span className="hidden sm:inline">|</span>
+                <span className="hidden sm:inline text-emerald-600 dark:text-emerald-400">
+                  ONLINE
+                </span>
+              </div>
+            </div>
+
+            {/* Map Frame */}
+            <div className="relative h-72 sm:h-96 w-full bg-zinc-100 dark:bg-zinc-900">
+              {loading ? (
+                <Skeleton className="h-full w-full" />
+              ) : (
+                <InteractiveMap lat={location.lat} lng={location.lng} zoom={zoom} />
+              )}
+            </div>
+
+            {/* Map Bottom Metadata Strip */}
+            <div className="px-3.5 py-2 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
+              <div className="flex items-center gap-2 truncate">
+                <span className="truncate">
+                  {location.city ? `${location.city}, ${location.country}` : location.country}
+                </span>
+              </div>
+              <span className="shrink-0 text-zinc-400 dark:text-zinc-500">
+                WGS-84 Projection
+              </span>
+            </div>
+          </div>
+
+          {/* Regional Protocols & Cultural Intel Dossier (5 cols) */}
+          <div className="lg:col-span-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 flex flex-col justify-between overflow-hidden">
+            {/* Header */}
+            <div>
+              <div className="p-3.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
+                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    Cultural & Local Protocols
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
+                  {filteredRules.length} Entries
+                </span>
+              </div>
+
+              {/* Category Filter Chips */}
+              {categories.length > 1 && (
+                <div className="px-3.5 py-2 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 overflow-x-auto custom-scrollbar bg-white dark:bg-zinc-950/50">
+                  {categories.map((cat) => {
+                    const isSelected = activeRuleCategory.toLowerCase() === cat.toLowerCase()
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveRuleCategory(cat)}
+                        className={`
+                          px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider transition-colors shrink-0
+                          focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400
+                          ${
+                            isSelected
+                              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 font-medium'
+                              : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                          }
+                        `}
+                      >
+                        {cat}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Protocol Rules Feed */}
+              <div className="p-3.5 space-y-2.5 max-h-[300px] sm:max-h-[340px] overflow-y-auto custom-scrollbar">
+                {loading ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-16 w-full rounded" />
+                    ))}
+                  </div>
+                ) : filteredRules.length > 0 ? (
+                  filteredRules.slice(0, 4).map((rule, idx) => (
+                    <div
+                      key={rule.id || idx}
+                      className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-mono uppercase tracking-wide text-zinc-500 dark:text-zinc-400 font-semibold">
+                          {rule.category}
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-600">
+                          #{String(idx + 1).padStart(2, '0')}
+                        </span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-zinc-700 dark:text-zinc-300">
+                        {rule.text}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-zinc-400 dark:text-zinc-500 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-md">
+                    <Info className="w-4 h-4 mx-auto mb-1.5 text-zinc-400" />
+                    <p className="text-xs">No specific advisory entries for this filter</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Dossier Footer Action */}
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+              <span className="text-[11px] text-zinc-500 font-mono">
+                Regional compliance verified
+              </span>
+              <Link
+                to="/emergency"
+                className="inline-flex items-center gap-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+              >
+                <span>Read Full Advisory</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════
+            4. MODULAR UTILITY LAUNCHPAD (4 Rapid Tool Cards)
+        ═════════════════════════════════════════ */}
+        <section aria-label="Utility Tool Launchpad" className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              Rapid Tool Launchpad
+            </span>
+            <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-600">
+              Core Modules
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              {
+                title: 'Currency Converter',
+                desc: 'Live foreign exchange rates & calculator',
+                icon: Banknote,
+                path: '/currency-converter',
+                tag: 'FX RATES',
+              },
+              {
+                title: 'Language Translator',
+                desc: 'Phrase translation & offline guide',
+                icon: Globe,
+                path: '/translator',
+                tag: 'SPEECH & TEXT',
+              },
+              {
+                title: 'Packing Checklist',
+                desc: 'Custom luggage & trip preparation lists',
+                icon: Briefcase,
+                path: '/checklist',
+                tag: 'PRE-FLIGHT',
+              },
+              {
+                title: 'Expense Ledger',
+                desc: 'Multi-currency budget & spend logging',
+                icon: DollarSign,
+                path: '/expenses',
+                tag: 'ACCOUNTING',
+              },
+            ].map((tool) => {
+              const Icon = tool.icon
+              return (
+                <Link
+                  key={tool.title}
+                  to={tool.path}
+                  className="p-3.5 rounded-lg bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors group flex flex-col justify-between focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
+                        <Icon className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-950 dark:group-hover:text-zinc-100 transition-colors" />
+                      </div>
+                      <span className="text-[9px] font-mono text-zinc-400 dark:text-zinc-500">
+                        {tool.tag}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 mt-2.5">
+                      {tool.title}
+                    </p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-snug">
+                      {tool.desc}
+                    </p>
+                  </div>
+
+                  <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-950 dark:group-hover:text-zinc-100">
+                    <span>Launch</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
       </div>
     </DashboardLayout>
   )

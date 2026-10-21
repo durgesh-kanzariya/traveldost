@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { Plus, Plane } from 'lucide-react'
-import { DashboardLayout, Breadcrumbs } from '../../components/layout'
+import { useState, useEffect, useMemo } from 'react'
+import { Plus, Plane, Compass } from 'lucide-react'
+import { DashboardLayout } from '../../components/layout'
 import { TripCard, TripForm, DeleteTripModal } from './'
 import { Modal } from '../../components/ui'
 import { useTrips } from './useTrips'
@@ -80,93 +80,172 @@ export function TripsPage() {
     }
   }
 
+  // Calculate summary metrics
+  const stats = useMemo(() => {
+    const total = trips.length
+    const now = new Date()
+    const active = trips.filter((t) => {
+      const s = new Date(t.start_date)
+      const e = new Date(t.end_date)
+      return now >= s && now <= e
+    }).length
+    const upcoming = trips.filter((t) => new Date(t.start_date) > now).length
+
+    return { total, active, upcoming }
+  }, [trips])
+
   return (
     <DashboardLayout>
-      <div className="mb-8">
-        <Breadcrumbs />
-        <div className="flex items-center justify-between mt-2">
+      <div className="space-y-6">
+        {/* ════════════════════════════════════════
+            HEADER & ACTION BAR
+        ═════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl flex items-center gap-3">
-              <Plane className="h-8 w-8 text-sky-600 dark:text-sky-400" />
-              My Trips
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+              Trip Itineraries
             </h1>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">
-              Plan and manage your travel trips
+            <p className="mt-0.5 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+              Active routes, multi-city waypoints, and travel budget parameters.
             </p>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-medium transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            New Trip
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Itinerary</span>
+            </button>
+          </div>
         </div>
+
+        {/* ════════════════════════════════════════
+            METRIC STRIP
+        ═════════════════════════════════════════ */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="p-3.5 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">
+              Total Logged
+            </span>
+            <div className="font-mono text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-0.5">
+              {stats.total}
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">
+              In Transit
+            </span>
+            <div className="font-mono text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {stats.active}
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">
+              Upcoming
+            </span>
+            <div className="font-mono text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+              {stats.upcoming}
+            </div>
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════
+            TRIP CARDS GRID / EMPTY STATE
+        ═════════════════════════════════════════ */}
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-40 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : trips.length === 0 ? (
+          <div className="py-16 text-center rounded-lg border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
+            <div className="w-10 h-10 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center mx-auto mb-3">
+              <Compass className="w-5 h-5 text-zinc-400" />
+            </div>
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              No itineraries registered yet
+            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
+              Plan your first route to track waypoints, budgets, and emergency protocols.
+            </p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create First Itinerary</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {trips.map((trip) => (
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════
+            MODALS
+        ═════════════════════════════════════════ */}
+        {showModal && (
+          <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="New Travel Itinerary">
+            <TripForm
+              onSubmit={handleCreateSubmit}
+              countries={countries}
+              countriesLoading={countriesLoading}
+              submitLabel="Register Itinerary"
+            />
+          </Modal>
+        )}
+
+        {showEditModal && tripToEdit && (
+          <Modal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            title="Edit Itinerary"
+          >
+            <TripForm
+              initialData={{
+                destinations:
+                  tripToEdit.destinations?.length > 0
+                    ? tripToEdit.destinations
+                    : [tripToEdit.destination || ''],
+                start_date: tripToEdit.start_date?.split('T')[0] || '',
+                end_date: tripToEdit.end_date?.split('T')[0] || '',
+                budget: tripToEdit.budget || '',
+                currency: tripToEdit.currency || 'USD',
+              }}
+              onSubmit={handleEditSubmit}
+              countries={countries}
+              countriesLoading={countriesLoading}
+              submitLabel="Save Changes"
+            />
+          </Modal>
+        )}
+
+        <DeleteTripModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          trip={tripToDelete}
+          checklistCount={checklistItemCount}
+          deleteOption={deleteOption}
+          setDeleteOption={setDeleteOption}
+          onConfirm={handleConfirmDelete}
+        />
       </div>
-
-      {loading ? (
-        <div className="text-center py-12 text-slate-500">Loading trips...</div>
-      ) : trips.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700">
-          <Plane className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-500 dark:text-slate-400 mb-4">No trips planned yet</p>
-          <button
-            onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-medium transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Plan Your First Trip
-          </button>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-          ))}
-        </div>
-      )}
-
-      {/* Create Trip Modal */}
-      {showModal && (
-        <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Plan New Trip">
-          <TripForm
-            onSubmit={handleCreateSubmit}
-            countries={countries}
-            countriesLoading={countriesLoading}
-            submitLabel="Create Trip"
-          />
-        </Modal>
-      )}
-
-      {/* Edit Trip Modal */}
-      {showEditModal && tripToEdit && (
-        <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Trip">
-          <TripForm
-            initialData={{
-              destinations: tripToEdit.destinations?.length > 0 ? tripToEdit.destinations : [tripToEdit.destination || ''],
-              start_date: tripToEdit.start_date?.split('T')[0] || '',
-              end_date: tripToEdit.end_date?.split('T')[0] || '',
-              budget: tripToEdit.budget || '',
-              currency: tripToEdit.currency || 'USD',
-            }}
-            onSubmit={handleEditSubmit}
-            countries={countries}
-            countriesLoading={countriesLoading}
-            submitLabel="Save Changes"
-          />
-        </Modal>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <DeleteTripModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        trip={tripToDelete}
-        checklistCount={checklistItemCount}
-        deleteOption={deleteOption}
-        setDeleteOption={setDeleteOption}
-        onConfirm={handleConfirmDelete}
-      />
     </DashboardLayout>
   )
 }
