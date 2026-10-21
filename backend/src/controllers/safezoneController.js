@@ -4,11 +4,12 @@ exports.getSafeZones = async (req, res) => {
     try {
         const { lat, lng, policeRadius = 5000, hospitalRadius = 2000 } = req.body;
 
-        if (!lat || !lng) {
-            return res.status(400).json({ message: 'Missing lat or lng parameters' });
+        if (lat === undefined || lat === null || isNaN(Number(lat)) ||
+            lng === undefined || lng === null || isNaN(Number(lng))) {
+            return res.status(400).json({ message: 'Missing or invalid lat or lng parameters' });
         }
 
-        const zones = await safezoneService.getSafeZones(lat, lng, policeRadius, hospitalRadius);
+        const zones = await safezoneService.getSafeZones(Number(lat), Number(lng), Number(policeRadius), Number(hospitalRadius));
         res.json(zones);
     } catch (error) {
         console.error('SafeZones API Error:', error.message);

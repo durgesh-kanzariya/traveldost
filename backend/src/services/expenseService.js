@@ -52,7 +52,7 @@ const getExpenseSummary = async (tripId, userId) => {
     const baseCurrency = trip.currency || 'USD';
     const budget = trip.budget || 0;
 
-    const expenses = await Expense.getExpensesForSummary(tripId, userId);
+    const aggregatedExpenses = await Expense.getExpensesForSummary(tripId, userId);
 
     let rates = {};
     let ratesAvailable = false;
@@ -68,9 +68,12 @@ const getExpenseSummary = async (tripId, userId) => {
     const categoryTotals = {};
     const currencyTotals = {};
     let unconvertedCount = 0;
+    let totalCount = 0;
 
-    for (const exp of expenses) {
-        const rawAmount = parseFloat(exp.amount) || 0;
+    for (const exp of aggregatedExpenses) {
+        const rawAmount = parseFloat(exp.total_amount) || 0;
+        const count = parseInt(exp.item_count, 10) || 1;
+        totalCount += count;
         currencyTotals[exp.currency] = (currencyTotals[exp.currency] || 0) + rawAmount;
 
         let normalizedAmount = null;
@@ -79,7 +82,7 @@ const getExpenseSummary = async (tripId, userId) => {
         } else if (ratesAvailable && rates[exp.currency]) {
             normalizedAmount = rawAmount / rates[exp.currency];
         } else {
-            unconvertedCount++;
+            unconvertedCount += count;
         }
 
         if (normalizedAmount !== null) {
@@ -99,7 +102,7 @@ const getExpenseSummary = async (tripId, userId) => {
         currency: baseCurrency,
         by_category: byCategory,
         by_currency: currencyTotals,
-        conversion_status: unconvertedCount === 0 ? 'complete' : (unconvertedCount < expenses.length ? 'partial' : 'unavailable'),
+        conversion_status: unconvertedCount === 0 ? 'complete' : (unconvertedCount < totalCount ? 'partial' : 'unavailable'),
         unconverted_items_count: unconvertedCount
     };
 };

@@ -17,14 +17,19 @@ const Expense = {
     },
 
     getExpensesForSummary: async (tripId, userId) => {
-        const query = 'SELECT amount, currency, category FROM expenses WHERE trip_id = $1 AND user_id = $2';
+        const query = `
+            SELECT currency, category, SUM(amount)::numeric as total_amount, COUNT(*)::int as item_count
+            FROM expenses
+            WHERE trip_id = $1 AND user_id = $2
+            GROUP BY currency, category
+        `;
         const result = await pool.query(query, [tripId, userId]);
         return result.rows;
     },
 
     create: async (userId, data) => {
         const { trip_id, amount, currency, category, description, expense_date } = data;
-        
+
         // Verify parent trip exists and belongs to user
         const tripCheck = await pool.query(
             'SELECT id, currency FROM trips WHERE id = $1 AND user_id = $2',
@@ -60,14 +65,6 @@ const Expense = {
             err.statusCode = 404;
             throw err;
         }
-    },
-
-    deleteByTripId: async (tripId, userId) => {
-        await pool.query('DELETE FROM custom_checklists WHERE trip_id = $1 AND user_id = $2', [tripId, userId]);
-    },
-
-    moveChecklistToGeneral: async (tripId, userId) => {
-        await pool.query('UPDATE custom_checklists SET trip_id = NULL WHERE trip_id = $1 AND user_id = $2', [tripId, userId]);
     }
 };
 

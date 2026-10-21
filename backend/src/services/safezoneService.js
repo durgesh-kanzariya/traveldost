@@ -12,18 +12,23 @@ const constructOverpassQuery = (lat, lng, policeRadius, hospitalRadius) => {
 };
 
 const parseOverpassResponse = (data) => {
+    if (!data || !Array.isArray(data.elements)) return [];
     return data.elements.map(el => {
-        const latitude = el.lat || (el.center && el.center.lat);
-        const longitude = el.lon || (el.center && el.center.lon);
+        const latitude = (el.lat !== null && el.lat !== undefined)
+            ? el.lat
+            : (el.center && el.center.lat !== null && el.center.lat !== undefined ? el.center.lat : null);
+        const longitude = (el.lon !== null && el.lon !== undefined)
+            ? el.lon
+            : (el.center && el.center.lon !== null && el.center.lon !== undefined ? el.center.lon : null);
 
         return {
             id: el.id,
             lat: latitude,
             lng: longitude,
-            type: el.tags.amenity,
-            name: el.tags.name || (el.tags.amenity === 'police' ? 'Unnamed Police Station' : 'Unnamed Hospital')
+            type: el.tags && el.tags.amenity,
+            name: (el.tags && el.tags.name) || (el.tags && el.tags.amenity === 'police' ? 'Unnamed Police Station' : 'Unnamed Hospital')
         };
-    }).filter(z => z.lat && z.lng);
+    }).filter(z => z.lat !== null && z.lat !== undefined && z.lng !== null && z.lng !== undefined);
 };
 
 exports.getSafeZones = async (lat, lng, policeRadius = 5000, hospitalRadius = 2000) => {

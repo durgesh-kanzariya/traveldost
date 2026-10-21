@@ -2,7 +2,7 @@ const currencyService = require('../services/currencyService');
 
 exports.getRates = async (req, res) => {
     try {
-        const { base } = req.params;
+        const base = (req.params.base || req.query.base || 'USD').toUpperCase();
         const data = await currencyService.getExchangeRates(base);
         res.json(data);
     } catch (error) {
