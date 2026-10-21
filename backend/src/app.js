@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth');
@@ -17,6 +18,10 @@ const authMiddleware = require('./middleware/authMiddleware');
 function createApp() {
   const app = express();
 
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
+
   const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 500,
@@ -25,22 +30,36 @@ function createApp() {
 
   app.use(globalLimiter);
 
+  const externalProxyLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many external API requests, please try again later.' }
+  });
+
   app.use(cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
 
+      const allowedConfigured = (process.env.CORS_ORIGINS || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
       const allowedProduction = [
         'https://traveldost.vercel.app',
         'https://traveldost-git-main-durgeshjkanzariya.vercel.app',
+        ...allowedConfigured
       ];
 
       // Allow any localhost / 127.0.0.1 port in development
       const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-      // Allow any *.vercel.app subdomain for Vercel preview deployments
-      const isVercel = origin.endsWith('.vercel.app');
+      // Restrict Vercel origins to only this project's preview deployments
+      const isProjectVercel = /^https:\/\/traveldost(-[a-z0-9-]+)?\.vercel\.app$/.test(origin);
 
-      if (isLocalhost || isVercel || allowedProduction.includes(origin)) {
+      if (isLocalhost || isProjectVercel || allowedProduction.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error(`CORS: origin ${origin} not allowed`));
@@ -70,10 +89,10 @@ function createApp() {
   app.use('/api/checklist', checklistRoutes);
   app.use('/api/guides', guideRoutes);
   app.use('/api/trips', authMiddleware, tripsRouter);
-  app.use('/api/translate', translateRouter);
-  app.use('/api/currency', currencyRouter);
-  app.use('/api/geocode', geocodeRouter);
-  app.use('/api/map', safezonesRouter);
+  app.use('/api/translate', externalProxyLimiter, translateRouter);
+  app.use('/api/currency', externalProxyLimiter, currencyRouter);
+  app.use('/api/geocode', externalProxyLimiter, geocodeRouter);
+  app.use('/api/map', externalProxyLimiter, safezonesRouter);
   app.use('/api/admin', adminRoutes);
   app.use('/api/expenses', expensesRouter);
 
@@ -83,7 +102,9 @@ function createApp() {
 
   app.use((err, req, res, next) => {
     console.error('❌ Server Error:', err.message);
-    res.status(500).json({ message: 'Internal Server Error' });
+    const statusCode = err.statusCode || err.status || 500;
+    const message = statusCode === 500 ? 'Internal Server Error' : err.message;
+    res.status(statusCode).json({ message });
   });
 
   return app;

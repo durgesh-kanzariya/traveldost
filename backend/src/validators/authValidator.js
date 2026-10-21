@@ -4,7 +4,9 @@ exports.registerRules = [
     check('firstName', 'First Name is required').notEmpty().trim().escape(),
     check('lastName', 'Last Name must be a string').optional().isString().trim().escape(),
     check('email', 'Please include a valid email').isEmail().normalizeEmail(),
-    check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
+    check('password', 'Password must be at least 8 characters and contain both letters and numbers')
+        .isLength({ min: 8, max: 128 })
+        .matches(/^(?=.*[A-Za-z])(?=.*\d)/),
     check('nativeLanguage', 'Native language must be a string').optional().isString().trim().escape()
 ];
 
@@ -23,5 +25,7 @@ exports.updateProfileRules = [
 
 exports.changePasswordRules = [
     check('oldPassword', 'Old password is required').exists(),
-    check('newPassword', 'Please enter a new password with 6 or more characters').isLength({ min: 6 })
+    check('newPassword', 'New password must be at least 8 characters and contain both letters and numbers')
+        .isLength({ min: 8, max: 128 })
+        .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
 ];
