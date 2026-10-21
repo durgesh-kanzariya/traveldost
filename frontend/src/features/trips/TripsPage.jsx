@@ -19,20 +19,31 @@ export function TripsPage() {
   const [deleteOption, setDeleteOption] = useState('move_to_general')
 
   const [countries, setCountries] = useState([])
-  const [countriesLoading, setCountriesLoading] = useState(false)
+  const [countriesLoading, setCountriesLoading] = useState(true)
 
   useEffect(() => {
-    setCountriesLoading(true)
+    let isMounted = true
     getAllGuides()
-      .then(setCountries)
-      .finally(() => setCountriesLoading(false))
+      .then((data) => {
+        if (isMounted) setCountries(data || [])
+      })
+      .catch((error) => {
+        console.error('Failed to load country guides:', error)
+        if (isMounted) setCountries([])
+      })
+      .finally(() => {
+        if (isMounted) setCountriesLoading(false)
+      })
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   const handleCreateSubmit = async (formData) => {
     try {
       await addTrip(formData)
       setShowModal(false)
-    } catch (err) {
+    } catch {
       alert('Failed to create trip')
     }
   }
@@ -42,7 +53,7 @@ export function TripsPage() {
       await editTrip(tripToEdit.id, formData)
       setShowEditModal(false)
       setTripToEdit(null)
-    } catch (err) {
+    } catch {
       alert('Failed to update trip')
     }
   }
@@ -64,7 +75,7 @@ export function TripsPage() {
       await removeTrip(tripToDelete.id, deleteOption)
       setShowDeleteModal(false)
       setTripToDelete(null)
-    } catch (err) {
+    } catch {
       alert('Failed to delete trip')
     }
   }

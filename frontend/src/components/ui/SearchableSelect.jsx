@@ -18,26 +18,29 @@ export function SearchableSelect({
     options = [],
     placeholder = 'Search...',
     loading = false,
-    id: externalId,
+    id,
+    externalId,
     ariaLabel,
     disabled = false
 }) {
     const generatedId = useId()
-    const inputId = externalId || `combobox-${generatedId}`
+    const inputId = id || externalId || `combobox-${generatedId}`
     const listboxId = `listbox-${generatedId}`
 
+    const [prevValue, setPrevValue] = useState(value || '')
     const [query, setQuery] = useState(value || '')
     const [isOpen, setIsOpen] = useState(false)
     const [highlightedIndex, setHighlightedIndex] = useState(-1)
     const ref = useRef(null)
     const listRef = useRef(null)
 
-    // sync if parent changes value externally
-    useEffect(() => {
+    // Sync state during render when parent prop changes, avoiding cascading render effects
+    if (value !== prevValue) {
+        setPrevValue(value || '')
         setQuery(value || '')
-    }, [value])
+    }
 
-    // close on outside click
+    // Close on outside click
     useEffect(() => {
         const handler = (e) => {
             if (ref.current && !ref.current.contains(e.target)) {
@@ -62,7 +65,7 @@ export function SearchableSelect({
 
     const handleInputChange = (e) => {
         setQuery(e.target.value)
-        onChange(e.target.value) // keep parent in sync while typing
+        onChange(e.target.value)
         setIsOpen(true)
         setHighlightedIndex(0)
     }
@@ -151,7 +154,7 @@ export function SearchableSelect({
                     role="listbox"
                     aria-label={ariaLabel || placeholder}
                     ref={listRef}
-                    className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg"
+                    className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1"
                 >
                     {filtered.map((option, idx) => {
                         const isSelected = option === value
@@ -162,22 +165,17 @@ export function SearchableSelect({
                                 id={`${listboxId}-option-${idx}`}
                                 role="option"
                                 aria-selected={isSelected}
+                                onClick={() => handleSelect(option)}
+                                onMouseEnter={() => setHighlightedIndex(idx)}
+                                className={`px-4 py-2.5 text-sm cursor-pointer select-none transition-colors ${
+                                    isHighlighted
+                                        ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-900 dark:text-sky-200'
+                                        : isSelected
+                                        ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 font-medium'
+                                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                }`}
                             >
-                                <button
-                                    type="button"
-                                    tabIndex={-1}
-                                    onClick={() => handleSelect(option)}
-                                    onMouseEnter={() => setHighlightedIndex(idx)}
-                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                                        isHighlighted
-                                            ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-900 dark:text-sky-200'
-                                            : isSelected
-                                            ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 font-medium'
-                                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                                    }`}
-                                >
-                                    {option}
-                                </button>
+                                <span>{option}</span>
                             </li>
                         )
                     })}

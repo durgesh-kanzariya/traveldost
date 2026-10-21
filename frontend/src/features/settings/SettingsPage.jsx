@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bell, Lock, User, Save, AlertCircle } from 'lucide-react'
 import { DashboardLayout, Breadcrumbs } from '../../components/layout'
 import { updateUserProfile, changePassword } from '../../shared/services/authService'
+import { getStoredUser, setStoredUser } from '../../shared/utils/authStorage'
 import { SearchableSelect } from '../../components/ui'
 
 const LANGUAGES = [
@@ -30,16 +31,15 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Load initial user data from localStorage
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser)
+    // Load initial user data from sessionStorage via authStorage
+    const stored = getStoredUser()
+    if (stored) {
       setUser({
-        firstName: parsed.firstName || parsed.first_name || '',
-        lastName: parsed.lastName || parsed.last_name || '',
-        email: parsed.email || '',
-        nativeLanguage: parsed.nativeLanguage || parsed.native_language || 'English',
-        defaultCurrency: parsed.defaultCurrency || parsed.default_currency || 'USD',
+        firstName: stored.firstName || stored.first_name || '',
+        lastName: stored.lastName || stored.last_name || '',
+        email: stored.email || '',
+        nativeLanguage: stored.nativeLanguage || stored.native_language || 'English',
+        defaultCurrency: stored.defaultCurrency || stored.default_currency || 'USD',
       })
     }
   }, [])
@@ -59,10 +59,9 @@ export function SettingsPage() {
 
     try {
       const updatedUser = await updateUserProfile(user)
-      // Update LocalStorage
-      const stored = JSON.parse(localStorage.getItem('user'))
+      const stored = getStoredUser() || {}
       const newStored = { ...stored, ...updatedUser }
-      localStorage.setItem('user', JSON.stringify(newStored))
+      setStoredUser(newStored)
 
       setUser(newStored)
       setMessage('Profile updated successfully!')
@@ -153,19 +152,22 @@ export function SettingsPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Native Language</label>
+              <label htmlFor="settings-native-language" className="text-sm font-medium text-slate-700 dark:text-slate-300">Native Language</label>
               <div className="mt-1">
                 <SearchableSelect
+                  id="settings-native-language"
                   value={user.nativeLanguage}
                   onChange={(val) => setUser({ ...user, nativeLanguage: val })}
                   options={LANGUAGES}
                   placeholder="Search language..."
+                  ariaLabel="Native Language"
                 />
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Default Currency</label>
+              <label htmlFor="settings-default-currency" className="text-sm font-medium text-slate-700 dark:text-slate-300">Default Currency</label>
               <select
+                id="settings-default-currency"
                 value={user.defaultCurrency}
                 onChange={(e) => setUser({ ...user, defaultCurrency: e.target.value })}
                 className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"

@@ -10,9 +10,9 @@ export function TripForm({ initialData, onSubmit, countries, countriesLoading, s
         budget: '',
         currency: (() => {
             try {
-                const user = JSON.parse(localStorage.getItem('user'));
+                const user = JSON.parse(sessionStorage.getItem('user'));
                 return user?.default_currency || user?.defaultCurrency || 'USD';
-            } catch (e) {
+            } catch {
                 return 'USD';
             }
         })()
@@ -43,7 +43,7 @@ export function TripForm({ initialData, onSubmit, countries, countriesLoading, s
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label htmlFor="trip-destination-0" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                         Destinations *
                     </label>
                     {formData.destinations.length < 5 && (
@@ -60,12 +60,13 @@ export function TripForm({ initialData, onSubmit, countries, countriesLoading, s
                 <div className="space-y-2">
                     {formData.destinations.map((dest, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                            <div className="flex items-center gap-1.5 text-slate-400 text-xs min-w-[54px]">
+                            <label htmlFor={`trip-destination-${idx}`} className="flex items-center gap-1.5 text-slate-400 text-xs min-w-[54px] cursor-pointer">
                                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                                 {idx === 0 ? 'Start' : `Stop ${idx}`}
-                            </div>
+                            </label>
                             <div className="flex-1">
                                 <SearchableSelect
+                                    id={`trip-destination-${idx}`}
                                     value={dest}
                                     onChange={(val) => updateStop(idx, val)}
                                     options={countries}

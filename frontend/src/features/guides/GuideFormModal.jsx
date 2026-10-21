@@ -1,31 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react';
 
 export function GuideFormModal({ isOpen, onClose, onSubmit, initialData }) {
-    const [formData, setFormData] = useState({
+    const emptyForm = {
         country_name: '',
         police_number: '',
         ambulance_number: '',
         fire_number: '',
         embassy_number: '',
         local_rules: ''
-    })
+    }
 
-    useEffect(() => {
-        if (initialData) {
-            setFormData(initialData)
-        } else {
-            // Reset form for new entry
-            setFormData({
-                country_name: '',
-                police_number: '',
-                ambulance_number: '',
-                fire_number: '',
-                embassy_number: '',
-                local_rules: ''
-            })
-        }
-    }, [initialData, isOpen])
+    const [prevInitialData, setPrevInitialData] = useState(initialData)
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+    const [formData, setFormData] = useState(initialData || emptyForm)
+
+    if (initialData !== prevInitialData || isOpen !== prevIsOpen) {
+        setPrevInitialData(initialData)
+        setPrevIsOpen(isOpen)
+        setFormData(initialData || emptyForm)
+    }
 
     if (!isOpen) return null
 

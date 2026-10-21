@@ -46,7 +46,7 @@ export function ManageGuides() {
             try {
                 await deleteGuide(guideId)
                 setGuides(guides.filter(g => g.id !== guideId))
-            } catch (err) {
+            } catch {
                 alert('Failed to delete guide')
             }
         }
@@ -61,7 +61,7 @@ export function ManageGuides() {
             }
             setIsModalOpen(false)
             fetchGuides() // Refresh list
-        } catch (err) {
+        } catch {
             alert('Failed to save guide')
         }
     }
@@ -91,6 +91,12 @@ export function ManageGuides() {
                     Add New Guide
                 </button>
             </div>
+
+            {error && (
+                <div role="alert" className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl text-sm font-medium">
+                    {error}
+                </div>
+            )}
 
             {/* Search Bar */}
             <div className="mb-6 relative">

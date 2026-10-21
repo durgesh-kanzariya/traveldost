@@ -1,10 +1,11 @@
 import { Mail, Phone, MapPin } from 'lucide-react'
 
-function ContactCard({ icon: Icon, title, info, colorClass, iconColorClass }) {
+function ContactCard({ icon, title, info, colorClass, iconColorClass }) {
+  const IconComponent = icon
   return (
     <div className="flex flex-col items-center rounded-2xl bg-white dark:bg-slate-800 p-8 text-center shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 transition-colors">
       <div className={`rounded-lg p-3 ${colorClass.replace('bg-', 'bg-opacity-100 dark:bg-opacity-20 ')} ${iconColorClass}`}>
-        <Icon className="h-6 w-6" />
+        <IconComponent className="h-6 w-6" />
       </div>
       <h3 className="mt-4 text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{info}</p>
