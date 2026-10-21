@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { getStoredUser, clearAuth } from '../../shared/utils/authStorage'
 import {
   LayoutDashboard,
   CheckSquare,
@@ -27,14 +28,13 @@ export function DashboardLayout({ children }) {
 
   // Lazy Initialization
   const [userData] = useState(() => {
-    const storedUser = localStorage.getItem('user')
-    return storedUser ? JSON.parse(storedUser) : { firstName: 'Traveler', lastName: '', email: 'user@example.com' }
+    const storedUser = getStoredUser()
+    return storedUser || { firstName: 'Traveler', lastName: '', email: 'user@example.com' }
   })
 
   // 2. LOGOUT FUNCTION
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    clearAuth()
     navigate('/login')
   }
 

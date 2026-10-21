@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import { Shield, Hospital, MapPin, Navigation } from 'lucide-react'
+import { Shield, Hospital, MapPin, Navigation, ZoomIn } from 'lucide-react'
 import api from '../../shared/services/api'
 
 const CACHE_KEY = 'traveldost_safezones_cache'
@@ -33,7 +33,6 @@ const getCachedData = (lat, lng) => {
         const age = Date.now() - timestamp
 
         if (distance <= CACHE_RADIUS_KM && age < CACHE_MAX_AGE_MS) {
-            console.log('📍 Serving safe zones from cache (distance:', distance.toFixed(2), 'km)')
             return data
         }
     } catch (err) {
@@ -62,10 +61,10 @@ const createIcon = (color, type) => {
         html: `<div style="background-color: ${color}; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 ${type === 'police'
-                ? '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>' // Shield
+                ? '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>'
                 : type === 'hospital'
-                    ? '<path d="M12 6v12m-6-6h12"></path>' // Plus/Cross
-                    : '<circle cx="12" cy="12" r="3"></circle>' // Dot
+                    ? '<path d="M12 6v12m-6-6h12"></path>'
+                    : '<circle cx="12" cy="12" r="3"></circle>'
             }
              </svg>
            </div>`,
@@ -93,43 +92,62 @@ function RecenterAutomatically({ lat, lng }) {
     return null
 }
 
+// --- HELPER TO TOGGLE SCROLL WHEEL ZOOM WITH USER INTENT ---
+function WheelZoomController({ enabled }) {
+    const map = useMap()
+    useEffect(() => {
+        if (!map || !map.scrollWheelZoom) return
+        if (enabled) {
+            map.scrollWheelZoom.enable()
+        } else {
+            map.scrollWheelZoom.disable()
+        }
+    }, [enabled, map])
+    return null
+}
+
 export function InteractiveMap({ lat, lng }) {
     const [safeZones, setSafeZones] = useState([])
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
+    const [scrollZoomEnabled, setScrollZoomEnabled] = useState(false)
 
-    useEffect(() => {
+    const fetchSafeZones = useCallback(async () => {
         if (!lat || !lng) return
 
-        const fetchSafeZones = async () => {
-            const cached = getCachedData(lat, lng)
-            if (cached) {
-                setSafeZones(cached)
-                return
-            }
-
-            setLoading(true)
-            try {
-                const res = await api.post('/map/safezones', { lat, lng })
-                const data = res.data
-                setSafeZones(data)
-                setCachedData(lat, lng, data)
-            } catch (err) {
-                console.error("Failed to fetch safe zones:", err)
-            } finally {
-                setLoading(false)
-            }
+        const cached = getCachedData(lat, lng)
+        if (cached) {
+            setSafeZones(cached)
+            setError(null)
+            return
         }
 
-        fetchSafeZones()
+        setLoading(true)
+        setError(null)
+        try {
+            const res = await api.post('/map/safezones', { lat, lng })
+            const data = res.data
+            setSafeZones(data)
+            setCachedData(lat, lng, data)
+        } catch (err) {
+            console.error("Failed to fetch safe zones:", err)
+            setError("Unable to load nearby emergency safe zones.")
+        } finally {
+            setLoading(false)
+        }
     }, [lat, lng])
+
+    useEffect(() => {
+        fetchSafeZones()
+    }, [fetchSafeZones])
 
     return (
         <div className="relative h-96 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner [&_.leaflet-tile-pane]:dark:invert-[.9] [&_.leaflet-tile-pane]:dark:hue-rotate-180 [&_.leaflet-tile-pane]:dark:contrast-75">
             <MapContainer
                 center={[lat, lng]}
                 zoom={14}
-                style={{ height: '100%', width: '100%', background: '#0f172a' }} // Start with dark bg to avoid white flash
-                scrollWheelZoom={true}
+                style={{ height: '100%', width: '100%', background: '#0f172a' }}
+                scrollWheelZoom={false}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -137,6 +155,7 @@ export function InteractiveMap({ lat, lng }) {
                 />
 
                 <RecenterAutomatically lat={lat} lng={lng} />
+                <WheelZoomController enabled={scrollZoomEnabled} />
 
                 {/* USER MARKER */}
                 <Marker position={[lat, lng]} icon={userIcon}>
@@ -164,6 +183,35 @@ export function InteractiveMap({ lat, lng }) {
                 ))}
 
             </MapContainer>
+
+            {/* WHEEL ZOOM CONTROL OVERLAY */}
+            <button
+                type="button"
+                onClick={() => setScrollZoomEnabled(prev => !prev)}
+                title={scrollZoomEnabled ? "Scroll wheel zoom is active. Click to lock." : "Click to enable zoom with mouse scroll wheel"}
+                className={`absolute top-4 left-14 z-[400] px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-md transition-all flex items-center gap-1.5 border backdrop-blur ${
+                    scrollZoomEnabled
+                        ? 'bg-sky-600 text-white border-sky-500 shadow-sky-500/20'
+                        : 'bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+            >
+                <ZoomIn className="h-3.5 w-3.5" />
+                <span>Scroll Zoom: {scrollZoomEnabled ? 'On' : 'Off'}</span>
+            </button>
+
+            {/* ERROR BANNER WITH RETRY */}
+            {error && (
+                <div className="absolute top-16 left-4 right-4 z-[400] bg-red-500/95 text-white px-3 py-2 rounded-xl text-xs flex items-center justify-between shadow-lg backdrop-blur animate-in fade-in">
+                    <span>{error}</span>
+                    <button
+                        type="button"
+                        onClick={fetchSafeZones}
+                        className="px-2.5 py-1 bg-white text-red-600 font-bold rounded-lg hover:bg-red-50 text-[11px] transition-colors shrink-0 ml-2 shadow-xs"
+                    >
+                        Retry
+                    </button>
+                </div>
+            )}
 
             {/* OVERLAY LOADING INDICATOR */}
             {loading && (

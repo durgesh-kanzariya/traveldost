@@ -6,10 +6,14 @@ const ThemeContext = createContext()
 export function ThemeProvider({ children }) {
     // 1. Initialize from localStorage or System Preference
     const [theme, setTheme] = useState(() => {
-        if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
-            return localStorage.getItem('theme')
-        }
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        try {
+            if (typeof window !== 'undefined') {
+                const stored = localStorage.getItem('theme')
+                if (stored) return stored
+            }
+        } catch { /* storage inaccessible */ }
+
+        if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)')?.matches) {
             return 'dark'
         }
         return 'light'
@@ -21,7 +25,7 @@ export function ThemeProvider({ children }) {
         root.classList.remove('light', 'dark')
 
         if (theme === 'system') {
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+            const systemTheme = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches
                 ? 'dark'
                 : 'light'
             root.classList.add(systemTheme)
@@ -29,7 +33,9 @@ export function ThemeProvider({ children }) {
         }
 
         root.classList.add(theme)
-        localStorage.setItem('theme', theme)
+        try {
+            localStorage.setItem('theme', theme)
+        } catch { /* ignore storage error */ }
     }, [theme])
 
     const toggleTheme = () => {

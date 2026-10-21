@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { getStoredUser, clearAuth } from '../../shared/utils/authStorage'
 import {
     LayoutDashboard,
     Users,
@@ -21,19 +22,13 @@ export function AdminLayout({ children }) {
     const navigate = useNavigate()
 
     const [userData] = useState(() => {
-        try {
-            const storedUser = localStorage.getItem('user')
-            return storedUser ? JSON.parse(storedUser) : { firstName: 'Admin', lastName: '', email: 'admin@example.com' }
-        } catch (e) {
-            console.error("Failed to parse user data", e);
-            return { firstName: 'Admin', lastName: '', email: 'admin@example.com' };
-        }
+        const storedUser = getStoredUser()
+        return storedUser || { firstName: 'Admin', lastName: '', email: 'admin@example.com' }
     })
 
     // LOGOUT FUNCTION
     const handleLogout = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+        clearAuth()
         navigate('/login')
     }
 

@@ -2,9 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/pwa-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>traveldost</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 ws://localhost:5173 ws://127.0.0.1:5173 https://*.vercel.app https://traveldost-backend.onrender.com https://api.bigdatacloud.net https://*.tile.openstreetmap.org;" />
+    
+    <title>TravelDost - Smart Travel Companion</title>
+    <meta name="description" content="TravelDost is a location-intelligent web application that keeps travelers safe and informed with instant emergency SOS contacts, uncommon cultural rules, travel checklists, and smart utilities." />
+    <meta name="theme-color" content="#0284c7" />
+    <link rel="canonical" href="https://traveldost.vercel.app/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://traveldost.vercel.app/" />
+    <meta property="og:title" content="TravelDost - Smart Travel Companion" />
+    <meta property="og:description" content="Explore the world without fear. Instant emergency SOS, local cultural rules, checklists, and trip tools." />
+    <meta property="og:image" content="/pwa-icon.svg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:url" content="https://traveldost.vercel.app/" />
+    <meta property="twitter:title" content="TravelDost - Smart Travel Companion" />
+    <meta property="twitter:description" content="Explore the world without fear. Instant emergency SOS, local cultural rules, checklists, and trip tools." />
+    <meta property="twitter:image" content="/pwa-icon.svg" />
   </head>
   <body>
     <div id="root"></div>

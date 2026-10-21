@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { getGuideByCountry, getUpcomingTrip, detectAndCacheLocation } from '../services'
 
 export function useDashboard() {
@@ -14,6 +14,7 @@ export function useDashboard() {
     const [error, setError] = useState(null)
     const [upcomingTrip, setUpcomingTrip] = useState(null)
     const [tripEmergencyData, setTripEmergencyData] = useState(null)
+    const locationRequestIdRef = useRef(0)
 
     const fetchUpcomingTrip = useCallback(async () => {
         try {
@@ -48,9 +49,8 @@ export function useDashboard() {
         }
     }, [])
 
-    // Load location and guide data on mount
     useEffect(() => {
-        let cancelled = false
+        const requestId = ++locationRequestIdRef.current
 
         async function loadLocation() {
             setLoading(true)
@@ -75,7 +75,7 @@ export function useDashboard() {
                     }
                 }
 
-                if (!cancelled) {
+                if (requestId === locationRequestIdRef.current) {
                     setLocation({
                         country: rawCountry,
                         city: detectedLocation.city,
@@ -86,25 +86,25 @@ export function useDashboard() {
                     setTimeout(() => setZoom(15), 500)
                 }
             } catch (err) {
-                if (!cancelled) {
+                if (requestId === locationRequestIdRef.current) {
                     console.error("Location detection failed:", err)
                     setError("Location access denied")
                     await fetchGuideData('India')
                 }
             } finally {
-                if (!cancelled) setLoading(false)
+                if (requestId === locationRequestIdRef.current) setLoading(false)
             }
         }
 
         loadLocation()
         fetchUpcomingTrip()
 
-        return () => { cancelled = true }
+        return () => { locationRequestIdRef.current++ }
     }, [fetchUpcomingTrip, fetchGuideData])
 
     // Manual location refresh function (callable from components)
     const refreshLocation = useCallback(async (forceRefresh = false) => {
-        let cancelled = false
+        const requestId = ++locationRequestIdRef.current
         setLoading(true)
         setZoom(4)
         setError(null)
@@ -131,7 +131,7 @@ export function useDashboard() {
                 }
             }
 
-            if (!cancelled) {
+            if (requestId === locationRequestIdRef.current) {
                 setLocation({
                     country: rawCountry,
                     city: detectedLocation.city,
@@ -142,16 +142,14 @@ export function useDashboard() {
                 setTimeout(() => setZoom(15), 500)
             }
         } catch (err) {
-            if (!cancelled) {
+            if (requestId === locationRequestIdRef.current) {
                 console.error("Location detection failed:", err)
                 setError("Location access denied")
                 await fetchGuideData('India')
             }
         } finally {
-            if (!cancelled) setLoading(false)
+            if (requestId === locationRequestIdRef.current) setLoading(false)
         }
-
-        return () => { cancelled = true }
     }, [fetchGuideData])
 
     return {
