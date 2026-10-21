@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../../shared/services/authService';
+import { setAuthToken, setStoredUser } from '../../shared/utils/authStorage';
 import { supportedLanguages } from '../../shared/utils/countryLanguages';
 import { Mail, Lock, ArrowRight, User, Languages, ArrowLeft } from 'lucide-react'
 
@@ -28,11 +29,11 @@ export function SignUpPage() {
 
       const data = await registerUser(userData); // Replaced fetch call
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      setAuthToken(data.token);
+      setStoredUser(data.user);
       const nativeLang = data.user.native_language || data.user.nativeLanguage;
       if (nativeLang) {
-        localStorage.setItem('nativeLanguage', nativeLang);
+        sessionStorage.setItem('nativeLanguage', nativeLang);
       }
 
       navigate('/dashboard');

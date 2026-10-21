@@ -1,22 +1,20 @@
 import { useNavigate } from 'react-router-dom'
+import { clearAuth, getStoredUser, getAuthToken } from '../utils/authStorage'
 
 export function useAuth() {
   const navigate = useNavigate()
 
   const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    localStorage.removeItem('nativeLanguage')
+    clearAuth()
     navigate('/login')
   }
 
   const getUser = () => {
-    const storedUser = localStorage.getItem('user')
-    return storedUser ? JSON.parse(storedUser) : null
+    return getStoredUser()
   }
 
   const getToken = () => {
-    return localStorage.getItem('token')
+    return getAuthToken()
   }
 
   const isAdmin = () => {

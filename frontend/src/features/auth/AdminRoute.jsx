@@ -1,15 +1,10 @@
 import { Navigate } from 'react-router-dom'
+import { getAuthToken, getStoredUser } from '../../shared/utils/authStorage'
 
 export function AdminRoute({ children }) {
     // 1. Get Token & User Data
-    const token = localStorage.getItem('token')
-    let user = {}
-    try {
-        user = JSON.parse(localStorage.getItem('user') || '{}')
-    } catch (e) {
-        console.error("Failed to parse user data in AdminRoute", e)
-        localStorage.removeItem('user') // Clear corrupted data
-    }
+    const token = getAuthToken()
+    const user = getStoredUser() || {}
 
     // 2. Check if logged in
     if (!token) {

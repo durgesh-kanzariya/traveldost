@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../../shared/services/authService';
+import { setAuthToken, setStoredUser } from '../../shared/utils/authStorage';
 import { Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react' // <--- Added ArrowLeft
 
 export function LoginPage() {
@@ -12,19 +13,15 @@ export function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      // Assuming loginUser is an imported function that handles the API call
-      // and returns data similar to the original fetch response's data.
-      // Also assuming it throws an error if login fails, which will be caught by the catch block.
-      const formData = { email, password }; // Define formData from state variables
+      const formData = { email, password };
       const data = await loginUser(formData);
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      setAuthToken(data.token);
+      setStoredUser(data.user);
 
       const nativeLang = data.user.native_language || data.user.nativeLanguage;
       if (nativeLang) {
-        localStorage.setItem('nativeLanguage', nativeLang);
+        sessionStorage.setItem('nativeLanguage', nativeLang);
       }
 
       if (data.user.role === 'admin') {
