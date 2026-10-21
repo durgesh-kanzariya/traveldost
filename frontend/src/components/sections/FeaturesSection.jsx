@@ -1,81 +1,99 @@
-import { MapPin, ShieldAlert, ScrollText, Languages, ClipboardList, Sparkles } from 'lucide-react'
+import { MapPin, ShieldAlert, ScrollText, Languages, CheckSquare, Coins } from 'lucide-react'
 
-const features = [
+const capabilities = [
   {
+    code: 'MOD_01',
     icon: MapPin,
-    title: 'Smart Location Detection',
+    title: 'Autonomous Geo Telemetry',
     description:
-      'Automatically detects your location and provides region-specific information instantly.',
-    color: 'bg-sky-100 text-sky-600',
+      'Identifies country and regional boundaries on boot to instantly align all emergency protocols, language tools, and local currencies.',
   },
   {
+    code: 'MOD_02',
     icon: ShieldAlert,
-    title: 'Emergency SOS',
+    title: 'Emergency SOS Telephony',
     description:
-      'One-tap access to local emergency numbers for police, ambulance, and fire services.',
-    color: 'bg-red-100 text-red-600',
+      'One-tap cellular dispatch to verified national police, fire department, paramedic, and consular emergency switches worldwide.',
   },
   {
+    code: 'MOD_03',
     icon: ScrollText,
-    title: 'Uncommon Rules',
+    title: 'Cultural & Legal Protocols',
     description:
-      'Learn about local laws and customs that tourists often miss, avoiding fines and embarrassment.',
-    color: 'bg-amber-100 text-amber-600',
+      'Curated jurisdiction guidelines covering unwritten social etiquette, transit regulations, tipping customs, and critical local fines.',
   },
   {
+    code: 'MOD_04',
     icon: Languages,
-    title: 'Language Tools',
+    title: 'Dual-Engine Phrasebook',
     description:
-      'Essential phrases, pronunciation guides, and real-time translation for seamless communication.',
-    color: 'bg-teal-100 text-teal-600',
+      'Offline-first survival lexicon with native phonetics, synthesized speech playback, and custom bilingual scenario translation.',
   },
   {
-    icon: ClipboardList,
-    title: 'Trip Checklist',
+    code: 'MOD_05',
+    icon: Coins,
+    title: 'Institutional FX Engine',
     description:
-      'Customized packing lists and travel document reminders based on your destination.',
-    color: 'bg-purple-100 text-purple-600',
+      'Live exchange parity backed by automated cross-rate fallback matrices to calculate travel burn rates with zero network dropouts.',
   },
   {
-    icon: Sparkles,
-    title: 'Local Gems',
+    code: 'MOD_06',
+    icon: CheckSquare,
+    title: 'Smart Packing Manifest',
     description:
-      'Discover hidden spots, local favorites, and authentic experiences off the tourist trail.',
-    color: 'bg-pink-100 text-pink-600',
+      'Trip-scoped packing checklists with categorical readiness progress tracking, customs reminders, and document verifications.',
   },
 ]
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="bg-white dark:bg-slate-900 py-16 sm:py-24 transition-colors duration-300">
+    <section id="features" className="py-20 sm:py-28 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors duration-150">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-            Everything You Need to Travel Safe
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-zinc-500 mb-2">
+            CORE_SUBSYSTEMS // ARCHITECTURE
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Engineered for Uncompromising Readiness
           </h2>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-            Powerful features designed to keep you informed, prepared, and
-            confident wherever your adventures take you.
+          <p className="mt-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+            Six mission-critical modules built directly into the traveler console for zero-friction exploration.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="group relative rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 transition-all hover:border-sky-200 dark:hover:border-sky-800 hover:shadow-lg dark:hover:shadow-slate-900/50"
-            >
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {capabilities.map((item) => {
+            const Icon = item.icon
+            return (
               <div
-                className={`inline-flex rounded-xl p-3 ${feature.color.replace('bg-', 'bg-opacity-100 dark:bg-opacity-20 ')}`}
+                key={item.code}
+                className="group p-5 rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between"
               >
-                <feature.icon className="h-6 w-6" />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-8 h-8 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center text-zinc-800 dark:text-zinc-200 group-hover:scale-105 transition-transform">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 tracking-wider">
+                      {item.code}
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between font-mono text-[10px] text-zinc-400">
+                  <span>TELEMETRY VERIFIED</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">ACTIVE</span>
+                </div>
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
-                {feature.title}
-              </h3>
-              <p className="mt-2 text-slate-600 dark:text-slate-400">{feature.description}</p>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

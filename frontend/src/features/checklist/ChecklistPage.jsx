@@ -1,18 +1,24 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom';
-import { getChecklistItemsByTrip, addChecklistItem, updateChecklistItem, deleteChecklistItem } from './checklistService.js';
-import { getTrips } from '../../shared/services/tripService.js';
-import { TripSelector } from '../trips';
-import { DashboardLayout } from '../../components/layout/DashboardLayout';
-import { Breadcrumbs } from '../../components/layout/Breadcrumbs';
-import { ListChecks, Plane, Plus, Trash2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom'
+import {
+  getChecklistItemsByTrip,
+  addChecklistItem,
+  updateChecklistItem,
+  deleteChecklistItem,
+} from './checklistService.js'
+import { getTrips } from '../../shared/services/tripService.js'
+import { TripSelector } from '../trips'
+import { DashboardLayout } from '../../components/layout/DashboardLayout'
+import { ListChecks, Plane, Plus, Trash2, CheckCircle2 } from 'lucide-react'
 
 export function ChecklistPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialTripId = searchParams.get('trip_id')
 
   const [trips, setTrips] = useState([])
-  const [selectedTripId, setSelectedTripId] = useState(initialTripId ? parseInt(initialTripId) : null)
+  const [selectedTripId, setSelectedTripId] = useState(
+    initialTripId ? parseInt(initialTripId, 10) : null
+  )
   const [checklist, setChecklist] = useState([])
   const [newItem, setNewItem] = useState('')
   const [loading, setLoading] = useState(true)
@@ -32,7 +38,7 @@ export function ChecklistPage() {
       const data = await getChecklistItemsByTrip(selectedTripId)
       setChecklist(data)
     } catch (error) {
-      console.error("Error fetching checklist:", error);
+      console.error('Error fetching checklist:', error)
     } finally {
       setLoading(false)
     }
@@ -58,32 +64,27 @@ export function ChecklistPage() {
   const addItem = async () => {
     if (newItem.trim()) {
       try {
-        const savedItem = await addChecklistItem(newItem, selectedTripId);
-        setChecklist((prev) => [...prev, savedItem]);
-        setNewItem('');
+        const savedItem = await addChecklistItem(newItem.trim(), selectedTripId)
+        setChecklist((prev) => [...prev, savedItem])
+        setNewItem('')
       } catch (error) {
-        console.error("Error adding item:", error);
+        console.error('Error adding item:', error)
       }
     }
   }
 
   const toggleChecklistItem = async (id, currentStatus) => {
     setChecklist((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+      prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item))
     )
 
     try {
-      await updateChecklistItem(id, !currentStatus);
+      await updateChecklistItem(id, !currentStatus)
     } catch (err) {
       console.error(err)
       setChecklist((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, checked: currentStatus } : item
-        )
+        prev.map((item) => (item.id === id ? { ...item, checked: currentStatus } : item))
       )
-      alert("Failed to save change. Check your connection.")
     }
   }
 
@@ -92,126 +93,201 @@ export function ChecklistPage() {
     setChecklist((prev) => prev.filter((item) => item.id !== id))
 
     try {
-      await deleteChecklistItem(id);
+      await deleteChecklistItem(id)
     } catch (err) {
       console.error(err)
       setChecklist(previousList)
-      alert("Could not delete item.")
     }
   }
 
-  const completedCount = checklist.filter(item => item.checked).length
-  const progressPercent = checklist.length > 0 ? Math.round((completedCount / checklist.length) * 100) : 0
+  const completedCount = checklist.filter((item) => item.checked).length
+  const progressPercent =
+    checklist.length > 0 ? Math.round((completedCount / checklist.length) * 100) : 0
 
-  const selectedTrip = trips.find(t => t.id === selectedTripId)
+  const selectedTrip = trips.find((t) => t.id === selectedTripId)
 
   return (
     <DashboardLayout>
-      <div className="mb-8">
-        <Breadcrumbs />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2">
+      <div className="space-y-6">
+        {/* ════════════════════════════════════════
+            HEADER & TRIP SELECTOR
+        ═════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl flex items-center gap-3">
-              <ListChecks className="h-8 w-8 text-sky-600 dark:text-sky-400" />
-              Checklist
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+              Packing Manifest
             </h1>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">
-              {completedCount} of {checklist.length} items completed
+            <p className="mt-0.5 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+              Pre-departure gear checklist, baggage prep, and traveler packing ledger.
             </p>
           </div>
 
-          <TripSelector
-            trips={trips}
-            selectedTripId={selectedTripId}
-            onSelect={handleTripChange}
-          />
-        </div>
-      </div>
-
-      {selectedTrip && (
-        <div className="mb-6 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl">
-          <div className="flex items-center gap-3">
-            <Plane className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            <div>
-              <p className="text-sm text-violet-600 dark:text-violet-400 font-medium">{selectedTrip.destination}</p>
-              <p className="text-xs text-violet-500 dark:text-violet-500">
-                {new Date(selectedTrip.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="mb-6 rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-slate-900 p-6 shadow-sm">
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Progress</p>
-            <p className="text-sm font-bold text-sky-600 dark:text-sky-400">{progressPercent}%</p>
-          </div>
-          <div className="h-3 w-full rounded-full bg-slate-200 dark:bg-slate-700">
-            <div
-              className="h-3 rounded-full bg-sky-600 dark:bg-sky-500 transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
+          <div className="flex items-center gap-2">
+            <TripSelector
+              trips={trips}
+              selectedTripId={selectedTripId}
+              onSelect={handleTripChange}
             />
           </div>
         </div>
-      </div>
 
-      <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        {/* ════════════════════════════════════════
+            STATUS & PROGRESS PANEL
+        ═════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+          {/* Active Scope Card (5 cols) */}
+          <div className="md:col-span-5 p-4 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
+                <Plane className="w-4 h-4 text-zinc-700 dark:text-zinc-300 -rotate-45" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                  Target Scope
+                </span>
+                <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50 truncate mt-0.5">
+                  {selectedTrip ? selectedTrip.destination : 'Universal Standalone'}
+                </p>
+              </div>
+            </div>
+
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 shrink-0">
+              {selectedTrip ? 'Assigned Route' : 'General Scope'}
+            </span>
+          </div>
+
+          {/* Progress Card (7 cols) */}
+          <div className="md:col-span-7 p-4 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-mono mb-2">
+              <span className="text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                Manifest Readiness
+              </span>
+              <div className="flex items-center gap-1.5 font-semibold text-zinc-900 dark:text-zinc-100">
+                <span>
+                  {completedCount}/{checklist.length} Completed
+                </span>
+                <span className="text-zinc-400 dark:text-zinc-600">|</span>
+                <span>{progressPercent}%</span>
+              </div>
+            </div>
+
+            <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════
+            QUICK ADD ITEM ROW
+        ═════════════════════════════════════════ */}
         <div className="flex gap-2">
           <input
             type="text"
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addItem()}
-            placeholder={selectedTrip ? `Add item for ${selectedTrip.destination}...` : "Add new item to global checklist..."}
-            className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-900 dark:text-white dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+            onKeyDown={(e) => e.key === 'Enter' && addItem()}
+            placeholder={
+              selectedTrip
+                ? `Add luggage or prep item for ${selectedTrip.destination}...`
+                : 'Add item to universal manifest (e.g. Passport, Universal Adapter)...'
+            }
+            className="flex-1 px-3.5 py-2 text-xs font-mono rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
           />
           <button
+            type="button"
             onClick={addItem}
-            className="flex items-center gap-2 rounded-lg bg-sky-600 hover:bg-sky-700 dark:bg-sky-600 dark:hover:bg-sky-500 px-4 py-2 font-medium text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer shrink-0"
           >
-            <Plus className="h-5 w-5" />
-            Add
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Item</span>
           </button>
         </div>
-      </div>
 
-      <div className="space-y-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
-        {loading ? (
-          <p className="text-center text-slate-500 dark:text-slate-400 py-4">Loading...</p>
-        ) : checklist.length === 0 ? (
-          <p className="text-center text-slate-500 dark:text-slate-400 py-4">
-            {selectedTrip
-              ? `No items for ${selectedTrip.destination} yet. Add some!`
-              : 'Your list is empty. Add items to start!'}
-          </p>
-        ) : (
-          checklist.map((item) => (
-            <div key={item.id} className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={() => toggleChecklistItem(item.id, item.checked)}
-                className="h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-sky-600 focus:ring-sky-500 cursor-pointer bg-white dark:bg-slate-700"
-              />
-              <span
-                className={`flex-1 text-sm break-all ${item.checked
-                  ? 'text-slate-400 dark:text-slate-600 line-through'
-                  : 'text-slate-700 dark:text-slate-200'
-                  }`}
-              >
-                {item.label}
-              </span>
-              <button
-                onClick={() => deleteItem(item.id)}
-                className="rounded-lg p-2 text-slate-400 dark:text-slate-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+        {/* ════════════════════════════════════════
+            CHECKLIST ENTRIES LEDGER
+        ═════════════════════════════════════════ */}
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 overflow-hidden">
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ListChecks className="w-3.5 h-3.5 text-zinc-500" />
+              <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                Manifest Checklist Items
+              </h2>
             </div>
-          ))
-        )}
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
+              {checklist.length} Total
+            </span>
+          </div>
+
+          {loading ? (
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/80 p-2 space-y-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-center justify-between p-3 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 rounded bg-zinc-200 dark:bg-zinc-800" />
+                    <div className="w-48 h-3.5 rounded bg-zinc-200 dark:bg-zinc-800" />
+                  </div>
+                  <div className="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800/60" />
+                </div>
+              ))}
+            </div>
+          ) : checklist.length === 0 ? (
+            <div className="py-14 text-center">
+              <div className="w-9 h-9 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center mx-auto mb-2">
+                <CheckCircle2 className="w-4 h-4 text-zinc-400" />
+              </div>
+              <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                {selectedTrip
+                  ? `No items registered for ${selectedTrip.destination}`
+                  : 'Universal manifest is empty'}
+              </p>
+              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                Type an item above to add it to your pre-flight preparation.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+              {checklist.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-3.5 hover:bg-zinc-50 dark:hover:bg-zinc-900/80 transition-colors group"
+                >
+                  <label className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => toggleChecklistItem(item.id, item.checked)}
+                      className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 accent-zinc-900 dark:accent-zinc-100 cursor-pointer focus:ring-1 focus:ring-zinc-400"
+                    />
+                    <span
+                      className={`text-xs font-medium break-all transition-colors ${
+                        item.checked
+                          ? 'text-zinc-400 dark:text-zinc-600 line-through'
+                          : 'text-zinc-900 dark:text-zinc-100'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => deleteItem(item.id)}
+                    title="Remove item"
+                    aria-label={`Remove ${item.label}`}
+                    className="p-1 rounded text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors opacity-80 group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer ml-3 shrink-0"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   )

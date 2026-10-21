@@ -1,64 +1,83 @@
-import { UserPlus, MapPin, Compass } from 'lucide-react'
+import { UserPlus, Radio, Compass } from 'lucide-react'
 
 const steps = [
   {
     icon: UserPlus,
-    step: '01',
-    title: 'Create Your Account',
+    code: 'STEP_01',
+    phase: 'INITIALIZATION',
+    title: 'Initialize Traveler ID',
     description:
-      'Sign up for free on our website to access your personalized travel dashboard.',
+      'Register your traveler profile to unlock personal itinerary ledgers, customs checklists, and customized emergency telemetry.',
   },
   {
-    icon: MapPin,
-    step: '02',
-    title: 'Enable Location',
+    code: 'STEP_02',
+    icon: Radio,
+    phase: 'GEOLOCATION_LOCK',
+    title: 'Authorize Telemetry',
     description:
-      'Allow location access in your browser so TravelDost can detect where you are instantly.',
+      'Enable browser coordinate tracking. TravelDost matches latitude & longitude against national geospatial boundaries in real-time.',
   },
   {
+    code: 'STEP_03',
     icon: Compass,
-    step: '03',
-    title: 'Start Exploring',
+    phase: 'AUTONOMOUS_DISPATCH',
+    title: 'Commence Field Operations',
     description:
-      'Instantly view emergency numbers, regional rules, and travel tools for your current location.',
+      'Access local emergency hotlines, legal rules, currency parity, and survival phrases tailored specifically to where your feet are.',
   },
 ]
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="bg-slate-50 dark:bg-slate-950 py-16 sm:py-24 transition-colors duration-300">
+    <section id="how-it-works" className="py-20 sm:py-28 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors duration-150">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-            How It Works
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-zinc-500 mb-2">
+            PROTOCOL_PIPELINE // EXECUTION
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            How Telemetry Coordinates
           </h2>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-            Start exploring the world safely in three simple steps.
+          <p className="mt-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+            Three straightforward stages establish high-accuracy traveler intelligence.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
-          {steps.map((step, index) => (
-            <div key={step.step} className="relative">
-              {index < steps.length - 1 && (
-                <div className="absolute right-0 top-12 hidden h-0.5 w-full translate-x-1/2 bg-gradient-to-r from-sky-300 to-transparent dark:from-sky-800 md:block" />
-              )}
-              <div className="relative flex flex-col items-center text-center">
-                <div className="relative">
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-sky-600 dark:bg-sky-600 shadow-lg dark:shadow-sky-900/30">
-                    <step.icon className="h-10 w-10 text-white" />
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {steps.map((item) => {
+            const Icon = item.icon
+            return (
+              <div
+                key={item.code}
+                className="p-6 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-2xs flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-9 h-9 rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-800 dark:text-zinc-200">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 tracking-wider">
+                      {item.code}
+                    </span>
                   </div>
-                  <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-teal-500 text-sm font-bold text-white shadow-sm border-2 border-slate-50 dark:border-slate-950">
-                    {step.step}
+
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 block mb-1">
+                    {item.phase}
                   </span>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-white">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-slate-600 dark:text-slate-400">{step.description}</p>
+
+                <div className="mt-6 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 font-mono text-[10px] text-zinc-400">
+                  <span>PIPELINE VERIFIED</span>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

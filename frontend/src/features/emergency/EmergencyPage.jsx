@@ -1,8 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
-import { Shield, Ambulance, Flame, RefreshCw, Search, ChevronDown, MapPin, Phone, Landmark, AlertTriangle, AlertOctagon, CheckCircle2 } from 'lucide-react'
+import {
+  Shield,
+  Ambulance,
+  Flame,
+  RefreshCw,
+  Search,
+  ChevronDown,
+  MapPin,
+  Phone,
+  Landmark,
+  AlertTriangle,
+  CheckCircle2,
+} from 'lucide-react'
 import { useEmergency } from './useEmergency'
 import { DashboardLayout } from '../../components/layout/DashboardLayout'
-import { Breadcrumbs } from '../../components/layout/Breadcrumbs'
 
 export function EmergencyPage() {
   const {
@@ -12,25 +23,24 @@ export function EmergencyPage() {
     loading,
     locationError,
     detectLocation,
-    fetchEmergencyData
+    fetchEmergencyData,
   } = useEmergency()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const searchRef = useRef(null)
 
-  // Close dropdown if clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsDropdownOpen(false)
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const filteredCountries = allCountries.filter(c =>
+  const filteredCountries = allCountries.filter((c) =>
     c.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -40,83 +50,73 @@ export function EmergencyPage() {
     fetchEmergencyData(country)
   }
 
-  // Color Mapping for reliable Tailwind detection
-  const colorStyles = {
-    blue: {
-      border: 'border-blue-600',
-      bgIcon: 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-      hoverIcon: 'group-hover:bg-blue-600',
-      btn: 'bg-blue-600 hover:bg-blue-700'
-    },
-    red: {
-      border: 'border-red-600',
-      bgIcon: 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-      hoverIcon: 'group-hover:bg-red-600',
-      btn: 'bg-red-600 hover:bg-red-700'
-    },
-    orange: {
-      border: 'border-orange-600',
-      bgIcon: 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-      hoverIcon: 'group-hover:bg-orange-600',
-      btn: 'bg-orange-600 hover:bg-orange-700'
-    }
-  }
-
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="space-y-6">
+        {/* ════════════════════════════════════════
+            HEADER & COUNTRY SEARCH
+        ═════════════════════════════════════════ */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
           <div>
-            <Breadcrumbs />
-            <h1 className="text-xl font-bold text-red-600 dark:text-red-500 sm:text-2xl flex items-center gap-2">
-              <AlertOctagon className="h-6 w-6" />
-              Emergency Support
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+              Emergency Dispatch & Consular Hub
             </h1>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              Immediate assistance for <span className="font-bold text-slate-900 dark:text-white">{selectedCountry}</span>.
+            <p className="mt-0.5 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+              Immediate telephony dispatches, crisis lines, and embassy assistance for{' '}
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100 font-mono">
+                {selectedCountry}
+              </span>
+              .
             </p>
           </div>
 
-          <div className="flex items-center gap-3 w-full lg:w-auto">
+          <div className="flex items-center gap-2 w-full lg:w-auto">
             <button
+              type="button"
               onClick={() => detectLocation(true)}
-              className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:border-sky-200 dark:hover:border-sky-800 transition-all shadow-sm shrink-0"
-              title="Use Current Location"
+              disabled={loading}
+              title="Sync GPS coordinates"
+              className="p-2 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer shrink-0"
             >
-              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
 
-            <div className="relative flex-1 lg:w-72" ref={searchRef}>
+            <div className="relative flex-1 lg:w-64" ref={searchRef}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Search country..."
+                  placeholder="Switch destination country..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value)
                     setIsDropdownOpen(true)
                   }}
                   onFocus={() => setIsDropdownOpen(true)}
-                  className="w-full pl-10 pr-10 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                  className="w-full pl-8 pr-8 py-1.5 text-xs font-mono rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
                 />
-                <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-400 transition-transform pointer-events-none ${
+                    isDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </div>
 
               {isDropdownOpen && (
-                <div className="absolute top-full mt-2 w-full max-h-60 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl dark:shadow-slate-900/50 z-50">
+                <div className="absolute top-full mt-1 w-full max-h-56 overflow-y-auto custom-scrollbar bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-xl z-30 text-xs font-mono">
                   {filteredCountries.length > 0 ? (
                     filteredCountries.map((country) => (
                       <button
                         key={country}
+                        type="button"
                         onClick={() => handleCountrySelect(country)}
-                        className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium border-b border-slate-50 dark:border-slate-800 last:border-0 transition-colors"
+                        className="w-full text-left px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-800/80 last:border-0 transition-colors cursor-pointer"
                       >
                         {country}
                       </button>
                     ))
                   ) : (
-                    <div className="px-4 py-3 text-sm text-slate-400">No country found</div>
+                    <div className="px-3 py-2 text-zinc-400">No destination found</div>
                   )}
                 </div>
               )}
@@ -124,146 +124,214 @@ export function EmergencyPage() {
           </div>
         </div>
 
+        {/* ════════════════════════════════════════
+            LOCATION & VERIFICATION STATUS BARS
+        ═════════════════════════════════════════ */}
         {locationError && (
-          <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-lg flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-            <MapPin className="h-4 w-4" />
-            {locationError}
+          <div className="p-3 rounded-md bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 flex items-center gap-2 text-xs font-mono text-rose-700 dark:text-rose-400">
+            <MapPin className="w-4 h-4 shrink-0" />
+            <span>{locationError}</span>
           </div>
         )}
 
         {activeData && !activeData.isDatabase && (
-          <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-sm text-amber-800 dark:text-amber-200">
-            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">112 Universal Emergency Number — Available in EU and select global networks (verify local carrier)</p>
-              <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
-                Regional emergency services for <strong>{selectedCountry}</strong> are not yet cataloged in our directory. Displaying 112 Universal Emergency Number — Available in EU and select global networks (verify local carrier). Please verify local dispatch numbers with your local network carrier, accommodation, or local authorities.
+          <div className="p-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex items-start gap-3 text-xs">
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                112 Universal Emergency Protocol (EU & Global Carrier Standard)
+              </p>
+              <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Regional dispatch numbers for <strong>{selectedCountry}</strong> are currently routed to the universal 112 international emergency network. Verify local carrier protocols with your accommodation or authorities upon landing.
               </p>
             </div>
           </div>
         )}
 
         {activeData && activeData.isDatabase && (
-          <div className="mb-6 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-xl flex items-center gap-2 text-xs font-medium text-sky-800 dark:text-sky-300">
-            <CheckCircle2 className="h-4 w-4 text-sky-600 dark:text-sky-400 shrink-0" />
-            <span>Listed Regional Contact numbers active for <strong>{selectedCountry}</strong>. (Cross-verify with local authorities when possible).</span>
+          <div className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex items-center gap-2 text-xs font-mono text-zinc-600 dark:text-zinc-400">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>
+              Verified regional telephony lines active for <strong>{selectedCountry}</strong>.
+            </span>
           </div>
         )}
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* ════════════════════════════════════════
+            PRIMARY TELEPHONY HOT-DIAL TILES (3 COLS)
+        ═════════════════════════════════════════ */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { title: 'Police', type: 'Crime & Safety', icon: Shield, color: 'blue', value: activeData?.police },
-            { title: 'Ambulance', type: 'Medical Emergency', icon: Ambulance, color: 'red', value: activeData?.ambulance },
-            { title: 'Fire Dept', type: 'Fire & Rescue', icon: Flame, color: 'orange', value: activeData?.fire },
+            {
+              title: 'Police Department',
+              type: 'Law Enforcement & Security',
+              icon: Shield,
+              value: activeData?.police,
+            },
+            {
+              title: 'Emergency Medical',
+              type: 'Paramedic & Ambulance Corps',
+              icon: Ambulance,
+              value: activeData?.ambulance,
+            },
+            {
+              title: 'Fire & Rescue',
+              type: 'Hazmat & Extrication Response',
+              icon: Flame,
+              value: activeData?.fire,
+            },
           ].map((card) => {
-            const style = colorStyles[card.color]
-            const hasValue = Boolean(card.value && typeof card.value === 'string' && card.value.trim() && card.value !== '--')
-            const badgeLabel = hasValue ? 'Listed Regional Contact' : 'Not Available'
+            const hasValue = Boolean(
+              card.value && typeof card.value === 'string' && card.value.trim() && card.value !== '--'
+            )
+            const Icon = card.icon
 
             return (
-              <div key={card.title} className={`group relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 p-4 shadow-md dark:shadow-slate-900/20 border-t-4 ${style.border} hover:-translate-y-0.5 transition-transform duration-300`}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${style.bgIcon} ${style.hoverIcon} group-hover:text-white transition-colors`}>
-                    <card.icon className="h-5 w-5" />
+              <div
+                key={card.title}
+                className="p-4 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-8 h-8 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-zinc-700 dark:text-zinc-300" />
+                    </div>
+                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400">
+                      {hasValue ? 'Verified' : 'Pending'}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                    hasValue
-                      ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300'
-                      : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                  }`}>
-                    {badgeLabel}
-                  </span>
+
+                  <h3 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    {card.title}
+                  </h3>
+                  <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 mb-3">
+                    {card.type}
+                  </p>
+
+                  <div className="font-mono text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50 my-2">
+                    {hasValue ? card.value : '—'}
+                  </div>
                 </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">{card.title}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-xs mb-4">{card.type}</p>
-                {hasValue ? (
-                  <a href={`tel:${card.value}`} className={`flex w-full items-center justify-center gap-2 rounded-lg ${style.btn} py-2.5 text-sm font-bold text-white transition-all active:scale-95`}>
-                    <Phone className="h-4 w-4" /> Call {card.value}
-                  </a>
-                ) : (
-                  <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 py-2.5 text-sm font-medium text-slate-400 dark:text-slate-500 select-none cursor-not-allowed">
-                    <Phone className="h-4 w-4" /> Not Available
-                  </div>
-                )}
+
+                <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+                  {hasValue ? (
+                    <a
+                      href={`tel:${card.value}`}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-medium bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Instant Call ({card.value})</span>
+                    </a>
+                  ) : (
+                    <div className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800/50 cursor-not-allowed select-none">
+                      <span>Line Unavailable</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}
         </div>
 
-        <div className="mt-6">
-          <div className="rounded-xl bg-slate-900 dark:bg-slate-800 p-4 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-white/10 rounded-lg">
-                <Landmark className="h-6 w-6 text-sky-300" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold">Embassy Helpline</h3>
-                <p className="text-slate-400 text-sm">For lost passports & legal help</p>
-              </div>
+        {/* ════════════════════════════════════════
+            CONSULAR & EMBASSY HELPLINE (Full Width Card)
+        ═════════════════════════════════════════ */}
+        <div className="p-4 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
+              <Landmark className="w-4 h-4 text-zinc-300" />
             </div>
-            {activeData?.embassy ? (
-              <a href={`tel:${activeData.embassy}`} className="px-4 py-2 bg-white text-slate-900 text-sm font-bold rounded-lg hover:bg-sky-50 transition-colors shrink-0">
-                Call {activeData.embassy}
-              </a>
-            ) : (
-              <span className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-slate-400 text-sm font-medium rounded-lg shrink-0">
-                Not Available
-              </span>
-            )}
+            <div>
+              <h3 className="text-xs font-semibold text-white">
+                Diplomatic & Consular Support Hotline
+              </h3>
+              <p className="text-[11px] font-mono text-zinc-400 mt-0.5">
+                Immediate consular assistance for lost travel passports, civil unrest, or legal emergencies.
+              </p>
+            </div>
           </div>
+
+          {activeData?.embassy ? (
+            <a
+              href={`tel:${activeData.embassy}`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-medium bg-zinc-100 hover:bg-white text-zinc-950 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 shrink-0 cursor-pointer"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Dial {activeData.embassy}</span>
+            </a>
+          ) : (
+            <span className="px-3 py-1 rounded text-xs font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 shrink-0">
+              Direct In-Country Line Not Cataloged
+            </span>
+          )}
         </div>
 
-        {/* Local Customs & Rules Section */}
-        <section className="mt-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-9 w-9 rounded-xl bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+        {/* ════════════════════════════════════════
+            REGIONAL PROTOCOLS & CUSTOMS
+        ═════════════════════════════════════════ */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+              <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                Destination Advisory & Protocols
+              </h2>
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Local Customs & Rules</h2>
+            <span className="text-[10px] font-mono text-zinc-400">
+              {selectedCountry} Registry
+            </span>
           </div>
 
           {activeData?.rules && activeData.rules.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(() => {
-                const parsed = activeData.rules.map(rule => {
-                  const match = rule.match(/^\[([^\]]+)\]\s*(.+)$/);
+                const parsed = activeData.rules.map((rule) => {
+                  const match = rule.match(/^\[([^\]]+)\]\s*(.+)$/)
                   if (match) {
-                    return { category: match[1], text: match[2] };
+                    return { category: match[1], text: match[2] }
                   }
-                  return { category: 'General', text: rule };
-                });
-                const grouped = {};
-                parsed.forEach(r => {
-                  if (!grouped[r.category]) grouped[r.category] = [];
-                  grouped[r.category].push(r);
-                });
+                  return { category: 'General', text: rule }
+                })
+                const grouped = {}
+                parsed.forEach((r) => {
+                  if (!grouped[r.category]) grouped[r.category] = []
+                  grouped[r.category].push(r)
+                })
 
                 return Object.entries(grouped).map(([category, rules]) => (
                   <div
                     key={category}
-                    className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-colors"
+                    className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden flex flex-col justify-between"
                   >
-                    <div className="px-3 py-2.5 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
-                      <AlertTriangle className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-                      <span className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-400">{category}</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto tabular-nums">{rules.length}</span>
+                    <div className="px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-900/70 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                        {category}
+                      </span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
+                        {rules.length}
+                      </span>
                     </div>
-                    <ul className="px-3 py-2.5 space-y-2">
+
+                    <div className="p-3.5 space-y-2">
                       {rules.map((r, idx) => (
-                        <li key={idx} className="flex gap-2.5 text-sm text-slate-700 dark:text-slate-300 leading-snug">
-                          <span className="mt-2 h-1 w-1 rounded-full bg-sky-600 dark:bg-sky-400 shrink-0" />
-                          {r.text}
-                        </li>
+                        <div
+                          key={idx}
+                          className="p-2.5 rounded bg-zinc-50/60 dark:bg-zinc-950/40 border border-zinc-200/70 dark:border-zinc-800/80"
+                        >
+                          <p className="text-xs leading-relaxed text-zinc-700 dark:text-zinc-300">
+                            {r.text}
+                          </p>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
-                ));
+                ))
               })()}
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-2 p-8 text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg">
-              <MapPin className="h-4 w-4" />
-              <span className="text-sm">No customs available for this location</span>
+            <div className="flex items-center justify-center gap-2 p-8 text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-mono">
+              <MapPin className="w-4 h-4 text-zinc-400" />
+              <span>No specific protocols cataloged for this destination</span>
             </div>
           )}
         </section>

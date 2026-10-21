@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X } from 'lucide-react';
+import { X, Save } from 'lucide-react'
 
 export function GuideFormModal({ isOpen, onClose, onSubmit, initialData }) {
     const emptyForm = {
@@ -34,21 +34,31 @@ export function GuideFormModal({ isOpen, onClose, onSubmit, initialData }) {
     }
 
     return (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
-                <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        {initialData ? 'Edit Country Guide' : 'Add New Country Guide'}
-                    </h2>
-                    <button onClick={onClose} className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-                        <X className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs">
+            <div className="w-full max-w-xl rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-800">
+                    <div>
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+                            INTELLIGENCE_DOSSIER
+                        </span>
+                        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                            {initialData ? `Edit Guide: ${initialData.country_name}` : 'New Country Intelligence Guide'}
+                        </h2>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                    >
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+                {/* Form Body */}
+                <form id="guide-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Country Name *
+                        <label className="block font-mono text-[11px] text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                            Country / Territory Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -56,92 +66,97 @@ export function GuideFormModal({ isOpen, onClose, onSubmit, initialData }) {
                             required
                             value={formData.country_name}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                            placeholder="e.g. Japan, Germany, Switzerland"
+                            className="w-full rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 font-sans"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                Police Number
+                            <label className="block font-mono text-[11px] text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                                Police Dispatch
                             </label>
                             <input
                                 type="text"
                                 name="police_number"
                                 value={formData.police_number}
                                 onChange={handleChange}
-                                placeholder="e.g. 911"
-                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                                placeholder="e.g. 110, 911"
+                                className="w-full rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                Ambulance Number
+                            <label className="block font-mono text-[11px] text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                                Ambulance / Paramedic
                             </label>
                             <input
                                 type="text"
                                 name="ambulance_number"
                                 value={formData.ambulance_number}
                                 onChange={handleChange}
-                                placeholder="e.g. 911"
-                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                                placeholder="e.g. 119, 112"
+                                className="w-full rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                Fire Number
+                            <label className="block font-mono text-[11px] text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                                Fire Department
                             </label>
                             <input
                                 type="text"
                                 name="fire_number"
                                 value={formData.fire_number}
                                 onChange={handleChange}
-                                placeholder="e.g. 911"
-                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                                placeholder="e.g. 119, 999"
+                                className="w-full rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                Embassy Number (Optional)
+                            <label className="block font-mono text-[11px] text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                                Consular / Embassy Hotline
                             </label>
                             <input
                                 type="text"
                                 name="embassy_number"
                                 value={formData.embassy_number}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                                placeholder="e.g. +1 (555) 019-2834"
+                                className="w-full rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Local Rules & Tips
+                        <label className="block font-mono text-[11px] text-zinc-600 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                            Local Rules, Cultural Norms & Advisories
                         </label>
                         <textarea
                             name="local_rules"
                             rows="4"
                             value={formData.local_rules}
                             onChange={handleChange}
-                            placeholder="Drive on the left side..."
-                            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500"
+                            placeholder="Rules regarding jaywalking, transit etiquette, tipping practices, emergency procedures..."
+                            className="w-full rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 resize-none font-sans"
                         />
                     </div>
                 </form>
 
-                <div className="p-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-4">
+                {/* Footer Actions */}
+                <div className="px-5 py-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-end gap-2 bg-zinc-50/50 dark:bg-zinc-950/50">
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                        className="px-3 py-1.5 rounded border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
-                        onClick={handleSubmit}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors"
+                        type="submit"
+                        form="guide-form"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-zinc-900 dark:bg-zinc-100 text-xs font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
                     >
-                        <Save className="w-4 h-4" />
-                        Save Guide
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Save Guide</span>
                     </button>
                 </div>
             </div>

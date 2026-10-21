@@ -25,8 +25,8 @@ export function AppRoutes() {
 		<BrowserRouter>
 			<Suspense
 				fallback={
-					<div className="flex min-h-screen items-center justify-center bg-slate-50">
-						<div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-sky-600"></div>
+					<div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+						<div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 dark:border-zinc-800 border-t-zinc-900 dark:border-t-zinc-100"></div>
 					</div>
 				}
 			>
@@ -154,7 +154,7 @@ export function AppRoutes() {
 
 function LandingPage() {
 	return (
-		<div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
+		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-zinc-800 selection:text-zinc-100 transition-colors duration-150">
 			<Navbar />
 			<main>
 				<HeroSection />

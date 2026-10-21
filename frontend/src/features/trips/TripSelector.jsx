@@ -1,79 +1,109 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom';
-import { Plane, Plus } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { Plane, Plus, ChevronDown, Check } from 'lucide-react'
 
 export function TripSelector({ trips, selectedTripId, onSelect }) {
   const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef(null)
 
-  const selectedTrip = trips.find(t => t.id === selectedTripId)
+  const selectedTrip = trips.find((t) => t.id === selectedTripId)
 
   const handleSelect = (tripId) => {
     onSelect(tripId)
     setIsOpen(false)
   }
 
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
+
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md text-xs font-mono text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer"
       >
-        <Plane className="h-4 w-4" />
-        {selectedTrip ? selectedTrip.destination : 'General'}
-        <span className="text-xs bg-sky-100 dark:bg-sky-900/30 px-2 py-0.5 rounded-full">
-          {selectedTrip ? 'Trip' : 'General'}
+        <Plane className="w-3.5 h-3.5 text-zinc-500 -rotate-45" />
+        <span className="font-medium truncate max-w-[120px] sm:max-w-[180px]">
+          {selectedTrip ? selectedTrip.destination : 'General Checklist'}
         </span>
+        <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400">
+          {selectedTrip ? 'Trip' : 'Global'}
+        </span>
+        <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-10 overflow-hidden">
-          <div className="p-2 border-b border-slate-100 dark:border-slate-700">
+        <div className="absolute right-0 mt-1 w-64 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-xl z-30 overflow-hidden text-xs font-mono animate-in fade-in duration-100">
+          <div className="p-1.5 border-b border-zinc-100 dark:border-zinc-800">
             <button
+              type="button"
               onClick={() => handleSelect(null)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                !selectedTripId 
-                  ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400' 
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                !selectedTripId
+                  ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 font-semibold'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900'
               }`}
             >
-              <span className="font-medium">General</span>
-              <span className="block text-xs text-slate-500">Standalone checklist</span>
+              <div>
+                <span className="block">General Checklist</span>
+                <span className="block text-[10px] text-zinc-400 dark:text-zinc-500 font-normal">
+                  Universal standalone checklist
+                </span>
+              </div>
+              {!selectedTripId && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />}
             </button>
           </div>
-          
+
           {trips.length > 0 ? (
-            <div className="max-h-48 overflow-y-auto p-2">
-              {trips.map(trip => (
-                <button
-                  key={trip.id}
-                  onClick={() => handleSelect(trip.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    selectedTripId === trip.id 
-                      ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400' 
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <span className="font-medium">{trip.destination}</span>
-                  <span className="block text-xs text-slate-500">
-                    {new Date(trip.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                </button>
-              ))}
+            <div className="max-h-48 overflow-y-auto p-1.5 custom-scrollbar space-y-0.5">
+              {trips.map((trip) => {
+                const isSelected = selectedTripId === trip.id
+                return (
+                  <button
+                    key={trip.id}
+                    type="button"
+                    onClick={() => handleSelect(trip.id)}
+                    className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                      isSelected
+                        ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 font-semibold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                    }`}
+                  >
+                    <div className="truncate mr-2">
+                      <span className="block truncate">{trip.destination}</span>
+                      <span className="block text-[10px] text-zinc-400 dark:text-zinc-500 font-normal">
+                        {trip.start_date?.split('T')[0]}
+                      </span>
+                    </div>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100 shrink-0" />}
+                  </button>
+                )
+              })}
             </div>
           ) : (
-            <div className="p-4 text-center text-slate-500 text-sm">
-              No trips yet
+            <div className="p-3 text-center text-zinc-400 text-xs">
+              No itineraries found
             </div>
           )}
-          
-          <div className="p-2 border-t border-slate-100 dark:border-slate-700">
+
+          <div className="p-1.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40">
             <Link
               to="/trips"
               onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors"
+              className="flex items-center justify-center gap-1.5 w-full px-2 py-1 text-xs text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white rounded transition-colors"
             >
-              <Plus className="h-4 w-4" />
-              Create New Trip
+              <Plus className="w-3 h-3" />
+              <span>Register New Trip</span>
             </Link>
           </div>
         </div>
