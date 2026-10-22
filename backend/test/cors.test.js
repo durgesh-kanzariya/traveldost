@@ -26,7 +26,7 @@ function checkOrigin(origin, envCorsOrigins = '') {
         if (isLocalhost || isProjectVercel || isCustomDomain || allowedProduction.includes(origin)) {
             resolve(true);
         } else {
-            reject(new Error(`CORS: origin ${origin} not allowed`));
+            resolve(false);
         }
     });
 }
@@ -62,14 +62,7 @@ describe('CORS Origin Validation', () => {
     });
 
     it('should reject unauthorized third-party origins', async () => {
-        await assert.rejects(
-            async () => {
-                await checkOrigin('https://malicious-attacker.com');
-            },
-            {
-                name: 'Error',
-                message: 'CORS: origin https://malicious-attacker.com not allowed'
-            }
-        );
+        const allowed = await checkOrigin('https://malicious-attacker.com');
+        assert.equal(allowed, false);
     });
 });

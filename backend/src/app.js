@@ -94,13 +94,24 @@ function createApp() {
       if (isLocalhost || isProjectVercel || isCustomDomain || allowedProduction.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS: origin ${origin} not allowed`));
+        callback(null, false);
       }
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'x-auth-token', 'Authorization', 'Accept'],
+    optionsSuccessStatus: 204
   }));
 
   app.use(express.json());
+
+  app.get('/api/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      version: '2.0.1-custom-domain',
+      timestamp: new Date().toISOString()
+    });
+  });
 
   app.get('/', (req, res) => {
     res.send('TravelDost Backend (Postgres) is Running!');
