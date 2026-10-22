@@ -77,6 +77,8 @@ function createApp() {
         .filter(Boolean);
 
       const allowedProduction = [
+        'https://traveldost.durgeshkanzariya.dev',
+        'https://durgeshkanzariya.dev',
         'https://traveldost.vercel.app',
         'https://traveldost-git-main-durgeshjkanzariya.vercel.app',
         ...allowedConfigured
@@ -86,8 +88,10 @@ function createApp() {
       const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
       // Restrict Vercel origins to only this project's preview deployments
       const isProjectVercel = /^https:\/\/traveldost(-[a-z0-9-]+)?\.vercel\.app$/.test(origin);
+      // Allow primary custom domain and all durgeshkanzariya.dev subdomains (e.g. traveldost.durgeshkanzariya.dev, www.traveldost.durgeshkanzariya.dev)
+      const isCustomDomain = /^https?:\/\/([a-z0-9-]+\.)*durgeshkanzariya\.dev$/.test(origin);
 
-      if (isLocalhost || isProjectVercel || allowedProduction.includes(origin)) {
+      if (isLocalhost || isProjectVercel || isCustomDomain || allowedProduction.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error(`CORS: origin ${origin} not allowed`));
